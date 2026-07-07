@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d0a14">
+<title>Seed Healer 01 — Raid Frame Priest</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:#08060f;color:#e8e2f4;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+button{font-family:inherit;cursor:pointer}
+#app{display:flex;flex-direction:column;gap:6px;height:100dvh;max-width:430px;margin:0 auto;padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:radial-gradient(120% 90% at 50% 0%,#1a1128 0%,#0d0a16 45%,#08060f 100%)}
+.pn{background:linear-gradient(180deg,#1b1430 0%,#130e22 100%);border:1px solid #3b2d5e;border-radius:12px}
+.hidden{display:none!important}
+
+/* ===== HUD ===== */
+#hud{padding:8px 11px 9px;flex:none}
+.hudTop{display:flex;justify-content:space-between;align-items:center;gap:6px}
+#bossName{font-size:14px;font-weight:800;color:#e9b8c4;letter-spacing:.02em;text-shadow:0 0 8px rgba(192,38,60,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hudR{display:flex;align-items:center;gap:6px;flex:none}
+#clock{font-size:11px;color:#c9bfe6;font-variant-numeric:tabular-nums;white-space:nowrap}
+#enrageTag{color:#ff8a95;font-weight:800;font-size:10px;animation:blinkA .5s infinite alternate;white-space:nowrap}
+#sndBtn{background:#241b3f;border:1px solid #453569;border-radius:8px;color:#e8e2f4;font-size:13px;padding:3px 8px}
+.bossbar{position:relative;height:20px;margin-top:7px;background:#3a0d16;border:1px solid #6b1d2a;border-radius:10px;overflow:hidden}
+#bossFill{position:absolute;top:0;left:0;bottom:0;width:100%;background:linear-gradient(180deg,#e04358,#8f1626)}
+#bossTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ffe3e8;text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
+.castwrap{position:relative;height:17px;margin-top:5px;background:#221a3c;border:1px solid #4a3a78;border-radius:8px;overflow:hidden}
+.castFill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,#7c4fd0,#b18cff)}
+.castwrap.noInt{border-color:#c0263c}
+.castwrap.noInt .castFill{background:linear-gradient(90deg,#c0263c,#ff7a8a)}
+.castwrap.smash .castFill{background:linear-gradient(90deg,#c05a26,#ffb37a)}
+.castTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#f2ecff;text-shadow:0 1px 2px #000}
+#priCastWrap .castFill{background:linear-gradient(90deg,#b58a1f,#ffd76a)}
+
+/* ===== WARN BAR ===== */
+#warnBar{display:flex;gap:6px;flex:none}
+#warnBar>div{flex:1;display:flex;align-items:center;gap:5px;padding:6px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;border:1px solid}
+.warnIco{flex:none;font-size:12px}
+.warnL{background:rgba(60,30,10,.5);border-color:#7a4a1e;color:#ffcf9d}
+#nextPat{overflow:hidden;text-overflow:ellipsis}
+.warnR{justify-content:flex-end;background:rgba(30,20,50,.5);border-color:#4a3a78;color:#d9c9ff}
+.warnR.intOk{background:rgba(20,50,30,.55);border-color:#3fae62;color:#9fe8b6;animation:blinkA .7s infinite alternate}
+.warnR.intCd{color:#b3a6d6}
+.warnR.intNo{background:rgba(50,15,20,.5);border-color:#c0394d;color:#ff9daa}
+
+/* ===== STAGE ===== */
+#stage{position:relative;flex:1;min-height:104px;overflow:hidden}
+#bossAvatar{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:50px;line-height:1;filter:drop-shadow(0 0 12px rgba(154,80,255,.55))}
+#bossAvatar.casting{animation:glowCast .5s infinite alternate}
+#bossAvatar.enr{filter:drop-shadow(0 0 16px rgba(255,60,80,.85))}
+#bossAvatar.hitF{filter:drop-shadow(0 0 12px rgba(255,140,140,.95)) brightness(1.4)}
+#calloutBox{position:absolute;top:52%;left:50%;transform:translate(-50%,-50%) scale(.9);max-width:90%;text-align:center;font-size:13px;font-weight:900;color:#fff;text-shadow:0 2px 8px #000,0 0 12px rgba(0,0,0,.85);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:6;line-height:1.3}
+#calloutBox.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#calloutBox.lgold{color:#ffe08a}
+#calloutBox.lr{color:#ff9098}
+#stageAllies{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center;gap:26px}
+.sAlly{font-size:24px;display:inline-block;animation:bob 1.5s ease-in-out infinite alternate;transition:filter .1s}
+.sAlly:nth-child(2){animation-delay:.25s}
+.sAlly:nth-child(3){animation-delay:.5s}
+.sAlly:nth-child(4){animation-delay:.75s}
+.sAlly.dead{opacity:.16;filter:grayscale(1);animation:none}
+#valorBanner{position:absolute;top:6px;right:8px;background:rgba(59,42,10,.92);border:1px solid #d4af37;color:#ffd76a;border-radius:999px;font-size:10px;font-weight:800;padding:3px 10px;font-variant-numeric:tabular-nums}
+
+/* ===== ALLY CARDS ===== */
+#cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:none}
+.card{position:relative;min-width:0;padding:6px 5px;min-height:120px;background:linear-gradient(180deg,#1c1532,#120e21);border:1.5px solid #3b2d5e;border-radius:12px;transition:border-color .12s;cursor:pointer}
+.card:active{transform:scale(.98)}
+.card.sel{border-color:#f4c95d;box-shadow:0 0 0 1.5px #f4c95d,0 0 12px rgba(244,201,93,.45)}
+.card.danger{animation:dangerPulse .7s infinite alternate}
+.card.dead{filter:grayscale(1);opacity:.55}
+.thBadge{position:absolute;top:5px;left:5px;z-index:3;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;border:1px solid;line-height:1.35;white-space:nowrap}
+.thBadge.th-stable{background:rgba(20,50,30,.7);border-color:#3fae62;color:#9fe8b6}
+.thBadge.th-rise{background:rgba(60,50,10,.7);border-color:#d4af37;color:#ffd76a}
+.thBadge.th-danger{background:rgba(60,30,10,.78);border-color:#e08a3f;color:#ffcf9d;animation:blinkA .5s infinite alternate}
+.thBadge.th-target{background:rgba(60,15,20,.82);border-color:#e0405a;color:#ff9daa;animation:blinkA .45s infinite alternate}
+.thBadge.th-dead{background:#1a1626;border-color:#443a58;color:#7a6f96}
+.cTop{display:flex;align-items:center;gap:4px;min-height:24px;margin-top:15px}
+.cEmoji{font-size:17px;line-height:1;flex:none}
+.cNames{display:flex;flex-direction:column;line-height:1.08;min-width:0}
+.cName{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cRole{font-size:9px;color:#a294cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fBarWrap{position:relative;height:16px;margin-top:5px;background:#241418;border:1px solid #4a2b35;border-radius:7px;overflow:hidden}
+.fShield{position:absolute;top:0;left:0;bottom:0;width:0%;background:rgba(72,199,255,.42)}
+.fFill{position:absolute;top:0;left:0;bottom:0;width:100%}
+.fFill.hpG{background:linear-gradient(180deg,#5ee08a,#2f9e57)}
+.fFill.hpY{background:linear-gradient(180deg,#f5c04a,#c98a1d)}
+.fFill.hpR{background:linear-gradient(180deg,#f4605e,#b3242c)}
+.fPct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;text-shadow:0 1px 2px #000}
+.cNum{margin-top:3px;text-align:center;font-size:11px;font-weight:700;color:#c3b6e6;font-variant-numeric:tabular-nums}
+.fChips{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;min-height:16px;justify-content:center}
+.chip{font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:6px;background:#241b3f;border:1px solid #453569;color:#d9cff0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip.cSh{border-color:#3fa9d8;color:#9fe0ff}
+.chip.cBad{border-color:#c0394d;color:#ff9daa}
+.chip.cBomb{border-color:#ff6a3d;color:#ffc09d;animation:blinkA .3s infinite alternate}
+.chip.cGold{border-color:#d4af37;color:#ffd76a}
+.chip.cOk{border-color:#3fae62;color:#9fe8b6}
+.chip.cCd{border-color:#6a5b93;color:#b3a6d6}
+.cState{margin-top:3px;min-height:12px;text-align:center;font-size:9.5px;font-weight:800}
+.cState.warn{color:#ffb44f}
+.cState.crit{color:#ff6b7a;animation:blinkA .4s infinite alternate}
+.cState.deadTx{color:#8a7fa8}
+.floats{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5}
+.flt{position:absolute;left:50%;top:16%;transform:translateX(-50%);font-size:13px;font-weight:900;text-shadow:0 1px 3px #000;animation:rise 1s ease-out forwards;white-space:nowrap}
+.flt.heal{color:#7dffa8}
+.flt.dmg{color:#ff7b74}
+.flt.abs{color:#8fdcff;font-size:11px}
+.flt.gold{color:#ffd76a}
+
+/* ===== PRIEST PANEL ===== */
+#f-pri.priPanel{flex:none;display:flex;align-items:center;gap:9px;padding:7px 10px;cursor:pointer;position:relative;transition:border-color .12s}
+#f-pri.priPanel:active{transform:scale(.99)}
+#f-pri.priPanel.sel{border-color:#f4c95d;box-shadow:0 0 0 1.5px #f4c95d,0 0 12px rgba(244,201,93,.4)}
+#f-pri.priPanel.danger{animation:dangerPulse .7s infinite alternate}
+.ppL{display:flex;align-items:center;gap:7px;flex:none}
+.ppEmoji{font-size:26px;line-height:1;filter:drop-shadow(0 0 8px rgba(244,201,93,.5))}
+.ppId{display:flex;flex-direction:column;line-height:1.12}
+.ppName{font-size:13px;font-weight:800;color:#f4d98a}
+.ppRole{font-size:9.5px;color:#a294cc}
+.ppMain{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.ppRow{display:flex;align-items:center;gap:6px}
+.ppLb{font-size:10px;font-weight:800;width:26px;flex:none;text-align:right}
+.ppLb.hp{color:#7dd89a}
+.ppLb.mp{color:#7aa8ff}
+.ppLb.holy{color:#ffd76a;width:auto}
+.fBarWrap.slim{height:15px;margin-top:0;flex:1}
+.resBar{position:relative;flex:1;height:15px;background:#101726;border:1px solid #2c3a5e;border-radius:7px;overflow:hidden}
+.resBar.slim{height:15px}
+.resBar.holy{border-color:#5e4a1f;background:#241c0d}
+.ppRow .resBar.holy{flex:0 0 78px}
+#manaFill{position:absolute;top:0;left:0;bottom:0;width:100%;background:linear-gradient(180deg,#5aa0ff,#2557c9)}
+#holyFill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(180deg,#ffd76a,#c98f1d)}
+.resTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
+.ppNum{font-size:10px;font-weight:700;color:#c3b6e6;font-variant-numeric:tabular-nums;flex:none;min-width:56px;text-align:right}
+.ppChips{position:absolute;top:6px;right:10px;margin-top:0;min-height:0;justify-content:flex-end;max-width:48%}
+.castwrap.slim{height:15px;margin-top:0}
+
+/* ===== SKILLS 3x2 ===== */
+#skills{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;flex:none}
+.skill{position:relative;height:60px;border-radius:12px;border:1px solid #4a3a78;background:linear-gradient(180deg,#261d45,#181231);color:#ece5ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;overflow:hidden}
+.skill:active{transform:scale(.96)}
+.skIcon{font-size:19px;line-height:1}
+.skName{font-size:11px;font-weight:800}
+.skCost{font-size:9.5px;color:#a795d1}
+.skill.noMana .skCost{color:#ff8a95}
+.skill.gLock{opacity:.78}
+.skill.dis{opacity:.5}
+.skVeil{position:absolute;left:0;right:0;bottom:0;height:0%;background:rgba(6,4,14,.68);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.skCdNum{font-size:14px;font-weight:900;color:#efe8ff;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
+.skill.saveReady{border-color:#f4c95d;animation:pulseGold 1s infinite alternate}
+.skill.passive{border-style:dashed;border-color:#5a4a80;background:linear-gradient(180deg,#231b3d,#161027)}
+.skill.passive .skCost{color:#9d8cc9}
+.skOn{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:900;color:#8fe3a5;background:rgba(20,50,30,.6);border:1px solid #3fae62;border-radius:5px;padding:0 4px}
+#gcdBar{height:3px;background:#241b3f;border-radius:2px;overflow:hidden;flex:none}
+#gcdFill{height:100%;width:0%;background:#f4c95d}
+/* ===== 02A-HF1: 고정 슬롯 / 자원 시인성 ===== */
+.thBadge{min-width:34px;height:15px;display:inline-flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.fChips{flex-wrap:nowrap;height:18px;min-height:18px;overflow:hidden;min-width:0;max-width:100%}
+.ppChips{height:auto;min-height:0;overflow:visible}
+.cState{height:13px;min-height:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.chip.cMore{border-color:#6a5b93;color:#c9bdea}
+.castwrap.idle{opacity:.5}
+.castwrap.idle .castFill{width:0!important}
+.castwrap.idle .castTxt{color:#8a7fa8;font-weight:600}
+.skIcon,.skName,.skCost{position:relative;z-index:2}
+.skVeil{z-index:1}
+.skill.focusArmed{border-color:#e9c46a;box-shadow:0 0 9px rgba(233,196,106,.55)}
+.skill.dis{opacity:.62}
+.skCost .rcMana{color:#8ab4ff;font-weight:800}
+.skCost .rcHoly{color:#ffd76a;font-weight:800}
+.skill.saveReady .rcHoly{color:#ffe08a}
+/* ===== 02A-HF1.1: 위협 배지 시각 안정 ===== */
+.thBadge{width:36px;min-width:36px;height:15px;padding:0;font-size:9px;font-weight:800;line-height:15px;border-width:1px;box-shadow:none;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
+.thBadge.th-stable,.thBadge.th-rise,.thBadge.th-danger,.thBadge.th-target,.thBadge.th-dead{animation:none;box-shadow:none;transform:none}
+.card{transition:border-color .15s ease}
+.card.danger{animation:none;border-color:#b5424f}
+.cState.crit{animation:none}
+/* ===== 02B: 전장 피규어 (말판 위 피규어로 정리) ===== */
+#bossAvatar{z-index:2}
+#stageAllies{gap:16px;align-items:flex-end;z-index:2}
+.fig{position:relative;width:42px;height:56px;display:flex;align-items:flex-end;justify-content:center;transition:filter .1s}
+.fig.dead{opacity:.16;filter:grayscale(1)}
+.figAura{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;opacity:.5;filter:blur(3px);z-index:0}
+.figBody{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:15px;height:21px;border-radius:7px 7px 4px 4px;z-index:2}
+.figBody::before{content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:inherit;filter:brightness(1.1)}
+.figBody::after{content:"";position:absolute;z-index:3}
+.figRing{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:30px;height:9px;border-radius:50%;border:1.5px solid transparent;z-index:1;transition:border-color .18s ease,box-shadow .18s ease}
+.figFlash{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:40px;height:46px;border-radius:50%;opacity:0;z-index:4;pointer-events:none;transition:opacity .15s ease}
+.fig-war .figBody{background:linear-gradient(180deg,#8fb0e6,#4a6bb0)}
+.fig-war .figAura{background:radial-gradient(circle,rgba(106,139,208,.7),transparent 70%)}
+.fig-war .figBody::after{width:9px;height:12px;border-radius:3px;background:linear-gradient(180deg,#cfe0ff,#7a95c8);border:1px solid #3a4d78;left:-8px;bottom:2px}
+.fig-rog .figBody{background:linear-gradient(180deg,#a99ac8,#5f5080);width:12px;height:20px}
+.fig-rog .figAura{background:radial-gradient(circle,rgba(122,106,154,.55),transparent 70%)}
+.fig-rog .figBody::after{width:2px;height:13px;background:#d8d0ec;left:-5px;bottom:1px;transform:rotate(18deg);box-shadow:11px 1px 0 #d8d0ec}
+.fig-mage .figBody{background:linear-gradient(180deg,#c79af0,#7a4db0)}
+.fig-mage .figAura{background:radial-gradient(circle,rgba(168,107,224,.7),transparent 70%)}
+.fig-mage .figBody::after{width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#f0d8ff,#a86be0);box-shadow:0 0 6px rgba(200,120,255,.8);right:-7px;bottom:9px}
+.fig-sham .figBody{background:linear-gradient(180deg,#7fd0dc,#3a8ea0)}
+.fig-sham .figAura{background:radial-gradient(circle,rgba(79,184,200,.55),transparent 70%)}
+.fig-sham .figBody::after{width:10px;height:10px;border-radius:50%;border:2px solid #bff0f6;right:-8px;bottom:6px}
+.figRing.fr-sel{border-color:#f4c95d;box-shadow:0 0 6px rgba(244,201,93,.5)}
+.figRing.fr-target{border-color:#ff4d5e;box-shadow:0 0 8px rgba(255,60,80,.7)}
+.figRing.fr-aoe{border-color:rgba(255,90,105,.75)}
+.figFlash.ff-heal{background:radial-gradient(circle,rgba(125,255,168,.55),transparent 70%)}
+.figFlash.ff-shield{background:radial-gradient(circle,rgba(143,220,255,.5),transparent 70%)}
+.figFlash.ff-dispel{background:radial-gradient(circle,rgba(224,182,255,.55),transparent 70%)}
+.figFlash.ff-save{background:radial-gradient(circle,rgba(255,215,106,.6),transparent 70%)}
+.figFlash.on{opacity:1}
+
+/* ===== 02B: 전장 오버레이 레이어 (action line / ring / AoE) ===== */
+#fxAoe{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 55%,rgba(190,30,45,.26),rgba(120,15,25,.12) 60%,transparent 85%);opacity:0;transition:opacity .25s ease;pointer-events:none;z-index:1}
+#fxAoeDecal{position:absolute;top:50%;left:50%;width:118px;height:118px;transform:translate(-50%,-50%);border-radius:50%;border:1.5px solid rgba(255,90,105,.32);box-shadow:inset 0 0 20px rgba(255,60,80,.14);opacity:0;transition:opacity .25s ease;pointer-events:none;z-index:1}
+#fxAoeDecal.wave{border-color:rgba(125,255,168,.5);box-shadow:inset 0 0 22px rgba(125,255,168,.2)}
+#fxSvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
+#fxSvg line{opacity:0;transition:opacity .2s ease}
+#fxSvg line.on{opacity:1}
+.fxBoss{stroke:#ff4d5e;stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 0 2px rgba(255,60,80,.55))}
+.fxInt{stroke:#ffd76a;stroke-width:2;stroke-dasharray:5 4;stroke-linecap:round}
+.fxInt.broken{stroke:#8a7a5a;stroke-dasharray:2 6}
+.fxInt.broken.on{opacity:.45}
+.fxPri{stroke-width:2.5;stroke-linecap:round;transition:opacity .35s ease}
+.fxPri.fp-heal{stroke:#7dffa8}
+.fxPri.fp-shield{stroke:#8fdcff}
+.fxPri.fp-dispel{stroke:#e0b6ff}
+.fxPri.fp-save{stroke:#ffd76a}
+
+/* ===== 02B-HF1: 하단 상태 라벨 슬롯 고정 (위험/위독 표시 시 카드 높이·정렬 불변) ===== */
+.cState,.fState{margin-top:3px;height:15px;min-height:15px;line-height:15px;overflow:hidden;white-space:nowrap;text-align:center;font-size:9.5px;font-weight:800;transition:color .15s ease}
+.fState.warn{color:#ffb44f}
+.fState.crit{color:#ff6b7a}
+.fState.deadTx{color:#8a7fa8}
+.chip.cHot{border-color:#5ee08a;color:#a8ffc8}
+.chip.cSeed{border-color:#8fd96a;color:#d4ffb0}
+
+
+/* ===== OVERLAYS ===== */
+.overlay{position:fixed;inset:0;background:rgba(7,5,13,.93);display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
+.ovCard{width:100%;max-width:346px;max-height:92dvh;overflow-y:auto;padding:18px 16px;background:linear-gradient(180deg,#1e1638,#120e22);border:1px solid #4a3a78;border-radius:16px}
+.ovKicker{font-size:10px;letter-spacing:.24em;color:#9d8cc9;font-weight:800}
+.ovTitle{font-size:21px;font-weight:900;color:#f4c95d;margin-top:4px;text-shadow:0 0 14px rgba(244,201,93,.35)}
+.ovQuote{margin:10px 0;padding:9px 11px;border-left:3px solid #7c4fd0;background:#171130;font-size:11.5px;line-height:1.65;color:#d9cff0;border-radius:0 8px 8px 0}
+.ovH{font-size:11px;font-weight:800;color:#c9a6ff;margin:11px 0 4px}
+.ovList{font-size:10.5px;line-height:1.75;color:#c4b8e4;list-style:none}
+.ovList b{color:#efe8ff}
+.bigBtn{display:block;width:100%;margin-top:14px;padding:12px;border:none;border-radius:12px;background:linear-gradient(180deg,#f2c14e,#c98f1d);color:#221602;font-size:15px;font-weight:900}
+.bigBtn:active{transform:scale(.97)}
+#endTitle{font-size:22px;font-weight:900;margin-top:4px}
+#endTitle.win{color:#ffd76a}
+#endTitle.lose{color:#ff8a95}
+#endSub{font-size:11px;color:#a795d1;margin-top:3px;line-height:1.5}
+.stGrid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:9px;font-size:10.5px}
+.stGrid .k{color:#9d8cc9;white-space:nowrap}
+.stGrid .v{color:#efe8ff;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.ins{margin-top:6px;padding:7px 9px;background:#171130;border-left:3px solid #d4af37;border-radius:0 8px 8px 0;font-size:10.5px;line-height:1.6;color:#e4dbf6}
+.ins.gold{border-color:#ffd76a}
+.ins.warn{border-color:#ff8a95}
+
+/* ===== FX ===== */
+#toast{position:fixed;left:50%;bottom:200px;transform:translateX(-50%);background:rgba(30,18,40,.96);border:1px solid #6a5b93;color:#efe8ff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;z-index:40;opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:30;background:radial-gradient(70% 60% at 50% 50%,transparent 45%,rgba(190,25,45,.4) 100%);opacity:0;transition:opacity .14s}
+#vignette.on{opacity:1}
+#app.shake{animation:shakeA .35s}
+
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+@keyframes rise{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-32px)}}
+@keyframes blinkA{from{opacity:.4}to{opacity:1}}
+@keyframes dangerPulse{from{border-color:#3b2d5e}to{border-color:#e0435a;box-shadow:0 0 9px rgba(224,67,90,.4)}}
+@keyframes pulseGold{from{box-shadow:0 0 5px rgba(244,201,93,.3)}to{box-shadow:0 0 15px rgba(244,201,93,.8)}}
+@keyframes glowCast{from{filter:drop-shadow(0 0 8px rgba(154,80,255,.5))}to{filter:drop-shadow(0 0 18px rgba(190,120,255,.95))}}
+@keyframes shakeA{0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}
+@media (max-height:730px){
+ #stage{height:62px}
+ #bossAvatar{font-size:34px}
+ .frame{min-height:106px}
+ .skill{height:52px}
+}
+</style>
+<style>
+/* ===== TOWN (CSS Master Build 00) ===== */
+:root{
+ --parch:#f4e9d1;--card:#fbf4e3;--card2:#efe2c6;
+ --ink:#4a3620;--ink2:#7c6544;--line:#c9a86a;
+ --gold:#c98f1d;--gold2:#e8b53c;--sprout:#4f9a54;--sprout2:#79c07e;
+}
+.screen{display:none}
+.screen.town{position:fixed;inset:0;max-width:430px;margin:0 auto;flex-direction:column;z-index:10;
+ background:radial-gradient(130% 92% at 50% -8%,#e4f0e0 0%,#f0e6c9 46%,#e6d5ac 100%);color:var(--ink);
+ font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif}
+.screen.town.active{display:flex}
+#sc-battle{display:none}
+#sc-battle.active{display:block}
+.twWrap{flex:1;display:flex;flex-direction:column;min-height:0;
+ padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 14px)}
+.twScroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+.twBar{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.twBack{flex:none;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--card);
+ color:var(--ink);font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1}
+.twBack:active{transform:scale(.94)}
+.twTitle{font-family:Georgia,"Times New Roman",serif;font-size:22px;font-weight:800;color:var(--ink)}
+.twSub{font-size:11px;color:var(--ink2);margin-top:2px;font-style:italic}
+.twNav{display:flex;flex-direction:column;gap:11px}
+.twFac{display:flex;align-items:center;gap:13px;padding:15px;border-radius:15px;text-align:left;color:var(--ink);
+ background:linear-gradient(180deg,var(--card),var(--card2));border:1px solid var(--line);box-shadow:0 2px 0 rgba(150,120,70,.18)}
+.twFac:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(150,120,70,.18)}
+.twFacE{flex:none;width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px;
+ background:radial-gradient(circle at 40% 35%,#fff6e2,#ecdcb4);border:1px solid var(--line)}
+.twFacB{display:flex;flex-direction:column;gap:2px;min-width:0}
+.twFacB b{font-size:15.5px;font-weight:800}
+.twFacB span{font-size:11.5px;color:var(--ink2);line-height:1.35}
+.twFacArrow{margin-left:auto;color:var(--gold);font-size:20px;font-weight:800;flex:none}
+.twUnit,.twSkill{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:13px;
+ background:var(--card);border:1px solid var(--line);margin-bottom:9px}
+.twSkill{align-items:flex-start}
+.twUnitE,.twSkillE{flex:none;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;
+ background:radial-gradient(circle at 40% 35%,#fff6e2,#ecdcb4);border:1px solid var(--line)}
+.twUnitB{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.twUnitB b{font-size:14px;font-weight:800}
+.twUnitB span{font-size:11px;color:var(--ink2)}
+.twUnitHp{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--sprout);font-variant-numeric:tabular-nums;flex:none}
+.twSkillB{display:flex;flex-direction:column;gap:2px;min-width:0}
+.twSkillB b{font-size:14px;font-weight:800}
+.twSkillC{font-size:10.5px;font-weight:700;color:var(--gold)}
+.twSkillD{font-size:11px;color:var(--ink2);line-height:1.4}
+.twBoss{padding:16px;border-radius:16px;border:1px solid var(--line);box-shadow:0 2px 0 rgba(150,120,70,.18);
+ background:linear-gradient(180deg,#fbf4e3,#efe2c6)}
+.twBossTop{display:flex;align-items:center;gap:12px}
+.twBossE{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:28px;
+ background:radial-gradient(circle at 45% 35%,#4a2233,#2a1420);border:1px solid #6b2b3a;box-shadow:0 0 12px rgba(180,40,70,.3)}
+.twBossName{display:flex;flex-direction:column;gap:2px}
+.twBossName b{font-family:Georgia,serif;font-size:17px;font-weight:800;color:#7a2740}
+.twBossTier{font-size:10.5px;font-weight:800;color:#b06a1e;letter-spacing:.04em}
+.twTags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.twTag{font-size:10px;font-weight:700;padding:4px 8px;border-radius:8px;background:#f0e2c2;border:1px solid var(--line);color:var(--ink2)}
+.twBlurb{margin-top:12px;padding:10px 12px;border-left:3px solid var(--sprout);background:#f3ead4;border-radius:0 9px 9px 0;
+ font-size:11.5px;line-height:1.6;color:var(--ink);font-style:italic}
+.twGoal{margin-top:11px;font-size:12px;font-weight:800;color:var(--ink)}
+.twBtn{display:block;width:100%;margin-top:14px;padding:14px;border:none;border-radius:13px;
+ background:linear-gradient(180deg,var(--gold2),var(--gold));color:#3a2408;font-size:15.5px;font-weight:900;box-shadow:0 2px 0 rgba(150,110,30,.4)}
+.twBtn:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(150,110,30,.4)}
+.twBtnGo{margin-top:16px}
+.twNote{margin-top:14px;font-size:10.5px;color:var(--ink2);text-align:center;line-height:1.5}
+.twSkill.ldSel{cursor:pointer;transition:border-color .12s,background .12s}
+.twSkill.ldSel.on{border-color:#5ee08a;background:linear-gradient(180deg,#16351f,#0f2417)}
+.ldTick{margin-left:auto;flex:none;align-self:center;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0f2417;background:#5ee08a}
+.twSkill.ldSel:not(.on) .ldTick{background:#2a2247;color:transparent}
+.ldHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ldCount{font-size:13px;font-weight:800;padding:4px 12px;border-radius:9px;background:#2a2247;color:#c9bdea;flex:none}
+.ldCount.ok{background:#16351f;color:#a8ffc8}
+.ldWarn{font-size:10.5px;font-weight:700;color:#ffb38a;flex:1;min-width:0;line-height:1.35}
+.ldSlots{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:14px}
+.ldSlot{height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;border:1.5px solid #3b2d5e;background:#161027;min-width:0}
+.ldSlot.empty{color:#5a4a80;border-style:dashed}
+.ldSlot.filled{border-color:#6a5b93;background:linear-gradient(180deg,#231b3d,#161027)}
+.twBtn[disabled]{opacity:.45;cursor:not-allowed}
+.twFoot{margin-top:14px;font-size:10px;color:var(--ink2);letter-spacing:.16em}
+.twHero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;padding:20px}
+.twKick{font-size:11px;letter-spacing:.32em;color:var(--sprout);font-weight:800;text-transform:uppercase}
+.twLogo{font-family:Georgia,"Times New Roman",serif;font-size:42px;font-weight:800;line-height:1.02;color:var(--ink);margin-top:8px}
+.twLogo .g{color:var(--gold);display:block;text-shadow:0 2px 10px rgba(201,143,29,.25)}
+.twQuote{margin:16px 0 6px;font-size:13px;line-height:1.7;color:var(--ink2);max-width:280px;font-style:italic}
+.twQuote b{color:var(--ink);font-style:normal}
+.bigBtn.twGhost{background:linear-gradient(180deg,#2a2148,#1a1330);color:#d9cff0;border:1px solid #4a3a78;margin-top:9px}
+/* CSS sprout — 이미지 0장, 성역 시그니처 */
+.sprout{position:relative;width:72px;height:72px;margin:0 auto 2px;filter:drop-shadow(0 6px 14px rgba(80,150,80,.35))}
+.sprout .pot{position:absolute;left:50%;bottom:0;width:34px;height:26px;transform:translateX(-50%);background:linear-gradient(180deg,#d79a4e,#b9772f);border-radius:6px 6px 11px 11px}
+.sprout .soil{position:absolute;left:50%;bottom:22px;width:34px;height:8px;transform:translateX(-50%);background:#5a3a22;border-radius:50%}
+.sprout .stem{position:absolute;left:50%;bottom:26px;width:4px;height:22px;transform:translateX(-50%);background:var(--sprout);border-radius:3px}
+.sprout .leaf{position:absolute;width:22px;height:15px;background:linear-gradient(135deg,var(--sprout2),var(--sprout));border-radius:0 100% 0 100%}
+.sprout .leaf.l{left:14px;bottom:38px;transform:rotate(-24deg)}
+.sprout .leaf.r{right:14px;bottom:38px;transform:rotate(24deg) scaleX(-1)}
+.sprout .glow{position:absolute;left:50%;top:4px;width:15px;height:15px;transform:translateX(-50%);border-radius:50%;
+ background:radial-gradient(circle,#ffe9a8,rgba(255,215,106,0));animation:twGlow 2.2s ease-in-out infinite alternate}
+@keyframes twGlow{from{opacity:.5;transform:translateX(-50%) scale(.85)}to{opacity:1;transform:translateX(-50%) scale(1.15)}}
+</style>
+</head>
+<body>
+
+<!-- ===== TITLE ===== -->
+<section id="sc-title" class="screen town">
+ <div class="twHero">
+  <div class="twKick">Sanctuary of Sproutlight</div>
+  <div class="sprout"><span class="pot"></span><span class="soil"></span><span class="stem"></span><span class="leaf l"></span><span class="leaf r"></span><span class="glow"></span></div>
+  <div class="twLogo">Seed<span class="g">Healer</span></div>
+  <div class="twQuote">파티는 알아서 싸운다.<br><b>나는 죽어가는 순서를 읽고 살린다.</b></div>
+  <button class="twBtn" id="btn-start" style="max-width:240px">▶ 성역으로 들어가기</button>
+  <div class="twFoot">CSS MASTER BUILD · 00</div>
+ </div>
+</section>
+<!-- ===== VILLAGE ===== -->
+<section id="sc-village" class="screen town">
+ <div class="twWrap">
+  <div class="twBar"><div><div class="twTitle">새싹빛 성역</div><div class="twSub">돌아온 곳은 언제나 따뜻하다</div></div></div>
+  <div class="twScroll">
+   <div class="twNote" id="village-status" style="margin-top:0;margin-bottom:15px">첫 원정을 기다리는 성역</div>
+   <div class="twNav">
+    <button class="twFac" id="nav-inn"><span class="twFacE">🛏️</span><div class="twFacB"><b>여관</b><span>파티를 확인하고 원정을 준비한다</span></div><span class="twFacArrow">›</span></button>
+    <button class="twFac" id="nav-chapel"><span class="twFacE">⛪</span><div class="twFacB"><b>성당</b><span>장착한 여섯 기도를 점검한다</span></div><span class="twFacArrow">›</span></button>
+    <button class="twFac" id="nav-guild"><span class="twFacE">📜</span><div class="twFacB"><b>길드 게시판</b><span>계약을 받고 전투로 향한다</span></div><span class="twFacArrow">›</span></button>
+   </div>
+  </div>
+ </div>
+</section>
+<!-- ===== INN ===== -->
+<section id="sc-inn" class="screen town">
+ <div class="twWrap">
+  <div class="twBar"><button class="twBack" id="back-inn">‹</button><div><div class="twTitle">여관</div><div class="twSub">불 앞에서 숨을 고른다</div></div></div>
+  <div class="twScroll">
+   <div id="inn-party"></div>
+   <button class="twBtn" id="inn-rest">🔥 전원 회복 · 준비 완료</button>
+   <div class="twNote">00에서는 파티가 고정입니다. 편성·시너지는 후속 편에서.</div>
+  </div>
+ </div>
+</section>
+<!-- ===== CHAPEL ===== -->
+<section id="sc-chapel" class="screen town">
+ <div class="twWrap">
+  <div class="twBar"><button class="twBack" id="back-chapel">‹</button><div><div class="twTitle">성당</div><div class="twSub">손이 기억하는 여섯 개의 기도</div></div></div>
+  <div class="twScroll">
+   <div id="chapel-skills"></div>
+   <div class="twNote">8개 중 6개를 골라 손에 익히세요. 이 구성으로 출정합니다. (새로고침 시 기본 구성으로 돌아갑니다)</div>
+  </div>
+ </div>
+</section>
+<!-- ===== GUILD BOARD ===== -->
+<section id="sc-guild" class="screen town">
+ <div class="twWrap">
+  <div class="twBar"><button class="twBack" id="back-guild">‹</button><div><div class="twTitle">길드 게시판</div><div class="twSub">계약은 정직하다 · 패턴은 매번 같다</div></div></div>
+  <div class="twScroll">
+   <div id="guild-list"></div>
+   <div class="twNote">활성 계약부터. 잠긴 계약(🔒)은 앞으로 열릴 질문입니다.</div>
+  </div>
+ </div>
+</section>
+
+<section id="sc-sortie" class="screen town">
+ <div class="twWrap">
+  <div class="twBar"><button class="twBack" id="back-sortie">‹</button><div><div class="twTitle">출정 확인</div><div class="twSub">답과 문제를 맞대보는 자리</div></div></div>
+  <div class="twScroll">
+   <div id="sortie-body"></div>
+  </div>
+ </div>
+</section>
+<div id="sc-battle" class="screen">
+<div id="app">
+ <header id="hud" class="pn">
+  <div class="hudTop">
+   <div id="bossName">☠️ 핏빛 예언자 모르가스</div>
+   <div class="hudR"><span id="clock">⏱ 0.0 / 75s</span><span id="enrageTag" class="hidden">🔥 광폭화</span><button id="sndBtn">🔊</button></div>
+  </div>
+  <div class="bossbar"><div id="bossFill"></div><span id="bossTxt">7200 / 7200 (100%)</span></div>
+  <div class="castwrap idle" id="bossCastWrap"><div class="castFill" id="bossCastFill"></div><span class="castTxt" id="bossCastTxt"></span></div>
+ </header>
+
+ <div id="warnBar">
+  <div class="warnL"><span class="warnIco">⚠️</span><span id="nextPat">다음: -</span></div>
+  <div class="warnR" id="intBar"><span class="warnIco">🗡️</span><span id="intTxt">차단 대기</span></div>
+ </div>
+
+ <section id="stage" class="pn">
+  <div id="bossAvatar">☠️</div>
+  <div id="fxAoe"></div>
+  <div id="fxAoeDecal"></div>
+  <svg id="fxSvg" xmlns="http://www.w3.org/2000/svg"><line id="fxBossLine" class="fxBoss"/><line id="fxIntLine" class="fxInt"/><line id="fxPriLine" class="fxPri"/></svg>
+  <div id="calloutBox"></div>
+  <div id="stageAllies">
+   <div class="fig fig-war" id="sa-war"><span class="figAura"></span><span class="figBody"></span><span class="figRing" id="fxr-war"></span><span class="figFlash" id="fxf-war"></span></div>
+   <div class="fig fig-rog" id="sa-rog"><span class="figAura"></span><span class="figBody"></span><span class="figRing" id="fxr-rog"></span><span class="figFlash" id="fxf-rog"></span></div>
+   <div class="fig fig-mage" id="sa-mage"><span class="figAura"></span><span class="figBody"></span><span class="figRing" id="fxr-mage"></span><span class="figFlash" id="fxf-mage"></span></div>
+   <div class="fig fig-sham" id="sa-sham"><span class="figAura"></span><span class="figBody"></span><span class="figRing" id="fxr-sham"></span><span class="figFlash" id="fxf-sham"></span></div>
+  </div>
+  <div id="valorBanner" class="hidden">🌀 전투 의지 <b id="valorLeft"></b></div>
+ </section>
+
+ <section id="cards">
+  <div class="card sel" id="f-war">
+   <div class="thBadge th-stable" id="th-war">안정</div>
+   <div class="cTop"><span class="cEmoji">🛡️</span><div class="cNames"><span class="cName">전사</span><span class="cRole">탱커</span></div></div>
+   <div class="fBarWrap"><div class="fShield" id="sh-war"></div><div class="fFill hpG" id="hp-war"></div><span class="fPct" id="pct-war">100%</span></div>
+   <div class="cNum" id="num-war">1050/1050</div>
+   <div class="fChips" id="ch-war"></div>
+   <div class="cState" id="st-war"></div>
+   <div class="floats" id="fl-war"></div>
+  </div>
+  <div class="card" id="f-rog">
+   <div class="thBadge th-stable" id="th-rog">안정</div>
+   <div class="cTop"><span class="cEmoji">🗡️</span><div class="cNames"><span class="cName">도적</span><span class="cRole">차단·근딜</span></div></div>
+   <div class="fBarWrap"><div class="fShield" id="sh-rog"></div><div class="fFill hpG" id="hp-rog"></div><span class="fPct" id="pct-rog">100%</span></div>
+   <div class="cNum" id="num-rog">640/640</div>
+   <div class="fChips" id="ch-rog"></div>
+   <div class="cState" id="st-rog"></div>
+   <div class="floats" id="fl-rog"></div>
+  </div>
+  <div class="card" id="f-mage">
+   <div class="thBadge th-stable" id="th-mage">안정</div>
+   <div class="cTop"><span class="cEmoji">🔮</span><div class="cNames"><span class="cName">마법사</span><span class="cRole">주딜러</span></div></div>
+   <div class="fBarWrap"><div class="fShield" id="sh-mage"></div><div class="fFill hpG" id="hp-mage"></div><span class="fPct" id="pct-mage">100%</span></div>
+   <div class="cNum" id="num-mage">580/580</div>
+   <div class="fChips" id="ch-mage"></div>
+   <div class="cState" id="st-mage"></div>
+   <div class="floats" id="fl-mage"></div>
+  </div>
+  <div class="card" id="f-sham">
+   <div class="thBadge th-stable" id="th-sham">안정</div>
+   <div class="cTop"><span class="cEmoji">🌀</span><div class="cNames"><span class="cName">주술사</span><span class="cRole">지원</span></div></div>
+   <div class="fBarWrap"><div class="fShield" id="sh-sham"></div><div class="fFill hpG" id="hp-sham"></div><span class="fPct" id="pct-sham">100%</span></div>
+   <div class="cNum" id="num-sham">700/700</div>
+   <div class="fChips" id="ch-sham"></div>
+   <div class="cState" id="st-sham"></div>
+   <div class="floats" id="fl-sham"></div>
+  </div>
+ </section>
+
+ <div id="f-pri" class="priPanel pn">
+  <div class="ppL"><span class="ppEmoji">✨</span><div class="ppId"><span class="ppName">나</span><span class="ppRole">사제</span></div></div>
+  <div class="ppMain">
+   <div class="ppRow"><span class="ppLb hp">HP</span><div class="fBarWrap slim"><div class="fShield" id="sh-pri"></div><div class="fFill hpG" id="hp-pri"></div><span class="fPct" id="pct-pri">100%</span></div><span class="ppNum" id="num-pri">780/780</span></div>
+   <div class="ppRow"><span class="ppLb mp">MP</span><div class="resBar slim"><div id="manaFill"></div><span class="resTxt" id="manaTxt">520/520</span></div><span class="ppLb holy">신성</span><div class="resBar holy slim"><div id="holyFill"></div><span class="resTxt" id="holyTxt">0/100</span></div></div>
+   <div class="castwrap slim idle" id="priCastWrap"><div class="castFill" id="priCastFill"></div><span class="castTxt" id="priCastTxt"></span></div>
+  </div>
+  <div class="fChips ppChips" id="ch-pri"></div>
+  <div class="floats" id="fl-pri"></div>
+ </div>
+
+ <div id="skills"></div>
+ <div id="gcdBar"><div id="gcdFill"></div></div>
+</div>
+</div><!-- /#sc-battle -->
+
+<div id="toast"></div>
+<div id="vignette"></div>
+
+<div id="startOv" class="overlay hidden">
+ <div class="ovCard">
+  <div class="ovKicker">SEED HEALER 01</div>
+  <div class="ovTitle">레이드 프레임 사제</div>
+  <div class="ovQuote">파티는 알아서 싸운다.<br>나는 죽어가는 순서를 읽고 살린다.</div>
+  <div class="ovH">☠️ 핏빛 예언자 모르가스 — 패턴</div>
+  <ul class="ovList">
+   <li>⚡ <b>어둠의 심판</b> — 2.5초 시전, 전원 피해. 도적이 차단을 시도한다</li>
+   <li>🩸 <b>피의 낙인</b> — 8초 출혈 + 받는 피해 증가. <b>정화 가능</b></li>
+   <li>💥 <b>불안정한 마력</b> — 3초 뒤 폭발. <b>정화로 무효</b></li>
+   <li>🔨 <b>탱커 강타</b> — 전사에게 큰 피해. 시전 바를 보고 미리 대비</li>
+   <li>🔥 <b>광폭화</b> — 60초부터. 심판을 차단할 수 없다</li>
+  </ul>
+  <div class="ovH">🎮 조작</div>
+  <ul class="ovList">
+   <li>① 아군 프레임을 <b>탭</b>해 치유 대상 선택</li>
+   <li>② 아래 <b>스킬 버튼</b> — 사제의 버튼은 정직하다</li>
+   <li>③ <b>마나는 유한하다.</b> 버릴 힐이 없다</li>
+  </ul>
+  <div class="ovH">🏆 목표</div>
+  <ul class="ovList"><li><b>75초 생존</b> 또는 <b>보스 처치</b>. 아군 전멸·사제 사망 시 패배</li></ul>
+  <button class="bigBtn" id="startBtn">▶ 전투 시작</button>
+ </div>
+</div>
+
+<div id="endOv" class="overlay hidden">
+ <div class="ovCard">
+  <div class="ovKicker">전투 분석 리포트</div>
+  <div id="endTitle"></div>
+  <div id="endSub"></div>
+  <div class="stGrid" id="endStats"></div>
+  <div class="ovH">🔍 관찰 포인트</div>
+  <div id="endIns"></div>
+  <button class="bigBtn" id="retryBtn">↻ 다시 도전 — 패턴은 동일하다</button>
+  <button class="bigBtn twGhost" id="toTownBtn">🏠 마을로 돌아가기</button>
+ </div>
+</div>
+
+<script>
+ 'use strict';
+/* ================= CODE MAP (단일 파일 내부 구획) =================
+ * DATA ......... CFG (CORE 내) · BOSSES/SK_DESC/SK_ICON (SCREEN FLOW 블록)
+ * STATE ........ createGame() 의 S 객체 (CORE)
+ * SCREEN FLOW .. curScreen / showScreen()  (UI 하단)
+ * VILLAGE ...... renderInn/renderChapel/renderGuild/refreshVillage/enterBattle
+ * BATTLE LOOP .. step(dt) (CORE) + frame(ts) rAF 루프 (UI 하단)
+ * SKILLS ....... CFG.skills + useSkill()/resolvePriCast() (CORE)
+ * BOSS PATTERNS  SCRIPT[] + fireScript()/resolveBossCast() (CORE)
+ * RESULT REPORT  report() (CORE) + showReport() (UI)
+ * RENDER ....... render()/drain()/doFx() (UI)
+ * INPUT ........ 입력 바인딩 + TOWN INPUT BINDINGS (UI)
+ * DEBUG/TEST ... window.__seedHealer.smoke() (SCREEN FLOW 블록)
+ * ── CORE 블록(START~END 마커 사이) 은 원본 바이트 그대로 보존 ──
+ * ================================================================= */
+//__CORE_START__
+const CFG={
+ dur:75, gcd:1.0, gcdValor:0.85,
+ mana:{max:520,start:520,regen:3.2,valorBonus:5},
+ holy:{regen:1.6,perCast:3,max:100},
+ priest:{hp:780},
+ allies:[
+  {id:'war', name:'전사',   emoji:'🛡️', role:'탱커',     hp:1050, atk:32, per:2.0},
+  {id:'rog', name:'도적',   emoji:'🗡️', role:'차단·근딜', hp:640,  atk:46, per:1.5},
+  {id:'mage',name:'마법사', emoji:'🔮', role:'주딜러',   hp:580,  atk:92, per:2.2},
+  {id:'sham',name:'주술사', emoji:'🌀', role:'지원',     hp:700,  atk:22, per:2.0}
+ ],
+ boss:{
+  name:'핏빛 예언자 모르가스', hp:7200,
+  melee:55, meleePer:2.0, enMelee:78, enMeleePer:1.7, offTankMul:1.5,
+  smash:250, enSmash:300, smashBlocked:0.5, smashCast:1.4,
+  judge:180, enJudge:225, judgeCast:2.5,
+  brandTick:20, brandDur:8, brandAmp:1.15,
+  bomb:240, bombFuse:3
+ },
+ intCd:20,
+ valor:{dur:12,atkMul:1.3,castMul:0.85},
+ skills:{
+  heal:  {name:'단일 치유',  mana:40,  heal:200, cast:0},
+  big:   {name:'강력 치유',  mana:75,  heal:520, cast:1.6},
+  shield:{name:'보호막',     mana:55,  absorb:320, dur:5, lock:6},
+  dispel:{name:'정화',       mana:45,  cd:3},
+  pray:  {name:'치유의 기도', mana:100, heal:240, cast:2.0, cd:8},
+  save:  {name:'긴급 구원',  holy:100, floor:0.35, immune:2}
+ }
+};
+/* 고정 스크립트 — 난수 0. 매판 동일. 변수는 오직 사제의 손. */
+const SCRIPT=[
+ {t:8, e:'smash'},
+ {t:10,e:'brand',tg:'mage'},
+ {t:15,e:'judge',j:1},
+ {t:20,e:'bomb', tg:'mage'},
+ {t:23,e:'smash',blk:1},
+ {t:25,e:'valor'},
+ {t:28,e:'brand',tg:'war'},
+ {t:32,e:'judge',j:2},
+ {t:38,e:'smash'},
+ {t:43,e:'brand',tg:'rog'},
+ {t:48,e:'judge',j:3},
+ {t:52,e:'smash',blk:1},
+ {t:55,e:'bomb', tg:'sham'},
+ {t:60,e:'enrage'},
+ {t:63,e:'brand',tg:'mage'},
+ {t:66,e:'judge',j:4},
+ {t:70,e:'smash'}
+];
+function createGame(){
+ const B=CFG.boss, K=CFG.skills;
+ const al=CFG.allies.map(a=>({id:a.id,name:a.name,emoji:a.emoji,role:a.role,max:a.hp,hp:a.hp,atk:a.atk,per:a.per,alive:true,debuffs:[],shield:null,shieldLock:0,undying:0,nextAtk:0}));
+ al[0].nextAtk=1.0; al[1].nextAtk=1.2; al[2].nextAtk=1.5; al[3].nextAtk=1.7;
+ const S={
+  t:0,started:false,over:false,result:'',endT:0,sel:'war',si:0,
+  pendJ:null,intReady:0,valorUntil:0,valorOff:false,rogFail:0,
+  boss:{hp:B.hp,max:B.hp,cast:null,enraged:false,nextMelee:2.2},
+  al,
+  pri:{id:'pri',name:'사제',emoji:'✨',role:'플레이어',max:CFG.priest.hp,hp:CFG.priest.hp,
+       mana:CFG.mana.start,manaMax:CFG.mana.max,holy:0,gcd:0,cast:null,cdDispel:0,cdPray:0,
+       shield:null,shieldLock:0,undying:0,debuffs:[],alive:true},
+  st:{heal:0,oh:0,abs:0,disp:0,bombDef:0,bombTot:0,brandTot:0,pray:0,saves:[],deaths:[],
+      oomT:0,ints:[],rogAssist:false,holyPeak:0,valorCasts:0,aoes:[],care:0,
+      tankLowMax:0,_tls:-1,brandMax:0,manaMin:CFG.mana.start},
+  ev:[]
+ };
+ const E=o=>S.ev.push(o);
+ const L=(m,c)=>E({y:'log',m,c:c||'lg'});
+ const F=(tg,txt,c)=>E({y:'flt',tg,txt,c});
+ const FX=(k,d)=>E({y:'fx',k,d:d||{}});
+ const deny=m=>E({y:'deny',m});
+ const unit=id=>id==='pri'?S.pri:S.al.find(a=>a.id===id);
+ const aliveAll=()=>S.al.filter(a=>a.alive);
+ const meleeTgt=()=>{for(const id of ['war','rog','sham','mage']){const a=unit(id);if(a.alive)return a}return null};
+ const inValor=()=>S.t<S.valorUntil;
+ const hasDeb=(u,k)=>u.debuffs.some(d=>d.k===k);
+
+ function end(kind,msg){
+  if(S.over)return;
+  S.over=true;S.result=kind;S.endT=S.t;
+  if(kind==='victory_kill'){L('🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!','lgold');FX('win');}
+  else if(kind==='victory_survive'){L('🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!','lgold');FX('win');}
+  else{L('☠️ '+(msg||'패배...'),'lr');FX('lose');}
+  E({y:'end',rep:report()});
+ }
+ function die(u){
+  u.alive=false;u.hp=0;u.debuffs=[];u.shield=null;
+  S.st.deaths.push({id:u.id,name:u.name,t:S.t});
+  L('💀 '+u.name+'이(가) 쓰러졌습니다!','lr');FX('death',{tg:u.id});
+  if(u.id==='pri'){end('defeat','사제가 쓰러졌습니다 — 파티를 살릴 손이 사라졌습니다.');return}
+  if(S.sel===u.id){const n=meleeTgt();S.sel=n?n.id:'pri';E({y:'sel'});}
+  if(aliveAll().length===0){end('defeat','파티가 전멸했습니다.');return}
+  if(u.id==='war'){const n=meleeTgt();if(n)L('⚠️ 전사가 무너졌다! 보스가 '+n.name+'에게 달려듭니다!','lo');}
+ }
+ function dmg(u,amt,tag){
+  if(S.over||!u.alive)return;
+  let a=amt;
+  if(tag!=='dot'&&hasDeb(u,'brand'))a=Math.round(a*B.brandAmp);
+  if(u.shield&&a>0){
+   const use=Math.min(u.shield.amt,a);
+   u.shield.amt-=use;a-=use;S.st.abs+=use;
+   if(use>0)F(u.id,'('+Math.round(use)+')','abs');
+   if(u.shield.amt<=0.5){u.shield=null;F(u.id,'보호막 파괴','abs');}
+  }
+  if(a<=0)return;
+  u.hp-=a;
+  F(u.id,'-'+a,'dmg');
+  if(u.hp<=0){
+   if(u.undying>S.t){u.hp=1;F(u.id,'불굴!','gold');L('⚜️ '+u.name+' — 구원의 가호가 죽음을 막았습니다!','lgold');FX('save',{tg:u.id,echo:1});}
+   else{die(u);return}
+  }
+  if((tag==='aoe'||tag==='smash'||tag==='bomb')&&u.alive&&u.hp/u.max<0.3)FX('vign');
+ }
+ function heal(u,amt){
+  if(!u.alive)return 0;
+  const eff=Math.min(amt,u.max-u.hp);
+  u.hp+=eff;
+  S.st.heal+=eff;S.st.oh+=(amt-eff);
+  if(eff>0)F(u.id,'+'+eff,'heal');
+  return eff;
+ }
+ function payMana(c){S.pri.mana-=c;if(S.pri.mana<S.st.manaMin)S.st.manaMin=S.pri.mana;if(!S.st.oomT&&S.pri.mana<40)S.st.oomT=S.t;}
+ function addHoly(n){S.pri.holy=Math.min(CFG.holy.max,S.pri.holy+n);if(S.pri.holy>S.st.holyPeak)S.st.holyPeak=S.pri.holy;}
+ function select(id){const u=unit(id);if(!u)return;if(!u.alive){deny('이미 쓰러진 대상입니다');return}S.sel=id;E({y:'sel'});}
+ function cancelCast(){if(S.pri.cast){S.pri.cast=null;L('시전을 취소했습니다.','lg');}}
+
+ function useSkill(k){
+  if(!S.started||S.over)return false;
+  const p=S.pri, sk=K[k], tg=unit(S.sel);
+  if(p.cast){deny('시전 중 — 시전 바를 탭하면 취소');return false}
+  if(S.t<p.gcd)return false;
+  if(k==='save'){
+   if(p.holy<CFG.holy.max){deny('신성력 부족 ('+Math.floor(p.holy)+'/100)');return false}
+  }else if(p.mana<sk.mana){deny('마나가 부족합니다');L('❕ 마나가 부족합니다!','lo');return false}
+  if(k==='dispel'&&S.t<p.cdDispel){deny('정화 대기 '+(p.cdDispel-S.t).toFixed(1)+'초');return false}
+  if(k==='pray'&&S.t<p.cdPray){deny('기도 대기 '+(p.cdPray-S.t).toFixed(1)+'초');return false}
+  if(!tg||!tg.alive){deny('대상이 없습니다');return false}
+  if(k==='shield'&&S.t<tg.shieldLock){deny(tg.name+' 보호막 재적용 대기 '+(tg.shieldLock-S.t).toFixed(1)+'초');return false}
+  if(k==='dispel'&&tg.debuffs.length===0){deny('제거할 해로운 효과가 없습니다');return false}
+  if(inValor())S.st.valorCasts++;
+  const gcd=()=>{p.gcd=S.t+(inValor()?CFG.gcdValor:CFG.gcd);};
+  switch(k){
+   case 'heal':
+    payMana(sk.mana);gcd();
+    heal(tg,sk.heal);addHoly(CFG.holy.perCast);
+    L('✨ 단일 치유 → '+tg.name,'lh');FX('heal',{tg:tg.id});break;
+   case 'big':{
+    const ct=sk.cast*(inValor()?CFG.valor.castMul:1);
+    p.cast={k:'big',tg:tg.id,name:'강력 치유',end:S.t+ct,dur:ct};gcd();FX('castStart');break}
+   case 'pray':{
+    const ct=sk.cast*(inValor()?CFG.valor.castMul:1);
+    p.cast={k:'pray',name:'치유의 기도',end:S.t+ct,dur:ct};gcd();FX('castStart');break}
+   case 'shield':
+    payMana(sk.mana);gcd();
+    tg.shield={amt:sk.absorb,end:S.t+sk.dur};tg.shieldLock=S.t+sk.lock;
+    addHoly(CFG.holy.perCast);
+    L('🔰 보호막 → '+tg.name+' ('+sk.absorb+' 흡수 / '+sk.dur+'초)','lh');F(tg.id,'보호막','abs');FX('shield',{tg:tg.id});break;
+   case 'dispel':{
+    payMana(sk.mana);gcd();p.cdDispel=S.t+sk.cd;S.st.disp++;
+    const d=tg.debuffs.find(x=>x.k==='bomb')||tg.debuffs[0];
+    tg.debuffs=tg.debuffs.filter(x=>x!==d);
+    if(d.k==='bomb'){
+     S.st.bombDef++;
+     L('💫 정화! '+tg.name+'의 불안정한 마력 무효화 — 폭발하지 않습니다!','lgold');
+     F(tg.id,'폭발 무효!','gold');FX('dispel',{tg:tg.id,big:1});
+    }else{
+     const held=S.t-d.t0;if(held>S.st.brandMax)S.st.brandMax=held;
+     if(tg.id==='rog'&&S.t>=43&&S.t<48.8)S.st.rogAssist=true;
+     L('💫 '+tg.name+'의 피의 낙인을 정화했습니다.','lh');
+     F(tg.id,'정화','gold');FX('dispel',{tg:tg.id});
+    }
+    addHoly(CFG.holy.perCast);break}
+   case 'save':{
+    p.holy-=CFG.holy.max;gcd();
+    const before=tg.hp/tg.max;
+    tg.hp=Math.max(tg.hp,Math.round(tg.max*sk.floor));
+    tg.undying=S.t+sk.immune;
+    S.st.saves.push({t:S.t,tg:tg.id,name:tg.name,before});
+    L('⚜️ 긴급 구원! '+tg.name+'이(가) 황금빛에 감싸입니다. (2초 사망 방지)','lgold');
+    F(tg.id,'구 원','gold');FX('save',{tg:tg.id});break}
+  }
+  return true;
+ }
+ function resolvePriCast(){
+  const c=S.pri.cast;S.pri.cast=null;
+  const sk=K[c.k];
+  if(c.k==='big'){
+   const tg=unit(c.tg);
+   if(!tg.alive){L('🌟 강력 치유 무산 — 대상이 이미 쓰러졌습니다.','lo');FX('fizzle');return}
+   payMana(sk.mana);
+   heal(tg,sk.heal);addHoly(CFG.holy.perCast);
+   L('🌟 강력 치유 → '+tg.name,'lh');FX('heal',{tg:tg.id,big:1});
+  }else{
+   payMana(sk.mana);S.pri.cdPray=S.t+sk.cd;S.st.pray++;
+   aliveAll().slice().forEach(a=>heal(a,sk.heal));
+   heal(S.pri,sk.heal);
+   addHoly(CFG.holy.perCast+1);
+   L('🙏 치유의 기도 — 파티 전체 +'+sk.heal,'lh');FX('pray');
+  }
+ }
+
+ function fireScript(ev){
+  switch(ev.e){
+   case 'smash':{
+    const w=unit('war');const tg=(w&&w.alive)?w:meleeTgt();
+    if(!tg)break;
+    S.boss.cast={kind:'smash',name:'탱커 강타',start:S.t,end:S.t+B.smashCast,tg:tg.id,blk:ev.blk||0};
+    L('🔨 모르가스가 강타를 준비합니다 → '+tg.name,'lb');FX('bossCast');break}
+   case 'judge':{
+    const un=ev.j===4;
+    S.boss.cast={kind:'judge',name:'어둠의 심판',start:S.t,end:S.t+B.judgeCast,j:ev.j,un};
+    if(un){L('⚡ 광폭화한 모르가스의 어둠의 심판 — 차단 불가!','lr');S.st.ints.push({j:ev.j,ok:-1,r:'광폭화 — 차단 불가'});FX('judgeWarn',{un:1});}
+    else{L('⚡ 모르가스가 어둠의 심판을 시전합니다! (차단 가능)','lb');S.pendJ={t:S.t+0.8,j:ev.j};FX('judgeWarn');}
+    break}
+   case 'brand':{
+    const tg=unit(ev.tg);if(!tg||!tg.alive)break;
+    S.st.brandTot++;
+    tg.debuffs.push({k:'brand',t0:S.t,end:S.t+B.brandDur,tick:S.t+1});
+    L('🩸 '+tg.name+'에게 피의 낙인! (8초 출혈·받는 피해 +15% — 정화 가능)','lo');
+    F(tg.id,'낙인','dmg');FX('debuff',{tg:tg.id});break}
+   case 'bomb':{
+    const tg=unit(ev.tg);if(!tg||!tg.alive)break;
+    S.st.bombTot++;
+    tg.debuffs.push({k:'bomb',t0:S.t,end:S.t+B.bombFuse});
+    L('💥 '+tg.name+'에게 불안정한 마력! 3초 뒤 폭발 — 정화로 무효화!','lr');
+    F(tg.id,'폭탄!','dmg');FX('debuff',{tg:tg.id,bomb:1});break}
+   case 'valor':
+    S.valorUntil=S.t+CFG.valor.dur;
+    L('🌀 주술사가 전투 의지를 외칩니다! 12초간 파티 공격·사제 시전 가속, 마나 회복 증가!','lgold');
+    FX('valor');break;
+   case 'enrage':
+    S.boss.enraged=true;
+    L('🔥 모르가스가 광폭화합니다! 모든 피해가 증가합니다!','lr');
+    FX('enrage');break;
+  }
+ }
+ function tryInterrupt(j){
+  const rog=unit('rog');
+  const fail=r=>{
+   S.rogFail=S.t+2.5;
+   L('❌ 차단 실패 — '+r,'lr');
+   if(rog&&rog.alive)F('rog','차단 실패!','dmg');
+   S.st.ints.push({j,ok:0,r});FX('intFail');
+  };
+  if(!rog||!rog.alive){fail('차단할 도적이 전장에 없습니다');return}
+  if(S.t<S.intReady){fail('도적의 차단 재사용 대기 '+(S.intReady-S.t).toFixed(1)+'초');return}
+  const d=rog.debuffs[0];
+  if(d){fail((d.k==='brand'?'도적이 피의 낙인에 걸려':'도적이 불안정한 마력에 휘말려')+' 반응이 늦었습니다');return}
+  S.boss.cast=null;
+  S.intReady=S.t+CFG.intCd;
+  S.boss.nextMelee=Math.max(S.boss.nextMelee,S.t+1.4);
+  const asst=(j===3&&S.st.rogAssist);
+  L('✅ 도적이 어둠의 심판을 차단했습니다!'+(asst?' (사제의 정화 지원!)':''),'lh');
+  F('rog','차단!','gold');
+  S.st.ints.push({j,ok:1,asst});FX('intOk');
+ }
+ function resolveBossCast(){
+  const c=S.boss.cast;S.boss.cast=null;
+  S.boss.nextMelee=Math.max(S.boss.nextMelee,S.t+0.8);
+  if(c.kind==='smash'){
+   const tg=unit(c.tg);
+   if(!tg.alive){L('강타가 허공을 갈랐습니다.','lg');return}
+   let d=S.boss.enraged?B.enSmash:B.smash;
+   if(c.blk){d=Math.round(d*B.smashBlocked);L('🛡️ 전사가 방패로 강타를 막았습니다! (피해 절반)','lh');F(tg.id,'방패 막기','abs');}
+   dmg(tg,d,'smash');FX('smash',{tg:tg.id});
+  }else{
+   const d=S.boss.enraged?B.enJudge:B.judge;
+   const h0=S.st.heal;
+   aliveAll().slice().forEach(a=>dmg(a,d,'aoe'));
+   dmg(S.pri,d,'aoe');
+   S.st.aoes.push({t:S.t,tot:d*5,h0,done:false});
+   L('💥 어둠의 심판이 파티를 덮칩니다! (전원 '+d+' 피해)','lr');FX('aoe');
+  }
+ }
+
+ function step(dt){
+  if(!S.started||S.over)return;
+  S.t+=dt;const t=S.t,p=S.pri;
+  while(S.si<SCRIPT.length&&SCRIPT[S.si].t<=t){fireScript(SCRIPT[S.si]);S.si++;if(S.over)return}
+  if(S.valorUntil&&!S.valorOff&&t>=S.valorUntil){S.valorOff=true;L('전투 의지가 잦아듭니다.','lg');FX('valorOff');}
+  p.mana=Math.min(p.manaMax,p.mana+(CFG.mana.regen+(inValor()?CFG.mana.valorBonus:0))*dt);
+  addHoly(CFG.holy.regen*dt);
+  if(p.cast&&t>=p.cast.end){resolvePriCast();if(S.over)return}
+  if(S.pendJ&&t>=S.pendJ.t){const j=S.pendJ.j;S.pendJ=null;if(S.boss.cast&&S.boss.cast.kind==='judge')tryInterrupt(j);}
+  if(S.boss.cast&&t>=S.boss.cast.end){resolveBossCast();if(S.over)return}
+  if(!S.boss.cast&&t>=S.boss.nextMelee){
+   const tg=meleeTgt();
+   if(tg){
+    let d=S.boss.enraged?B.enMelee:B.melee;
+    if(tg.id!=='war')d=Math.round(d*B.offTankMul);
+    dmg(tg,d,'melee');FX('melee',{tg:tg.id});
+    if(S.over)return;
+   }
+   S.boss.nextMelee=t+(S.boss.enraged?B.enMeleePer:B.meleePer);
+  }
+  const am=inValor()?CFG.valor.atkMul:1;
+  for(const a of S.al){
+   if(!a.alive)continue;
+   if(t>=a.nextAtk){
+    S.boss.hp=Math.max(0,S.boss.hp-a.atk);
+    a.nextAtk=t+a.per/am;
+    FX('allyAtk',{tg:a.id});
+   }
+  }
+  for(const a of S.al){
+   if(!a.alive)continue;
+   const kept=[];
+   for(const d of a.debuffs){
+    if(d.k==='brand'){
+     while(a.alive&&d.tick<=t&&d.tick<=d.end+0.001){dmg(a,B.brandTick,'dot');d.tick+=1;}
+     if(S.over)return;
+     if(!a.alive)break;
+     if(t>=d.end){const held=d.end-d.t0;if(held>S.st.brandMax)S.st.brandMax=held;continue}
+     kept.push(d);
+    }else{
+     if(t>=d.end){
+      L('💥 불안정한 마력이 폭발합니다! → '+a.name,'lr');
+      dmg(a,B.bomb,'bomb');FX('bombBoom',{tg:a.id});
+      if(S.over)return;
+      if(!a.alive)break;
+     }else kept.push(d);
+    }
+   }
+   a.debuffs=a.alive?kept:[];
+  }
+  for(const u of S.al.concat([p])){
+   if(u.shield&&t>=u.shield.end){u.shield=null;if(u.alive)F(u.id,'보호막 소멸','abs');}
+  }
+  const w=unit('war');
+  if(w.alive&&w.hp/w.max<0.4){
+   if(S.st._tls<0)S.st._tls=t;
+   const dlow=t-S.st._tls;
+   if(dlow>S.st.tankLowMax)S.st.tankLowMax=dlow;
+  }else S.st._tls=-1;
+  for(const a2 of S.st.aoes){
+   if(!a2.done&&t>=a2.t+6){a2.done=true;a2.healed=S.st.heal-a2.h0;if(a2.healed>=a2.tot*0.45)S.st.care++;}
+  }
+  if(S.boss.hp<=0){end('victory_kill');return}
+  if(t>=CFG.dur){end('victory_survive');return}
+ }
+
+ function report(){
+  const st=S.st;
+  const surA=aliveAll().length;
+  const surv=surA+(S.pri.alive?1:0);
+  const bossPct=Math.round(100*S.boss.hp/S.boss.max);
+  const win=S.result.indexOf('victory')===0;
+  const ins=[];
+  const push=(c,m)=>ins.push({c,m});
+  if(S.result==='victory_kill')push('gold','보스 처치 성공. 아군의 생존이 곧 화력이었다 — 힐이 딜을 만들었다.');
+  if(S.result==='victory_survive')push('gold','생존 승리. 처치까지 가려면 아군을 더 온전히 살려 공격 시간을 지켜줘야 한다. (남은 보스 HP '+bossPct+'%)');
+  if(!win&&st.deaths.length){
+   const f=st.deaths[0];
+   if(f.id==='war')push('warn','전사가 '+f.t.toFixed(0)+'초에 먼저 무너졌다. 탱커가 쓰러지면 보스는 후열을 문다 — 붕괴의 시작.');
+   else if(f.id==='pri')push('warn','사제가 쓰러지면 그걸로 끝이다. 광역 패턴 뒤에는 내 HP도 프레임이다.');
+   else push('warn',f.name+'이(가) '+f.t.toFixed(0)+'초에 먼저 쓰러졌다. 죽음의 원인(출혈? 폭발? 광역?)을 로그에서 되짚어 보자.');
+  }
+  const j3=st.ints.find(i=>i.j===3);
+  if(j3&&j3.ok&&j3.asst)push('gold','43초의 낙인을 정화해 도적의 세 번째 차단을 성공시켰다 — 이번 판의 결정적 케어.');
+  if(j3&&!j3.ok&&j3.r&&j3.r.indexOf('낙인')>=0)push('warn','48초 차단 실패 — 도적의 피의 낙인을 먼저 정화했다면 차단이 성공했다. 정화는 힐이 아니라 차단 지원이기도 하다.');
+  if(st.bombTot>0){
+   if(st.bombDef>=st.bombTot)push('gold','불안정한 마력 '+st.bombTot+'회 전부 무효화 — 완벽한 정화 감각.');
+   else push('warn','불안정한 마력 '+(st.bombTot-st.bombDef)+'회가 폭발했다. 3초 안의 정화는 피해 자체를 지운다.');
+  }
+  if(st.saves.length===0&&st.deaths.filter(d=>d.id!=='pri').length>0&&st.holyPeak>=100)push('warn','신성력 100이 잠들어 있는 동안 동료가 쓰러졌다. 긴급 구원은 아끼라고만 있는 버튼이 아니다.');
+  const early=st.saves.find(s=>s.before>0.5);
+  if(early)push('warn','긴급 구원이 다소 일찍 나갔다 ('+early.name+' HP '+Math.round(early.before*100)+'%). 죽음의 문턱까지 아낄수록 가치가 커진다.');
+  if(st.oomT)push('warn','마나가 '+st.oomT.toFixed(0)+'초에 바닥났다. 광역 패턴 직전에는 기도 비용(100)을 남겨두자.');
+  if(st.tankLowMax>6)push('warn','전사가 HP 40% 미만으로 최장 '+st.tankLowMax.toFixed(1)+'초 방치됐다. 탱커의 바닥은 전멸의 카운트다운이다.');
+  if(st.brandMax>5.5)push('warn','피의 낙인이 최장 '+st.brandMax.toFixed(1)+'초 유지됐다. 정화가 빠를수록 피가 덜 샌다.');
+  if(st.valorCasts>=3)push('gold','전투 의지 12초 동안 '+st.valorCasts+'회 시전 — 가속 창을 제대로 썼다.');
+  if(st.care>=1)push('gold','광역 피격 후 '+st.care+'회, 파티를 제때 복구했다. 실패를 사건으로 바꾸는 손.');
+  if(win&&st.deaths.length===0)push('gold','사망자 0 — 무결점 진형. 다음 판엔 더 공격적인 마나 운용도 가능하다.');
+  const ohPct=(st.heal+st.oh)>0?Math.round(100*st.oh/(st.heal+st.oh)):0;
+  return {
+   r:S.result,t:S.endT,bossPct,bossDead:S.boss.hp<=0,surv,surA,
+   heal:Math.round(st.heal),oh:Math.round(st.oh),ohPct,abs:Math.round(st.abs),
+   disp:st.disp,bombDef:st.bombDef,bombTot:st.bombTot,pray:st.pray,
+   saves:st.saves.length,deaths:st.deaths.slice(),oomT:st.oomT,
+   ints:st.ints.slice(),care:st.care,manaMin:Math.round(st.manaMin),
+   ins:ins.slice(0,5)
+  };
+ }
+ function nextPattern(){
+  const NM={smash:'🔨 탱커 강타',judge:'⚡ 어둠의 심판',brand:'🩸 피의 낙인',bomb:'💥 불안정한 마력',valor:'🌀 전투 의지',enrage:'🔥 광폭화'};
+  if(S.si<SCRIPT.length){const e=SCRIPT[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
+  return null;
+ }
+ function start(){S.started=true;L('전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!','lb');FX('start');}
+ return {S,step,useSkill,select,cancelCast,start,nextPattern,report,
+  meleeTgtId:()=>{const m=meleeTgt();return m?m.id:null}};
+}
+if(typeof module!=='undefined'&&module.exports)module.exports={CFG,SCRIPT,createGame};
+//__CORE_END__
+/* ===== UI ADAPTER ===== */
+const $=id=>document.getElementById(id);
+function sT(el,s){if(el.__t!==s){el.__t=s;el.textContent=s;}}
+function sH(el,s){if(el.__h!==s){el.__h=s;el.innerHTML=s;}}
+function sW(el,w){const v=w.toFixed(1)+'%';if(el.__w!==v){el.__w=v;el.style.width=v;}}
+function sC(el,c,on){if(on)el.classList.add(c);else el.classList.remove(c);}
+
+/* --- WebAudio 미니 신스 (외부 의존 0) --- */
+let AC=null,muted=false;
+function ainit(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC&&AC.state==='suspended')AC.resume();}catch(e){}}
+function tone(f0,f1,d,ty,v,dl){
+ if(!AC||muted)return;
+ try{
+  const t0=AC.currentTime+(dl||0);
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type=ty||'sine';
+  o.frequency.setValueAtTime(Math.max(20,f0),t0);
+  if(f1)o.frequency.exponentialRampToValueAtTime(Math.max(20,f1),t0+d);
+  g.gain.setValueAtTime(v||.12,t0);
+  g.gain.exponentialRampToValueAtTime(.0008,t0+d);
+  o.connect(g);g.connect(AC.destination);
+  o.start(t0);o.stop(t0+d+.03);
+ }catch(e){}
+}
+const SFX={
+ heal:()=>tone(660,900,.12,'sine',.09),
+ bigHeal:()=>{tone(523,660,.16,'sine',.1);tone(784,990,.16,'sine',.07,.03);},
+ shield:()=>tone(300,210,.16,'triangle',.12),
+ dispel:()=>tone(880,1500,.15,'sine',.09),
+ defuse:()=>{tone(880,1500,.14,'sine',.1);tone(1320,1800,.16,'sine',.08,.05);},
+ debuff:()=>tone(240,170,.16,'square',.07),
+ bomb:()=>tone(190,120,.22,'square',.11),
+ boom:()=>tone(150,45,.4,'sawtooth',.2),
+ aoe:()=>{tone(120,42,.5,'sawtooth',.22);tone(80,35,.6,'sawtooth',.14,.04);},
+ smash:()=>tone(160,60,.28,'sawtooth',.17),
+ melee:()=>tone(180,120,.05,'square',.035),
+ intOk:()=>{tone(523,784,.1,'square',.09);tone(784,1046,.12,'square',.07,.08);},
+ intFail:()=>tone(240,120,.32,'square',.15),
+ death:()=>tone(170,50,.7,'sawtooth',.18),
+ save:()=>{tone(523,523,.4,'triangle',.12);tone(659,659,.4,'triangle',.1,.05);tone(784,784,.5,'triangle',.1,.1);},
+ valor:()=>{tone(392,392,.12,'square',.09);tone(494,494,.12,'square',.09,.1);tone(587,587,.2,'square',.1,.2);},
+ enrage:()=>tone(90,55,.8,'sawtooth',.18),
+ pray:()=>{tone(440,440,.35,'sine',.09);tone(554,554,.35,'sine',.08,.06);tone(659,659,.4,'sine',.08,.12);},
+ cast:()=>tone(430,520,.1,'sine',.05),
+ ui:()=>tone(210,190,.07,'square',.06),
+ start:()=>{tone(392,392,.1,'square',.1);tone(587,587,.18,'square',.1,.1);},
+ win:()=>{tone(523,523,.14,'square',.1);tone(659,659,.14,'square',.1,.14);tone(784,784,.14,'square',.1,.28);tone(1046,1046,.4,'square',.11,.42);},
+ lose:()=>{tone(330,330,.2,'sawtooth',.1);tone(262,262,.2,'sawtooth',.1,.2);tone(196,150,.6,'sawtooth',.12,.4);}
+};
+
+/* --- 게임 인스턴스 --- */
+let G=null,acc=0,lastTs=0,lastHitFx=0,toastTm=0,vignTm=0;
+const IDS=['war','rog','mage','sham','pri'];
+const SKL=['heal','big','shield','dispel','pray','save'];
+function newGame(){
+ ledgerReset();
+ G=createGame();
+ renderSkillSlots();
+ var _lg=$('log');if(_lg)_lg.innerHTML='';
+ IDS.forEach(id=>{$('fl-'+id).innerHTML='';});
+ $('endOv').classList.add('hidden');
+ render();
+}
+
+
+/* ========== SCREEN FLOW ========== */
+let curScreen='title';
+const TOWN_SCREENS=['title','village','inn','chapel','guild','sortie','battle'];
+function showScreen(name){
+ curScreen=name;
+ TOWN_SCREENS.forEach(s=>sC($('sc-'+s),'active',s===name));
+ if(name!=='battle'){$('startOv').classList.add('hidden');$('endOv').classList.add('hidden');}
+ if(name==='inn')renderInn();
+ else if(name==='chapel')renderChapel();
+ else if(name==='guild')renderGuild();
+ else if(name==='sortie')renderSortie();
+ else if(name==='village')refreshVillage();
+ const el=$('sc-'+name);if(el)el.scrollTop=0;
+ SFX.ui();
+}
+
+/* ========== SAVE (localStorage, try/catch + 메모리 fallback) ========== */
+const SAVE=(function(){
+ const KEY='seedHealer00';
+ let mem={clears:0,best:null},ls=null;
+ try{ls=window.localStorage;const raw=ls.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object')mem=Object.assign(mem,o);}}catch(e){ls=null;}
+ function persist(){try{if(ls)ls.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+ return {
+  data:function(){return mem;},
+  recordWin:function(t){mem.clears++;if(mem.best==null||t<mem.best)mem.best=t;persist();},
+  reset:function(){mem={clears:0,best:null};persist();}
+ };
+})();
+
+/* ========== VILLAGE DATA + RENDER ========== */
+const BOSSES=[{
+ slot:'boss01',
+ tier:'표준',
+ q:'너는 순서를 읽는가?',
+ tags:['⚡ 어둠의 심판 (차단)','🩸 피의 낙인 · 💥 불안정한 마력 (정화)','🔨 탱커 강타','🔥 60초 광폭화'],
+ blurb:'파티는 알아서 싸운다. 너는 죽어가는 순서를 읽어라.',
+ goal:'75초 생존 또는 처치'
+},{
+ /* === Guild Board Monster Select 01: 준비 중 셸 — 전투/SCRIPT 미연결 (docs/15 §3) === */
+ slot:'shell_iron', shell:1,
+ name:'강철의 파쇄자',
+ q:'네 마나는 나의 파괴보다 오래 버티는가?',
+ tags:['🔨 탱커 폭사','⏳ 마나 압박']
+},{
+ slot:'shell_thirst', shell:1,
+ name:'갈증의 심연',
+ q:'무엇을 안 쓸 것인가?',
+ tags:['⏳ 마나 압박','🌊 광역 피해','🕯️ 지속 피해']
+}];
+const SK_ORDER=['heal','big','shield','dispel','pray','save'];
+const SK_ICON={heal:'✨',big:'🌟',shield:'🔰',dispel:'💫',pray:'🙏',save:'⚜️',renew:'🌿',seed:'🌱',focus:'🔆'};
+const SK_DESC={
+ heal:'낮은 비용 · 즉시. 급할 때 한 명을 빠르게.',
+ big:'1.6초 시전 · 큰 회복. 무거운 피해 뒤 복구.',
+ shield:'320 흡수 · 5초. 같은 대상 6초 재적용 잠금. 강타 예고에 미리.',
+ dispel:'CD 3초. 낙인 · 불안정한 마력 제거 — 정화는 차단 지원이기도 하다.',
+ pray:'2초 시전 · CD 8초. 파티 전원 회복. 광역 직후.',
+ save:'신성력 100. 치명타 방지 + 2초 불굴. 죽음의 문턱에서.'
+};
+/* ===== 07: 성당/로드아웃 미니 — 구현 완료 8스킬 중 6개 장착 · docs/07_CHAPEL_LOADOUT_MINI.md ===== */
+var LOADOUT_POOL=['heal','big','shield','dispel','pray','save','renew','seed','focus'];
+var LOADOUT_DEFAULT=['heal','big','shield','dispel','renew','seed'];
+var LOADOUT=LOADOUT_DEFAULT.slice();   /* 세션 유지 · 새로고침 시 기본값 · localStorage 미사용 */
+var SELECTED_BOSS='boss01';            /* Sortie Confirm 01: 세션 선택 보스 · 저장 안 함 */
+var LD_DESC={
+ heal:'빠르게 한 명을 치유합니다. (빠른 단일 치유)',
+ big:'긴 준비 후 큰 치유를 줍니다. (큰 단일 치유)',
+ shield:'피해가 오기 전에 아군을 보호합니다.',
+ dispel:'해로운 효과를 제거합니다. 낙인을 정화하면 도적의 차단 기회가 열립니다.',
+ pray:'광역 피해에 대응하는 파티 치유입니다.',
+ save:'신성력을 모두 소모해 쓰러지기 직전의 아군을 구합니다.',
+ renew:'지속적으로 회복시켜 잔상처를 관리합니다. (지속 치유)',
+ seed:'피해를 받을 아군에게 심어두면, 맞는 순간 치유가 터지고 다른 아군에게 옮겨갑니다. (예약 치유)',
+ focus:'8초 안에 쓰는 다음 일부 마나 기술의 마나를 돌려받습니다. (깊은 치유·공명의 기도·긴급 구원 제외)'
+};
+function ldName(k){if(k==='renew')return RENEW.name;if(k==='seed')return SEED.name;if(k==='focus')return FOCUS.name;return (CFG.skills[k]||{}).name||k;}
+function ldCost(k){if(k==='focus')return 'CD '+FOCUS.cd+'초 · 마나 0';if(k==='save')return '신성력 '+CFG.skills.save.holy;if(k==='renew')return '지속 · 마나 '+RENEW.mana;if(k==='seed')return '예약 · 마나 '+SEED.mana;return '마나 '+CFG.skills[k].mana;}
+function loadoutToggle(k){var i=LOADOUT.indexOf(k);if(i>=0){LOADOUT.splice(i,1);}else{if(LOADOUT.length>=6){showToast('6칸이 가득 찼습니다 — 먼저 하나를 해제하세요');return;}LOADOUT.push(k);}renderChapel();}
+function refreshVillage(){
+ const d=SAVE.data();
+ $('village-status').textContent = d.clears>0
+  ? ('원정 클리어 '+d.clears+'회 · 최고 기록 '+d.best.toFixed(1)+'초')
+  : '첫 원정을 기다리는 성역';
+}
+function renderInn(){
+ const rows=[{e:'✨',n:'사제',r:'플레이어(나)',hp:CFG.priest.hp}]
+  .concat(CFG.allies.map(a=>({e:a.emoji,n:a.name,r:a.role,hp:a.hp})));
+ $('inn-party').innerHTML=rows.map(u=>
+  '<div class="twUnit"><span class="twUnitE">'+u.e+'</span>'+
+  '<div class="twUnitB"><b>'+u.n+'</b><span>'+u.r+'</span></div>'+
+  '<span class="twUnitHp">HP '+u.hp+'</span></div>').join('');
+}
+/* === Chapel Save/Return 01: 로드아웃을 세션 확정하고 마을로 (localStorage 미사용 · 19 정책) === */
+function chapelSaveReturn(){
+ if(LOADOUT.length!==6){showToast('저장됨 · 아직 '+LOADOUT.length+'/6 — 전투 전까지 6칸을 채워주세요');}
+ else{showToast('로드아웃 저장됨 — 이번 세션 동안 유지됩니다');}
+ showScreen('village');
+}
+function renderChapel(){
+ var eq=LOADOUT_POOL.filter(function(k){return LOADOUT.indexOf(k)>=0;});
+ var cnt=LOADOUT.length,warn=LOADOUT.indexOf('dispel')<0;
+ var head='<div class="ldHead"><span class="ldCount'+(cnt===6?' ok':'')+'">장착 '+cnt+' / 6</span>'+(warn?'<span class="ldWarn">⚠️ 정화 없음 — 낙인/차단 연계가 어려워집니다</span>':'')+'</div>';
+ var slots='<div class="ldSlots">'+[0,1,2,3,4,5].map(function(i){var k=eq[i];return k?'<div class="ldSlot filled">'+SK_ICON[k]+'</div>':'<div class="ldSlot empty">＋</div>';}).join('')+'</div>';
+ var list=LOADOUT_POOL.map(function(k){
+  var on=LOADOUT.indexOf(k)>=0;
+  return '<div class="twSkill ldSel'+(on?' on':'')+'" data-ld="'+k+'"><span class="twSkillE">'+SK_ICON[k]+'</span>'+
+   '<div class="twSkillB"><b>'+ldName(k)+'</b><span class="twSkillC">'+ldCost(k)+'</span><span class="twSkillD">'+LD_DESC[k]+'</span></div>'+
+   '<span class="ldTick">'+(on?'✓':'')+'</span></div>';
+ }).join('');
+ var start='<button class="twBtn twBtnGo" id="chapel-start"'+(cnt===6?'':' disabled')+'>▶ 이 구성으로 전투 시작</button>';
+ var save='<button class="twBtn" id="chapel-save">🏛️ 저장하고 마을로</button>';
+ $('chapel-skills').innerHTML=head+slots+list+start+save;
+ var items=$('chapel-skills').querySelectorAll('.ldSel');
+ for(var i=0;i<items.length;i++){(function(el){el.addEventListener('click',function(){loadoutToggle(el.dataset.ld);});})(items[i]);}
+ var sb=$('chapel-start');if(sb)sb.addEventListener('click',function(){enterBattle(1);});
+ var vb=$('chapel-save');if(vb)vb.addEventListener('click',chapelSaveReturn);
+}
+function renderGuild(){
+ $('guild-list').innerHTML=BOSSES.map(function(b){
+  const name=b.shell?b.name:CFG.boss.name;
+  const tier=b.shell?'준비 중':('난이도 · '+b.tier);
+  let h='<div class="twBoss"'+(b.shell?' data-shell="'+b.slot+'"':'')+'>'+
+   '<div class="twBossTop"><span class="twBossE">'+(b.shell?'🔒':'☠️')+'</span>'+
+   '<div class="twBossName"><b>'+name+'</b><span class="twBossTier">'+tier+'</span></div></div>'+
+   '<div class="twTags">'+b.tags.map(function(t){return '<span class="twTag">'+t+'</span>';}).join('')+'</div>'+
+   '<div class="twBlurb">❓ "'+b.q+'"</div>';
+  if(b.shell){
+   h+='<div class="twGoal">🔒 앞으로 열릴 질문 — 다음 편에서</div>';
+  }else{
+   h+='<div class="twBlurb">"'+b.blurb+'"</div>'+
+    '<div class="twGoal">🏆 '+b.goal+'</div>'+
+    '<button class="twBtn twBtnGo" data-boss="'+b.slot+'">▶ 출정 준비</button>';
+  }
+  return h+'</div>';
+ }).join('');
+}
+/* === Sortie Confirm 01: 답(로드아웃)과 문제(태그)를 맞대보는 화면 — 경고만, 잠금 아님 === */
+function sortieGo(){enterBattle(SELECTED_BOSS);}
+function renderSortie(){
+ var b=null;for(var i=0;i<BOSSES.length;i++){if(BOSSES[i].slot===SELECTED_BOSS){b=BOSSES[i];break;}}
+ if(!b||b.shell){showScreen('guild');return;}
+ var hasD=LOADOUT.indexOf('dispel')>=0;
+ var warn=hasD?'💫 정화 준비됨 — 낙인과 차단 기회를 읽으세요':'⚠️ 정화 없음 — 낙인/차단 연계가 어려워집니다';
+ var lo=LOADOUT.map(function(k){return '<span class="twTag">'+(SK_ICON[k]||'')+' '+ldName(k)+'</span>';}).join('');
+ var al=CFG.allies.map(function(a){return '<span class="twTag">'+a.emoji+' '+a.name+' · '+a.role+'</span>';}).join('');
+ $('sortie-body').innerHTML=
+  '<div class="twBoss">'+
+   '<div class="twBossTop"><span class="twBossE">☠️</span><div class="twBossName"><b>'+CFG.boss.name+'</b><span class="twBossTier">난이도 · '+b.tier+'</span></div></div>'+
+   '<div class="twTags">'+b.tags.map(function(t){return '<span class="twTag">'+t+'</span>';}).join('')+'</div>'+
+   '<div class="twBlurb">❓ "'+b.q+'"</div>'+
+  '</div>'+
+  '<div class="twBoss">'+
+   '<div class="twBossTop"><span class="twBossE">🏛️</span><div class="twBossName"><b>나의 답 — 로드아웃</b><span class="twBossTier">'+LOADOUT.length+'/6</span></div></div>'+
+   '<div class="twTags">'+lo+'</div>'+
+   '<div class="twGoal">'+warn+'</div>'+
+  '</div>'+
+  '<div class="twBoss">'+
+   '<div class="twBossTop"><span class="twBossE">🤝</span><div class="twBossName"><b>동료</b><span class="twBossTier">4인 · 자동 행동</span></div></div>'+
+   '<div class="twTags">'+al+'</div>'+
+  '</div>'+
+  '<button class="twBtn twBtnGo" id="sortie-go">⚔️ 출정</button>';
+ var g=$('sortie-go');if(g)g.addEventListener('click',sortieGo);
+}
+function enterBattle(slot){
+ if(LOADOUT.length!==6){showToast('스킬 6개를 장착하세요 ('+LOADOUT.length+'/6)');showScreen('chapel');return;}
+ ainit();
+ newGame();
+ showScreen('battle');
+ $('startOv').classList.remove('hidden');
+}
+
+/* ========== TOWN INPUT BINDINGS ========== */
+$('btn-start').addEventListener('click',function(){ainit();showScreen('village');});
+$('nav-inn').addEventListener('click',function(){showScreen('inn');});
+$('nav-chapel').addEventListener('click',function(){showScreen('chapel');});
+$('nav-guild').addEventListener('click',function(){showScreen('guild');});
+$('back-inn').addEventListener('click',function(){showScreen('village');});
+$('back-chapel').addEventListener('click',function(){showScreen('village');});
+$('back-guild').addEventListener('click',function(){showScreen('village');});
+$('back-sortie').addEventListener('click',function(){showScreen('guild');});
+$('inn-rest').addEventListener('click',function(){showToast('파티가 숨을 골랐다 — 준비 완료');showScreen('village');});
+function guildBoardTap(e){
+ var s=e.target.closest('[data-shell]');
+ if(s){showToast('🔒 아직 열리지 않은 토벌 — 준비 중입니다');return;}
+ var b=e.target.closest('[data-boss]');
+ if(b){SELECTED_BOSS=b.dataset.boss;showScreen('sortie');}
+}
+$('guild-list').addEventListener('click',guildBoardTap);
+$('toTownBtn').addEventListener('click',function(){showScreen('village');});
+
+/* ========== DEBUG / TEST HELPERS ========== */
+window.__seedHealer={CFG:CFG,SCRIPT:SCRIPT,createGame:createGame,SAVE:SAVE,go:showScreen,
+ smoke:function(){var g=createGame();g.start();var n=0;while(!g.S.over&&n<4000){g.step(0.05);n++;}return {over:g.S.over,result:g.S.result,t:+g.S.t.toFixed(1),steps:n};}};
+
+
+/* --- 입력 바인딩 --- */
+IDS.forEach(id=>{$('f-'+id).addEventListener('click',()=>{if(G)G.select(id);});});
+/* ===== 03: 사제 스킬 풀 정의 (정의 전용 · dormant · docs/03_PRIEST_SKILL_POOL_LOCK.md 참조) =====
+   전투 슬롯은 6칸 고정. 아래 PRIEST_SKILL_POOL은 향후 로드아웃 확장을 위한 데이터 계약이며,
+   현재 전투 로직(SLOTS / CFG.skills / render / renderSkillSlots)은 이 데이터를 사용하지 않는다.
+   type: manaActive | holyPowerActive | cooldownActive | passive
+   display는 성소판 표시명 후보(displayNameCandidate)일 뿐, 이번 카드에서 UI에 적용하지 않는다.
+   origin(원형 레퍼런스)은 개발 전용 메모이며 플레이어 UI에 노출하지 않는다. */
+var PRIEST_SKILL_POOL=[
+ {display:'빠른 치유',   type:'manaActive',      origin:'순간 치유',         role:'빠른 단일 응급 치유',    impl:'implemented-current', slot:'heal'},
+ {display:'깊은 치유',   type:'manaActive',      origin:'상급 치유',         role:'느리지만 큰 단일 치유',  impl:'implemented-current', slot:'big'},
+ {display:'결속 치유',   type:'manaActive',      origin:'결속의 치유',       role:'대상+사제 동시 치유',    impl:'defined'},
+ {display:'소생',        type:'manaActive',      origin:'소생',              role:'지속 치유(HoT)/선대응',  impl:'defined'},
+ {display:'공명의 기도', type:'manaActive',      origin:'치유의 기도 계열',  role:'광역 예고 대응 파티 힐', impl:'implemented-current', slot:'pray'},
+ {display:'기도씨앗',    type:'manaActive',      origin:'회복의 기원',       role:'피격 시 발동 스마트 힐', impl:'defined'},
+ {display:'보호막',      type:'manaActive',      origin:'신의 권능: 보호막', role:'선대응 흡수/급사 방지',  impl:'implemented-current', slot:'shield'},
+ {display:'정화',        type:'manaActive',      origin:'마법 무효화 계열',  role:'디버프 해제(심장)',      impl:'implemented-current', slot:'dispel'},
+ {display:'소실',        type:'cooldownActive',  origin:'소실',              role:'사제 생존/어그로 감소',  impl:'dormant'},
+ {display:'성심 집중',   type:'cooldownActive',  origin:'내면의 집중력',     role:'다음 주문 강화 보조',    impl:'implemented-current', slot:'focus'},
+ {display:'긴급 구원',   type:'holyPowerActive', origin:'긴급 구원',         role:'죽기 직전 즉시 구원',    impl:'implemented-current', slot:'save'},
+ {display:'수호 서약',   type:'holyPowerActive', origin:'고통 억제',         role:'받는 피해 대폭 감소',    impl:'defined'},
+ {display:'대정화',      type:'holyPowerActive', origin:'대규모 무효화',     role:'복수/전체 디버프 정리',  impl:'defined'},
+ {display:'굳센 기도',   type:'passive',         origin:'인내의 기원',       role:'파티 최대 HP 증가',      impl:'dormant'},
+ {display:'성소의 호흡', type:'passive',         origin:'천상의 정신',       role:'사제 마나 회복 증가',    impl:'dormant'},
+ {display:'신의 계시',   type:'passive',         origin:'신의 계시',         role:'치유에 짧은 보호 여운',  impl:'dormant'}
+];
+var SLOTS=[{k:'heal',type:'active'},{k:'big',type:'active'},{k:'shield',type:'active'},{k:'dispel',type:'active'},{k:'pray',type:'active'},{k:'save',type:'active'}];
+/* ===== 04: 소생(Renew) — 어댑터 레벨 HoT (코어 미접촉) · docs/04_RENEW_FIRST_SKILL.md ===== */
+var RENEW={name:'소생',mana:35,dur:12,tick:3,amt:70,icon:'🌿'};
+/* SLOTS 원본은 위에 보존. 04 테스트는 5번 슬롯(치유의 기도)을 임시로 소생으로 교체한 SLOTS_TEST04를 렌더. */
+var SLOTS_TEST04=[{k:'heal',type:'active'},{k:'big',type:'active'},{k:'shield',type:'active'},{k:'dispel',type:'active'},{k:'renew',type:'active'},{k:'save',type:'active'}];
+function renewTgt(S){if(S.sel==='pri')return S.pri;for(var i=0;i<S.al.length;i++){if(S.al[i].id===S.sel)return S.al[i];}return null;}
+/* ===== 05: 기도씨앗(회복의 기원) — 어댑터 레벨 예약힐(피격 발동, 1회 발동형) · docs/05_PRAYER_SEED_FIRST_SMART_HEAL.md ===== */
+/* ===== 06: 어댑터 치유 집계 ledger — 소생/기도씨앗을 리포트 총 회복량·오버힐에 합산 · docs/06_COMBAT_REPORT_ACCURACY.md ===== */
+var HEAL_LEDGER={renew:{eff:0,over:0},seed:{eff:0,over:0}};
+function ledgerReset(){HEAL_LEDGER={renew:{eff:0,over:0},seed:{eff:0,over:0}};}
+function ledgerAdd(k,eff,over){var e=HEAL_LEDGER[k];if(!e)return;if(eff>0)e.eff+=eff;if(over>0)e.over+=over;}
+var SEED={name:'기도씨앗',mana:60,dur:30,amt:140,max:3,icon:'🌱'};
+/* 05 테스트: 5번=소생, 6번=기도씨앗 (긴급구원 임시 제외 · 데이터 보존). 선대응 힐러 손맛 확인. */
+var SLOTS_TEST05=[{k:'heal',type:'active'},{k:'big',type:'active'},{k:'shield',type:'active'},{k:'dispel',type:'active'},{k:'renew',type:'active'},{k:'seed',type:'active'}];
+function seedFind(S,id){if(id==='pri')return S.pri;for(var i=0;i<S.al.length;i++){if(S.al[i].id===id)return S.al[i];}return null;}
+function seedClearAll(S){var arr=S.al.concat([S.pri]);for(var i=0;i<arr.length;i++){if(arr[i]&&arr[i].seed)delete arr[i].seed;}}
+function seedTransferTarget(S,exclude){
+ /* 전이 대상: 생존 아군(4인) 중 HP% 최저 > 동률이면 보스표적/위험 우선 > 배열 순서(결정론적). 현재대상·기존 씨앗보유 제외. */
+ var best=null,bestPct=2,mt=(G&&G.meleeTgtId)?G.meleeTgtId():null,bc=S.boss.cast;
+ for(var i=0;i<S.al.length;i++){var a=S.al[i];
+  if(!a.alive||a.id===exclude||a.seed)continue;
+  var pct=a.hp/a.max;
+  if(pct<bestPct-1e-9){bestPct=pct;best=a;}
+  else if(best&&Math.abs(pct-bestPct)<1e-9){
+   var aD=(mt===a.id)||(bc&&bc.kind==='smash'&&bc.tg===a.id);
+   var bD=(mt===best.id)||(bc&&bc.kind==='smash'&&bc.tg===best.id);
+   if(aD&&!bD)best=a;
+  }
+ }
+ return best;
+}
+/* ===== 16B: 성심 집중 01 — 준게이트(core-paid mana refund) · docs/23 §6 ===== */
+var FOCUS={name:'성심 집중',cd:30,dur:8,icon:'🔆'};
+var FOCUS_REFUND={heal:1,shield:1,dispel:1};   /* 환급형 대상(코어 즉시기) — 허용목록: 미등재=기본 제외 */
+function focusIsArmed(S){return !!S&&S.t<(S.pri.focusArmedUntil||0);}
+function focusSpend(S){S.pri.focusArmedUntil=0;addLog('✨ 성심 집중 — 마나 소모 없음!','lgold');}
+function focusUse(){
+ if(!G)return;var S=G.S,p=S.pri,t=S.t;
+ if(!S.started||S.over||!p.alive||p.cast||t<p.gcd)return;
+ if(t<(p.focusCdUntil||0))return;
+ p.focusArmedUntil=t+FOCUS.dur;
+ p.focusCdUntil=t+FOCUS.cd;
+ p.gcd=t+((t<S.valorUntil)?CFG.gcdValor:CFG.gcd);
+ addLog('🔆 성심 집중 — 8초 안의 다음 치유는 마나가 무료!','lh');
+}
+function focusWrapUse(k){
+ if(!G)return;var S=G.S,p=S.pri;
+ if(!FOCUS_REFUND[k]||!focusIsArmed(S)){G.useSkill(k);return;}
+ var m0=p.mana,mm0=S.st.manaMin,oo0=S.st.oomT;
+ var ok=G.useSkill(k);
+ if(ok===true&&p.mana<m0){
+  p.mana=Math.min(p.manaMax,m0);S.st.manaMin=mm0;S.st.oomT=oo0; /* docs/23 R2·R5: 3필드 정확 복원 */
+  focusSpend(S);
+ }
+}
+function focusBtnUpdate(S){
+ var b=$('sk-focus');if(!b||!S)return;var p=S.pri,t=S.t;
+ var cdU=(p.focusCdUntil||0),onCd=t<cdU,armed=focusIsArmed(S);
+ b.classList.toggle('dis',!S.started||S.over||!!p.cast||onCd);
+ b.classList.toggle('gLock',t<p.gcd);
+ b.classList.toggle('focusArmed',armed);
+ var v=$('veil-focus'),c=$('cdn-focus');
+ if(v)v.style.height=onCd?((100*(cdU-t)/FOCUS.cd).toFixed(1)+'%'):'0%';
+ if(c)c.textContent=onCd?(cdU-t).toFixed(1):'';
+}
+function seedUse(){
+ if(!G)return;var S=G.S,p=S.pri,t=S.t;
+ if(!S.started||S.over||!p.alive||p.cast||t<p.gcd)return;
+ var _fF=focusIsArmed(S);
+ if(!_fF&&p.mana<SEED.mana){showToast('마나가 부족하다');return;}
+ var u=renewTgt(S);
+ if(!u||!u.alive){showToast('대상을 선택하세요');return;}
+ if(_fF){focusSpend(S);}else{p.mana-=SEED.mana;}
+ p.gcd=t+((t<S.valorUntil)?CFG.gcdValor:CFG.gcd);
+ seedClearAll(S);                                            /* 파티 내 기도씨앗 1개 정책 */
+ u.seed={end:t+SEED.dur,amt:SEED.amt,charges:SEED.max,since:t};
+ addLog('🌱 기도씨앗 → '+(u.name||'사제'),'lh');
+ if(typeof fxBeam==='function')fxBeam(u.id,'heal');
+}
+function seedOnHit(id){
+ if(!G)return;var S=G.S;if(S.over)return;var u=seedFind(S,id);
+ if(!u||!u.seed||!u.alive)return;
+ if(S.t>=u.seed.end){delete u.seed;return;}
+ if(S.t<=u.seed.since+1e-9)return;                           /* 전이 직후 같은 프레임 재발동 방지: 다음 피격을 기다림 */
+ var seed=u.seed;delete u.seed;                              /* 현재 대상에서 제거(이동 준비) */
+ var before=u.hp;u.hp=Math.min(u.max,u.hp+seed.amt);var eff=u.hp-before;var real=Math.round(eff);ledgerAdd('seed',eff,seed.amt-eff);
+ if(real>0)spawnFloat(u.id,'+'+real,'heal');
+ if(typeof fxBeam==='function')fxBeam(u.id,'heal');
+ var left=seed.charges-1;
+ if(left<=0)return;                                          /* 3회 소진 → 종료 */
+ var tgt=seedTransferTarget(S,u.id);
+ if(!tgt)return;                                             /* 전이 대상 없음 → 종료 */
+ tgt.seed={end:seed.end,amt:seed.amt,charges:left,since:S.t}; /* 수명(end) 유지 · 전이시각 기록 */
+ addLog('🌱 기도씨앗 → '+(tgt.name||'')+' 옮겨감','lh');
+}
+function seedExpire(S){
+ if(!S)return;var t=S.t;var arr=S.al.concat([S.pri]);
+ for(var i=0;i<arr.length;i++){var u=arr[i];if(!u||!u.seed)continue;if(!u.alive||t>=u.seed.end)delete u.seed;}
+}
+function seedBtnUpdate(S){
+ var b=$('sk-seed');if(!b||!S)return;var p=S.pri;
+ var noMana=p.mana<SEED.mana&&!focusIsArmed(S);var dis=!S.started||S.over||!!p.cast;var gLock=S.t<p.gcd;
+ b.classList.toggle('noMana',noMana);b.classList.toggle('dis',dis||noMana);b.classList.toggle('gLock',gLock);
+}
+
+function renewUse(){
+ if(!G)return;var S=G.S,p=S.pri,t=S.t;
+ if(!S.started||S.over||!p.alive||p.cast||t<p.gcd)return;
+ var _fF=focusIsArmed(S);
+ if(!_fF&&p.mana<RENEW.mana){showToast('마나가 부족하다');return;}
+ var u=renewTgt(S);
+ if(!u||!u.alive){showToast('치유할 대상을 선택하세요');return;}
+ if(_fF){focusSpend(S);}else{p.mana-=RENEW.mana;}
+ p.gcd=t+((t<S.valorUntil)?CFG.gcdValor:CFG.gcd);
+ u.hot={end:t+RENEW.dur,next:t+RENEW.tick,amt:RENEW.amt};
+ addLog('🌿 소생 → '+(u.name||'사제'),'lh');
+ if(typeof fxBeam==='function')fxBeam(u.id,'heal');
+}
+function renewTicks(S){
+ if(!S||S.over)return;var t=S.t;var arr=S.al.concat([S.pri]);
+ for(var i=0;i<arr.length;i++){var u=arr[i];if(!u||!u.hot)continue;
+  if(!u.alive){delete u.hot;continue;}
+  var g=0;
+  while(t>=u.hot.next&&u.hot.next<=u.hot.end+1e-6&&g<20){
+   var before=u.hp;u.hp=Math.min(u.max,u.hp+u.hot.amt);var eff=u.hp-before;var real=Math.round(eff);ledgerAdd('renew',eff,u.hot.amt-eff);
+   if(real>0)spawnFloat(u.id,'+'+real,'heal');
+   u.hot.next+=RENEW.tick;g++;
+  }
+  if(t>=u.hot.end)delete u.hot;
+ }
+}
+function renewBtnUpdate(S){
+ var b=$('sk-renew');if(!b||!S)return;var p=S.pri;
+ var noMana=p.mana<RENEW.mana&&!focusIsArmed(S);var dis=!S.started||S.over||!!p.cast;var gLock=S.t<p.gcd;
+ b.classList.toggle('noMana',noMana);b.classList.toggle('dis',dis||noMana);b.classList.toggle('gLock',gLock);
+}
+function skCostTxt(k){if(k==='focus')return '<span class="rcMana">◆마나 0</span> · CD'+FOCUS.cd+'초';if(k==='renew')return '<span class="rcMana">◆마나 '+RENEW.mana+'</span> · 지속';if(k==='seed')return '<span class="rcMana">◆마나 '+SEED.mana+'</span> · 예약';var s=CFG.skills[k];if(k==='save')return '<span class="rcHoly">✦신성력 '+s.holy+'</span>';var ex=s.cast?(' · '+s.cast+'초'):(s.cd?(' · CD'+s.cd+'초'):' · 즉시');return '<span class="rcMana">◆마나 '+s.mana+'</span>'+ex;}
+function renderSkillSlots(){
+ var eq=LOADOUT_POOL.filter(function(k){return LOADOUT.indexOf(k)>=0;});
+ $('skills').innerHTML=eq.map(function(k){
+  var ic=SK_ICON[k]||'🔹';
+  var s=CFG.skills[k]||{name:(k==='renew'?RENEW.name:(k==='seed'?SEED.name:(k==='focus'?FOCUS.name:k)))};
+  return '<button class="skill" data-k="'+k+'" id="sk-'+k+'"><span class="skIcon">'+ic+'</span><span class="skName">'+s.name+'</span><span class="skCost">'+skCostTxt(k)+'</span><div class="skVeil" id="veil-'+k+'"><span class="skCdNum" id="cdn-'+k+'"></span></div></button>';
+ }).join('');
+ var _bs=$('skills').querySelectorAll('.skill');
+ for(var _j=0;_j<_bs.length;_j++){(function(b){b.addEventListener('click',function(){if(!G)return;if(b.dataset.k==='renew'){renewUse();}else if(b.dataset.k==='seed'){seedUse();}else if(b.dataset.k==='focus'){focusUse();}else{focusWrapUse(b.dataset.k);}});})(_bs[_j]);}
+}
+renderSkillSlots();
+$('priCastWrap').addEventListener('click',()=>{if(G)G.cancelCast();});
+$('sndBtn').addEventListener('click',()=>{muted=!muted;$('sndBtn').textContent=muted?'🔇':'🔊';if(!muted)ainit();});
+$('startBtn').addEventListener('click',()=>{ainit();$('startOv').classList.add('hidden');G.start();});
+$('retryBtn').addEventListener('click',()=>{ainit();newGame();G.start();});
+document.addEventListener('touchstart',ainit,{once:true});
+
+/* --- 이벤트 드레인 --- */
+function drain(){
+ const evs=G.S.ev.splice(0);
+ for(const e of evs){
+  if(e.y==='log'){addLog(e.m,e.c);if(e.c==='lgold'||e.c==='lr')showCallout(e.m,e.c);}
+  else if(e.y==='flt'){if(e.c==='dmg'&&typeof e.txt==='string'&&e.txt.charAt(0)==='-')seedOnHit(e.tg);spawnFloat(e.tg,e.txt,e.c);}
+  else if(e.y==='deny'){showToast(e.m);SFX.ui();}
+  else if(e.y==='fx')doFx(e.k,e.d||{});
+  else if(e.y==='end'){const rep=e.rep;if(rep.r.indexOf('victory')===0)SAVE.recordWin(rep.t);setTimeout(()=>showReport(rep),650);}
+ }
+}
+function addLog(m,c){
+ const el=$('log');if(!el)return;
+ const s=document.createElement('span');
+ s.className=c;s.textContent=m;
+ el.appendChild(s);
+ while(el.childNodes.length>60)el.removeChild(el.firstChild);
+ el.scrollTop=el.scrollHeight;
+}
+function spawnFloat(tg,txt,c){
+ const box=$('fl-'+tg);if(!box)return;
+ while(box.childNodes.length>=5)box.removeChild(box.firstChild);
+ const s=document.createElement('span');
+ s.className='flt '+c;s.textContent=txt;
+ box.__n=((box.__n||0)+1)%3;
+ s.style.top=(10+box.__n*15)+'%';
+ box.appendChild(s);
+ setTimeout(()=>{if(s.parentNode)s.parentNode.removeChild(s);},1000);
+}
+function showToast(m){
+ const t=$('toast');t.textContent=m;t.classList.add('on');
+ clearTimeout(toastTm);toastTm=setTimeout(()=>t.classList.remove('on'),1300);
+}
+function flashFrame(id,color){
+ const f=$('f-'+id);if(!f)return;
+ f.style.boxShadow='0 0 14px '+color;
+ setTimeout(()=>{f.style.boxShadow='';},180);
+}
+function shake(){
+ const a=$('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');
+ setTimeout(()=>a.classList.remove('shake'),380);
+}
+function vign(){
+ const v=$('vignette');v.classList.add('on');
+ clearTimeout(vignTm);vignTm=setTimeout(()=>v.classList.remove('on'),450);
+}
+function bossHit(){
+ const now=performance.now();
+ if(now-lastHitFx<350)return;
+ lastHitFx=now;
+ const b=$('bossAvatar');
+ b.classList.add('hitF');
+ setTimeout(()=>b.classList.remove('hitF'),120);
+}
+function pulseStage(id){
+ const e=$('sa-'+id);if(!e)return;
+ e.style.filter='brightness(1.7)';
+ setTimeout(()=>{e.style.filter='';},110);
+}
+function doFx(k,d){
+ switch(k){
+  case 'heal':d.big?SFX.bigHeal():SFX.heal();flashFrame(d.tg,'rgba(125,255,168,.8)');fxBeam(d.tg,'heal');break;
+  case 'shield':SFX.shield();flashFrame(d.tg,'rgba(143,220,255,.8)');fxBeam(d.tg,'shield');break;
+  case 'dispel':d.big?SFX.defuse():SFX.dispel();flashFrame(d.tg,'rgba(217,166,255,.8)');fxBeam(d.tg,'dispel');break;
+  case 'debuff':d.bomb?SFX.bomb():SFX.debuff();break;
+  case 'bombBoom':SFX.boom();shake();vign();break;
+  case 'aoe':SFX.aoe();shake();vign();break;
+  case 'smash':SFX.smash();shake();break;
+  case 'melee':SFX.melee();break;
+  case 'allyAtk':bossHit();pulseStage(d.tg);break;
+  case 'intOk':SFX.intOk();flashFrame('rog','rgba(255,215,106,.85)');break;
+  case 'intFail':SFX.intFail();vign();break;
+  case 'death':SFX.death();shake();vign();break;
+  case 'save':if(!d.echo)SFX.save();flashFrame(d.tg,'rgba(255,215,106,.9)');fxBeam(d.tg,'save');break;
+  case 'valor':SFX.valor();break;
+  case 'enrage':SFX.enrage();shake();break;
+  case 'pray':SFX.pray();IDS.forEach(id=>flashFrame(id,'rgba(125,255,168,.55)'));fxWave();break;
+  case 'castStart':SFX.cast();break;
+  case 'fizzle':SFX.ui();break;
+  case 'vign':vign();break;
+  case 'start':SFX.start();break;
+  case 'win':SFX.win();break;
+  case 'lose':SFX.lose();break;
+ }
+}
+
+/* --- 렌더 --- */
+function hpCls(p){return p>0.6?'hpG':p>0.3?'hpY':'hpR';}
+function chipsHTML(u,S,mt,t){
+ /* 05-HF1: 우선순위 정렬 후 ally 카드 최대 2개 표시(+N 축약). 카드 폭은 CSS(minmax0/min-width0/overflow)로 고정. */
+ /* 우선순위 p: 1 위험디버프·차단실패(정화/대응 필요) > 2 기도씨앗 > 3 소생 > 4 보호막 > 5 기타 */
+ const a=[];
+ for(const d of u.debuffs){const lf=Math.max(0,d.end-t).toFixed(1);a.push({p:1,h:d.k==='brand'?'<span class="chip cBad">🩸'+lf+'</span>':'<span class="chip cBomb">💥'+lf+'</span>'});}
+ if(u.id==='rog'&&u.alive&&S.rogFail>t)a.push({p:1,h:'<span class="chip cBad">❌</span>'});
+ if(u.seed)a.push({p:2,h:'<span class="chip cSeed">🌱씨앗'+(u.seed.charges>1?u.seed.charges:'')+'</span>'});
+ if(u.hot)a.push({p:3,h:'<span class="chip cHot">🌿소생</span>'});
+ if(u.shield)a.push({p:4,h:'<span class="chip cSh">🔰'+Math.ceil(u.shield.amt)+'</span>'});
+ if(u.undying>t)a.push({p:5,h:'<span class="chip cGold">⚜️불굴</span>'});
+ if(u.id==='rog'&&u.alive){const cd=S.intReady-t;a.push({p:5,h:cd>0?'<span class="chip cCd">차단'+Math.ceil(cd)+'s</span>':'<span class="chip cOk">차단✓</span>'});}
+ if(t<S.valorUntil){if(u.id==='sham')a.push({p:5,h:'<span class="chip cGold">🌀</span>'});if(u.id==='pri')a.push({p:5,h:'<span class="chip cGold">⚡</span>'});}
+ a.sort(function(x,y){return x.p-y.p;});
+ const MAX=(u.id==='pri')?3:2;
+ if(a.length>MAX)return a.slice(0,MAX).map(function(o){return o.h;}).join('')+'<span class="chip cMore">+'+(a.length-MAX)+'</span>';
+ return a.map(function(o){return o.h;}).join('');
+}
+/* === Threat Lookahead 01: 위협 배지 실데이터화 — SCRIPT/S.si 읽기 전용 (14 §4 · 유키 승인 1단계) === */
+var THREAT_LOOKAHEAD_SEC=6; /* lookahead 창 — 손맛 값, 나라 폰 실기로 튜닝 */
+function nextThreatFor(id,S,t,mt){
+ for(var i=S.si;i<SCRIPT.length;i++){
+  var ev=SCRIPT[i];
+  if(ev.t>t+THREAT_LOOKAHEAD_SEC)break;
+  if((ev.e==='brand'||ev.e==='bomb')&&ev.tg===id)return true;
+  if(ev.e==='smash'&&mt===id)return true; /* 강타 예정 대상=현재 전열(확실 해석 범위) — judge/valor/enrage는 대상 상승 미표시 */
+ }
+ return false;
+}
+function threatBadge(u,S,mt,t){
+ if(!u.alive)return {cls:'th-dead',tx:'—'};
+ const bc=S.boss.cast;
+ if(bc&&bc.kind==='smash'&&bc.tg===u.id)return {cls:'th-danger',tx:'위험'};
+ if(u.debuffs&&u.debuffs.some(function(d){return d.k==='brand'||d.k==='bomb';}))return {cls:'th-danger',tx:'위험'};
+ if(mt===u.id)return {cls:'th-target',tx:'표적'};
+ if(nextThreatFor(u.id,S,t,mt))return {cls:'th-rise',tx:'상승'};
+ return {cls:'th-stable',tx:'안정'};
+}
+let calloutTm=0;
+function showCallout(m,c){
+ const b=$('calloutBox');if(!b)return;
+ b.textContent=m;b.className=(c||'');b.classList.add('show');
+ clearTimeout(calloutTm);calloutTm=setTimeout(function(){b.classList.remove('show');},1400);
+}
+/* ===== 02B: 전장 행동선 오버레이 (render-only) ===== */
+var A=null;
+function fxAnchors(){
+ var st=$('stage'); if(!st)return null;
+ var sr=st.getBoundingClientRect(); if(!sr.width||!sr.height)return null;
+ function c(id){var e=$(id);if(!e)return null;var r=e.getBoundingClientRect();return {x:r.left-sr.left+r.width/2,y:r.top-sr.top+r.height/2};}
+ var a={boss:c('bossAvatar'),war:c('sa-war'),rog:c('sa-rog'),mage:c('sa-mage'),sham:c('sa-sham')};
+ a.pri={x:sr.width/2,y:sr.height-4};
+ return a;
+}
+window.addEventListener('resize',function(){A=null;});
+function fxLn(id,from,to,on,cls){
+ var e=$(id); if(!e)return;
+ if(from&&to){e.setAttribute('x1',from.x);e.setAttribute('y1',from.y);e.setAttribute('x2',to.x);e.setAttribute('y2',to.y);}
+ var nc=cls+(on?' on':''); if(e.getAttribute('class')!==nc)e.setAttribute('class',nc);
+}
+function fxToggle(id,on){var e=$(id);if(e){var v=on?'1':'0';if(e.style.opacity!==v)e.style.opacity=v;}}
+var fxPriTm=0;
+function fxBeam(tg,kind){
+ if(!A)A=fxAnchors(); if(!A||!A[tg])return;
+ var ln=$('fxPriLine');
+ if(ln){ln.setAttribute('x1',A.pri.x);ln.setAttribute('y1',A.pri.y);ln.setAttribute('x2',A[tg].x);ln.setAttribute('y2',A[tg].y);ln.setAttribute('class','fxPri fp-'+kind+' on');clearTimeout(fxPriTm);fxPriTm=setTimeout(function(){ln.setAttribute('class','fxPri fp-'+kind);},460);}
+ var fl=$('fxf-'+tg);
+ if(fl){fl.className='figFlash ff-'+kind+' on';setTimeout((function(x){return function(){x.className='figFlash';};})(fl),460);}
+}
+function fxWave(){
+ ['war','rog','mage','sham'].forEach(function(id){var fl=$('fxf-'+id);if(fl){fl.className='figFlash ff-heal on';setTimeout((function(x){return function(){x.className='figFlash';};})(fl),560);}});
+}
+function renderFx(S,t,p,mt){
+ if(!A)A=fxAnchors(); if(!A)return;
+ var bc=S.boss.cast;
+ var smashTg=(bc&&bc.kind==='smash')?bc.tg:null;
+ fxLn('fxBossLine',A.boss,smashTg?A[smashTg]:null,!!smashTg,'fxBoss');
+ var aoe=!!(bc&&bc.kind==='judge');
+ fxToggle('fxAoe',aoe); fxToggle('fxAoeDecal',aoe);
+ var rog=null; for(var i=0;i<S.al.length;i++){if(S.al[i].id==='rog')rog=S.al[i];}
+ var intOn=!!(bc&&bc.kind==='judge'&&!bc.un&&rog&&rog.alive);
+ var branded=false; if(rog){for(var j=0;j<rog.debuffs.length;j++){if(rog.debuffs[j].k==='brand')branded=true;}}
+ fxLn('fxIntLine',A.rog,A.boss,intOn,'fxInt'+(branded?' broken':''));
+ var ids=['war','rog','mage','sham'];
+ for(var k=0;k<ids.length;k++){
+  var id=ids[k],al=null; for(var m=0;m<S.al.length;m++){if(S.al[m].id===id)al=S.al[m];}
+  var ring=$('fxr-'+id); if(!ring)continue;
+  var cls='figRing';
+  if(al&&al.alive){ if(smashTg===id)cls='figRing fr-target'; else if(aoe)cls='figRing fr-aoe'; else if(S.sel===id)cls='figRing fr-sel'; }
+  if(ring.className!==cls)ring.className=cls;
+ }
+}
+function render(){
+ if(!G)return;
+ const S=G.S,t=S.t,p=S.pri;
+ sT($('clock'),'⏱ '+t.toFixed(1)+' / '+CFG.dur+'s');
+ sW($('bossFill'),100*S.boss.hp/S.boss.max);
+ sT($('bossTxt'),Math.round(S.boss.hp)+' / '+S.boss.max+' ('+Math.round(100*S.boss.hp/S.boss.max)+'%)');
+ const bc=S.boss.cast, bw=$('bossCastWrap');
+ if(bc){
+  sC(bw,'idle',false);
+  sC(bw,'noInt',!!bc.un);
+  sC(bw,'smash',bc.kind==='smash');
+  sW($('bossCastFill'),Math.min(100,100*(t-bc.start)/(bc.end-bc.start)));
+  sT($('bossCastTxt'),bc.name+(bc.un?' [차단 불가]':'')+' '+Math.max(0,bc.end-t).toFixed(1)+'초');
+ }else{sC(bw,'idle',true);sC(bw,'noInt',false);sC(bw,'smash',false);sW($('bossCastFill'),0);sT($('bossCastTxt'),'다음 행동 대기 중');}
+ const np=G.nextPattern();
+ sT($('nextPat'),np?('다음: '+np.nm+' '+Math.max(0,np.eta).toFixed(1)+'초'):'남은 패턴 없음 — 버텨라!');
+ sC($('enrageTag'),'hidden',!S.boss.enraged);
+ const ba=$('bossAvatar');
+ sC(ba,'casting',!!bc);
+ sC(ba,'enr',S.boss.enraged);
+ sT(ba,S.boss.hp<=0?'💥':'☠️');
+ const vb=$('valorBanner');
+ if(t<S.valorUntil){vb.classList.remove('hidden');sT($('valorLeft'),(S.valorUntil-t).toFixed(1)+'s');}
+ else vb.classList.add('hidden');
+ const mt=G.meleeTgtId();renderFx(S,t,p,mt);
+ for(const id of IDS){
+  const u=(id==='pri')?p:S.al.find(a=>a.id===id);
+  const fr=$('f-'+id);
+  const pct=Math.max(0,u.hp/u.max);
+  sC(fr,'sel',S.sel===id);
+  sC(fr,'dead',!u.alive);
+  sC(fr,'danger',u.alive&&pct<0.35);
+  const fill=$('hp-'+id);
+  sW(fill,pct*100);
+  const hc=hpCls(pct);
+  if(fill.__hc!==hc){fill.__hc=hc;fill.className='fFill '+hc;}
+  sW($('sh-'+id),u.shield?Math.min(100,(u.hp+u.shield.amt)/u.max*100):0);
+  sT($('pct-'+id),Math.round(pct*100)+'%');
+  sT($('num-'+id),Math.max(0,Math.round(u.hp))+'/'+u.max);
+  sH($('ch-'+id),chipsHTML(u,S,mt,t));var _th=$('th-'+id);if(_th){var _tb=threatBadge(u,S,mt,t);sT(_th,_tb.tx);if(_th.__c!==_tb.cls){_th.__c=_tb.cls;_th.className='thBadge '+_tb.cls;}}
+  if(id!=='pri'){
+   const st=$('st-'+id);
+   if(!u.alive){sT(st,'💀 쓰러짐');st.className='fState deadTx';}
+   else if(pct<0.15){sT(st,'☠️ 위독');st.className='fState crit';}
+   else if(pct<0.35){sT(st,'⚠️ 위험');st.className='fState warn';}
+   else{sT(st,'');st.className='fState';}
+   const sa=$('sa-'+id);
+   sC(sa,'dead',!u.alive);
+  }
+ }
+ var _it=$('intTxt'),_ib=$('intBar');if(_it&&_ib){var _rg=null;for(var _i=0;_i<S.al.length;_i++){if(S.al[_i].id==='rog')_rg=S.al[_i];}var _bc2=S.boss.cast,_cl='warnR',_tx2='차단 대기';if(!_rg||!_rg.alive){_tx2='도적 전투불능';_cl='warnR intNo';}else if(S.boss.enraged){_tx2='광폭화 · 차단 불가';_cl='warnR intNo';}else if(_bc2&&_bc2.kind!=='smash'&&_bc2.un){_tx2='이 패턴 차단 불가';_cl='warnR intNo';}else if(t>=S.intReady){_tx2='도적 차단 준비';_cl='warnR intOk';}else{_tx2='차단 재정비 '+Math.max(0,Math.ceil(S.intReady-t))+'초';_cl='warnR intCd';}sT(_it,_tx2);if(_ib.__c!==_cl){_ib.__c=_cl;_ib.className=_cl;}}sW($('manaFill'),100*p.mana/p.manaMax);
+ sT($('manaTxt'),Math.floor(p.mana)+' / '+p.manaMax);
+ sW($('holyFill'),p.holy);
+ sT($('holyTxt'),Math.floor(p.holy)+' / 100');
+ const pcw=$('priCastWrap');
+ if(p.cast){
+  sC(pcw,'idle',false);
+  sW($('priCastFill'),Math.min(100,100*(1-(p.cast.end-t)/p.cast.dur)));
+  sT($('priCastTxt'),p.cast.name+' '+Math.max(0,p.cast.end-t).toFixed(1)+'초 (탭: 취소)');
+ }else{sC(pcw,'idle',true);sW($('priCastFill'),0);sT($('priCastTxt'),'시전 대기');}
+ const su=(S.sel==='pri')?p:S.al.find(a=>a.id===S.sel);
+ 
+ const gTot=(t<S.valorUntil?CFG.gcdValor:CFG.gcd);
+ const gr=Math.max(0,p.gcd-t);
+ sW($('gcdFill'),gr>0?100*gr/gTot:0);
+ for(const k of SKL){
+  const b=$('sk-'+k),veil=$('veil-'+k),cdn=$('cdn-'+k);
+  if(!b)continue;
+  const sk=CFG.skills[k];if(!sk)continue;
+  let dis=!S.started||S.over||!!p.cast;
+  let vh=0,ct='';
+  if(k==='save'){
+   const ready=p.holy>=100;
+   sC(b,'saveReady',ready&&!dis);
+   if(!ready){dis=true;vh=100-p.holy;ct=Math.floor(p.holy)+'/100';}
+  }else{
+   sC(b,'noMana',p.mana<sk.mana);
+   if(p.mana<sk.mana)dis=true;
+  }
+  if(k==='dispel'&&t<p.cdDispel){dis=true;vh=100*(p.cdDispel-t)/sk.cd;ct=(p.cdDispel-t).toFixed(1);}
+  if(k==='pray'&&t<p.cdPray){dis=true;vh=100*(p.cdPray-t)/sk.cd;ct=(p.cdPray-t).toFixed(1);}
+  if(k==='shield'&&su&&t<su.shieldLock){dis=true;vh=100*(su.shieldLock-t)/sk.lock;ct=(su.shieldLock-t).toFixed(1);}
+  sC(b,'gLock',t<p.gcd);
+  sC(b,'dis',dis);
+  const vhs=vh.toFixed(1)+'%';
+  if(veil.__vh!==vhs){veil.__vh=vhs;veil.style.height=vhs;}
+  sT(cdn,ct);
+ }
+}
+
+/* === Report Hint 01: 다음 판 한 줄 — 코어 집계값만 읽기 · 결정론 우선순위(지시서 순) === */
+function pickReportHint(r){
+ var led=(typeof HEAL_LEDGER!=='undefined')?HEAL_LEDGER:null;
+ var resv=led?(((led.renew&&led.renew.eff)||0)+((led.seed&&led.seed.eff)||0)):0;
+ if(r&&r.oomT>0)return '다음 판: 광역 전에는 치유의 기도 비용 100을 남겨두세요.';
+ if(r&&(r.bombTot||0)>(r.bombDef||0))return '다음 판: 불안정한 마력은 3초 안에 정화하면 피해 자체가 사라집니다.';
+ if(r&&r.ints&&r.ints.some(function(i){return i.ok===0&&i.r&&i.r.indexOf('낙인')>=0;}))return '다음 판: 도적의 낙인을 먼저 정화하면 차단 기회가 살아납니다.';
+ if(r&&r.deaths&&r.deaths.length&&r.deaths[0].id==='war')return '다음 판: 전사 HP 40% 아래는 전멸 카운트다운입니다.';
+ if(resv>0)return '다음 판: 예약한 치유가 실제 회복으로 이어졌는지 다시 비교해보세요.';
+ return '다음 판: 같은 패턴에서 더 적은 마나로 살아남아보세요.';
+}
+/* --- 리포트 --- */
+function showReport(r){
+ const win=r.r.indexOf('victory')===0;
+ const ttl=$('endTitle');
+ ttl.textContent=win?(r.r==='victory_kill'?'🏆 승리 — 보스 처치!':'🏆 승리 — 75초 생존!'):'☠️ 패배';
+ ttl.className=win?'win':'lose';
+ sT($('endSub'),win?'파티는 사제의 손끝에서 살아남았다.':'죽어가는 순서를 다시 읽어보자. 패턴은 다음 판에도 똑같다.');
+ const intsTx=r.ints.length?r.ints.map(i=>i.ok===1?'✅':(i.ok===0?'❌':'🚫')).join(' ')+' (🚫=차단 불가)':'-';
+ const _lgR=Math.round(HEAL_LEDGER.renew.eff),_lgS=Math.round(HEAL_LEDGER.seed.eff);
+ const _addEff=HEAL_LEDGER.renew.eff+HEAL_LEDGER.seed.eff,_addOh=HEAL_LEDGER.renew.over+HEAL_LEDGER.seed.over;
+ const _tHeal=Math.round(r.heal+_addEff),_tOh=Math.round(r.oh+_addOh);
+ const _tOhPct=(_tHeal+_tOh)>0?Math.round(100*_tOh/(_tHeal+_tOh)):0;
+ const rows=[
+  ['전투 시간',r.t.toFixed(1)+'초'],
+  ['보스',r.bossDead?'처치!':'HP '+r.bossPct+'% 잔존'],
+  ['생존',r.surv+' / 5'],
+  ['사망자',r.deaths.length?r.deaths.map(d=>d.name).join(', '):'없음'],
+  ['총 회복량',_tHeal+''],
+  ['오버힐',_tOh+' ('+_tOhPct+'%)'],
+  ['보호막 흡수',r.abs+''],
+  ['정화',r.disp+'회 (폭발 무효 '+r.bombDef+'/'+r.bombTot+')'],
+  ['치유의 기도',r.pray+'회'],
+  ['긴급 구원',r.saves+'회'],
+  ['도적 차단',intsTx],
+  ['광역 후 복구',r.care+'회'],
+  ['마나 최저 / 고갈',r.manaMin+(r.oomT?' / '+r.oomT.toFixed(0)+'초에 바닥':' / 없음')]
+ ];
+ var _si=5;if(_lgR>0){rows.splice(_si,0,['· 소생',_lgR+'']);_si++;}if(_lgS>0){rows.splice(_si,0,['· 기도씨앗',_lgS+'']);_si++;}
+ sH($('endStats'),rows.map(x=>'<div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div>').join(''));
+ sH($('endIns'),(r.ins.map(i=>'<div class="ins '+i.c+'">'+i.m+'</div>').join('')||'<div class="ins">특이사항 없음</div>')+'<div class="ins gold">💡 '+pickReportHint(r)+'</div>');
+ $('endOv').classList.remove('hidden');
+}
+
+/* --- 메인 루프 --- */
+function frame(ts){
+ if(!lastTs)lastTs=ts;
+ let dt=(ts-lastTs)/1000;lastTs=ts;
+ if(dt>0.25)dt=0.25;
+ if(G&&curScreen==='battle'){
+  acc+=dt;
+  let guard=0;
+  while(acc>=0.05&&guard<40){G.step(0.05);acc-=0.05;guard++;}
+  if(guard>=40)acc=0;
+  renewTicks(G.S);renewBtnUpdate(G.S);seedExpire(G.S);seedBtnUpdate(G.S);focusBtnUpdate(G.S);
+  drain();
+  render();
+ }else{acc=0;}
+ requestAnimationFrame(frame);
+}
+showScreen('title');
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
