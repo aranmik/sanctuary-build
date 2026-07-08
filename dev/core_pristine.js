@@ -48,8 +48,41 @@ const SCRIPT=[
  {t:66,e:'judge',j:4},
  {t:70,e:'smash'}
 ];
-function createGame(){
- const B=CFG.boss, K=CFG.skills;
+/* === Iron Crusher Runtime 01: 보스 정의 색인 — A안 최소 분기(docs/30). 무인자=boss01(모르가스) 폴백 === */
+const IRON_BOSS={
+ name:'강철의 파쇄자', sn:'파쇄자', hp:7800,
+ melee:62, meleePer:2.0, enMelee:84, enMeleePer:1.6, offTankMul:1.6,
+ smash:320, enSmash:380, smashBlocked:0.5, smashCast:1.6,
+ winKill:'🏆 강철의 파쇄자 격파! 파티의 버티기가 강철을 이겼습니다!',
+ winSv:'🏆 75초 생존! 강철의 파쇄자가 굉음을 내며 멈춰 섭니다!',
+ openLn:'전투 개시 — 강철의 파쇄자가 육중한 발걸음으로 다가옵니다!'
+};
+/* 파쇄자 고정 스크립트 — 강타/버티기 문법. 기존 어휘만 사용(smash/valor/enrage) · brand/bomb/judge 없음 */
+const IRON_SCRIPT=[
+ {t:6, e:'smash'},
+ {t:13,e:'smash',blk:1},
+ {t:19,e:'smash'},
+ {t:24,e:'valor'},
+ {t:27,e:'smash'},
+ {t:34,e:'smash',blk:1},
+ {t:40,e:'smash'},
+ {t:46,e:'smash'},
+ {t:52,e:'valor'},
+ {t:55,e:'enrage'},
+ {t:58,e:'smash'},
+ {t:64,e:'smash',blk:1},
+ {t:70,e:'smash'}
+];
+const BOSS_DEFS={
+ boss01:{boss:Object.assign({},CFG.boss,{sn:'모르가스',
+  winKill:'🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!',
+  winSv:'🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!',
+  openLn:'전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!'}),script:SCRIPT},
+ shell_iron:{boss:IRON_BOSS,script:IRON_SCRIPT}
+};
+function createGame(bossId){
+ const D=BOSS_DEFS[bossId]||BOSS_DEFS.boss01;
+ const B=D.boss, SC=D.script, K=CFG.skills;
  const al=CFG.allies.map(a=>({id:a.id,name:a.name,emoji:a.emoji,role:a.role,max:a.hp,hp:a.hp,atk:a.atk,per:a.per,alive:true,debuffs:[],shield:null,shieldLock:0,undying:0,nextAtk:0}));
  al[0].nextAtk=1.0; al[1].nextAtk=1.2; al[2].nextAtk=1.5; al[3].nextAtk=1.7;
  const S={
@@ -79,8 +112,8 @@ function createGame(){
  function end(kind,msg){
   if(S.over)return;
   S.over=true;S.result=kind;S.endT=S.t;
-  if(kind==='victory_kill'){L('🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!','lgold');FX('win');}
-  else if(kind==='victory_survive'){L('🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!','lgold');FX('win');}
+  if(kind==='victory_kill'){L(B.winKill,'lgold');FX('win');}
+  else if(kind==='victory_survive'){L(B.winSv,'lgold');FX('win');}
   else{L('☠️ '+(msg||'패배...'),'lr');FX('lose');}
   E({y:'end',rep:report()});
  }
@@ -206,12 +239,12 @@ function createGame(){
     const w=unit('war');const tg=(w&&w.alive)?w:meleeTgt();
     if(!tg)break;
     S.boss.cast={kind:'smash',name:'탱커 강타',start:S.t,end:S.t+B.smashCast,tg:tg.id,blk:ev.blk||0};
-    L('🔨 모르가스가 강타를 준비합니다 → '+tg.name,'lb');FX('bossCast');break}
+    L('🔨 '+B.sn+'가 강타를 준비합니다 → '+tg.name,'lb');FX('bossCast');break}
    case 'judge':{
     const un=ev.j===4;
     S.boss.cast={kind:'judge',name:'어둠의 심판',start:S.t,end:S.t+B.judgeCast,j:ev.j,un};
-    if(un){L('⚡ 광폭화한 모르가스의 어둠의 심판 — 차단 불가!','lr');S.st.ints.push({j:ev.j,ok:-1,r:'광폭화 — 차단 불가'});FX('judgeWarn',{un:1});}
-    else{L('⚡ 모르가스가 어둠의 심판을 시전합니다! (차단 가능)','lb');S.pendJ={t:S.t+0.8,j:ev.j};FX('judgeWarn');}
+    if(un){L('⚡ 광폭화한 '+B.sn+'의 어둠의 심판 — 차단 불가!','lr');S.st.ints.push({j:ev.j,ok:-1,r:'광폭화 — 차단 불가'});FX('judgeWarn',{un:1});}
+    else{L('⚡ '+B.sn+'가 어둠의 심판을 시전합니다! (차단 가능)','lb');S.pendJ={t:S.t+0.8,j:ev.j};FX('judgeWarn');}
     break}
    case 'brand':{
     const tg=unit(ev.tg);if(!tg||!tg.alive)break;
@@ -231,7 +264,7 @@ function createGame(){
     FX('valor');break;
    case 'enrage':
     S.boss.enraged=true;
-    L('🔥 모르가스가 광폭화합니다! 모든 피해가 증가합니다!','lr');
+    L('🔥 '+B.sn+'가 광폭화합니다! 모든 피해가 증가합니다!','lr');
     FX('enrage');break;
   }
  }
@@ -277,7 +310,7 @@ function createGame(){
  function step(dt){
   if(!S.started||S.over)return;
   S.t+=dt;const t=S.t,p=S.pri;
-  while(S.si<SCRIPT.length&&SCRIPT[S.si].t<=t){fireScript(SCRIPT[S.si]);S.si++;if(S.over)return}
+  while(S.si<SC.length&&SC[S.si].t<=t){fireScript(SC[S.si]);S.si++;if(S.over)return}
   if(S.valorUntil&&!S.valorOff&&t>=S.valorUntil){S.valorOff=true;L('전투 의지가 잦아듭니다.','lg');FX('valorOff');}
   p.mana=Math.min(p.manaMax,p.mana+(CFG.mana.regen+(inValor()?CFG.mana.valorBonus:0))*dt);
   addHoly(CFG.holy.regen*dt);
@@ -384,11 +417,11 @@ function createGame(){
  }
  function nextPattern(){
   const NM={smash:'🔨 탱커 강타',judge:'⚡ 어둠의 심판',brand:'🩸 피의 낙인',bomb:'💥 불안정한 마력',valor:'🌀 전투 의지',enrage:'🔥 광폭화'};
-  if(S.si<SCRIPT.length){const e=SCRIPT[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
+  if(S.si<SC.length){const e=SC[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
   return null;
  }
- function start(){S.started=true;L('전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!','lb');FX('start');}
- return {S,step,useSkill,select,cancelCast,start,nextPattern,report,
+ function start(){S.started=true;L(B.openLn,'lb');FX('start');}
+ return {S,step,useSkill,select,cancelCast,start,nextPattern,report,script:SC,
   meleeTgtId:()=>{const m=meleeTgt();return m?m.id:null}};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports={CFG,SCRIPT,createGame};

@@ -25,6 +25,7 @@
 | 새 창 부팅 리허설 | **PASS** (2026-07-07 · 본 세계선에서 세이브 v8.1 + index.html만으로 실증) |
 
 19A~20C 구간은 전부 문서 작업 — **빌드 무변**.
+★**EP21 재-baseline**: 위 표는 EP20C 이관 검증용 스냅샷. Iron Crusher Runtime 01(p15)이 코어를 A안으로 열어 **현행 기준선 = 112,359 B / 1,838줄 / md5 `8e7ee68a11add47db2e375447866fbf7` · CORE 427줄/20,818 B(587~1015) · 스모크 모르가스 51.4/1029 + 파쇄자 48.5/971** — 상세는 [31 §5](./31_IRON_CRUSHER_RUNTIME.md).
 
 ## 2. 현재 세계선 완료 목록
 
@@ -48,6 +49,8 @@
 - Matrix → Sortie Warning Contract 01
 - Matrix → Sortie Warning 01 (구현 · 커밋 `460c40a` · 유키 FINAL PASS)
 - Boss Core Gate Decision 01 ([30](./30_BOSS_CORE_GATE_DECISION.md) · A안 최소 분기형 확정 · EP21)
+- Iron Crusher Runtime 01 ([31](./31_IRON_CRUSHER_RUNTIME.md) · 파쇄자 실전투 개방 · p15 · **FINAL PASS**(나라 1트 클리어+유키) · 강철의 파쇄자=1차 데모 2번째 축 · 재-baseline)
+- 세이브 v8.3 발행(EP21 · 현행 정본 · 기준선 112,359/1,838/`8e7ee68a…` · v8.2는 이관 스냅샷) · 다음 = Thirst Abyss Runtime 01
 
 ## 3. 1차 데모 정의 (27 정본)
 

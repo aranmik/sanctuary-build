@@ -50,7 +50,7 @@
 
 **완료 이동**: Chapel Save/Return 01 · Guild Board Monster Select 01 · Sortie Confirm 01 · Report Hint 01 · Threat Lookahead 01 · **성심 집중 01(구현 완료 / 실기 1차 확인 / 잠정 OK)** — 상태 상세는 §1·§6.
 **다음 착공 = 노트북 이관 후, 기준선 검증부터([102 §6](./102_FINAL_HANDOFF_INDEX.md) — 51.4 전 착공 ⛔).** 이관 기준 순서(EP20C 확정): ① 기준선 검증 ② Threat Lookahead 실기 마감(97 §2) ③ Matrix→Sortie Warning 01([29 계약](./29_MATRIX_SORTIE_WARNING_CONTRACT.md) + 20B 결정 7건 = 착공 입력) ④ **Boss Core Gate Decision**([28 도면](./28_BOSS_CORE_GATE_PREP.md) — A안 미래 채택 후보 · 개방은 이관 후) ⑤ 강철의 파쇄자 실전투 ⑥ 갈증의 심연 실전투 → 최종 QA. Save Policy Revision·성장/재화/동료 구현은 장기 보류 유지. Boss Shell Cards 01은 **17B로 문서 종결**(98 카드 6). (패시브/강화는 규칙 확정 후 — 98 대기 목록)
-**진행 갱신(EP21)**: ①기준선 검증 · ②Threat 실기 PASS · ③Matrix→Sortie Warning 01(커밋 `460c40a`·유키 FINAL PASS) 완료. ④**Boss Core Gate Decision → [30](./30_BOSS_CORE_GATE_DECISION.md)에서 A안 최소 분기형 확정**(구현 0 · 코어 무접촉) → 다음 = **Iron Crusher Runtime 01**(⑤ 파쇄자 실전투 첫 구현 · A안 코어 개정 + 재-baseline 의식).
+**진행 갱신(EP21)**: ①기준선 검증 · ②Threat 실기 PASS · ③Matrix→Sortie Warning 01(커밋 `460c40a`·유키 FINAL PASS) 완료. ④**Boss Core Gate Decision → [30](./30_BOSS_CORE_GATE_DECISION.md)에서 A안 최소 분기형 확정** → ⑤**Iron Crusher Runtime 01 FINAL PASS**([31](./31_IRON_CRUSHER_RUNTIME.md) · p15 · `shell_iron` 실전투·모르가스 51.4+로그 지문 무손상·**재-baseline: 112,359 B/1,838줄/md5 `8e7ee68a…`·CORE 427줄/20,818 B·파쇄자 스모크 48.5/971**·**나라 폰 1트 클리어 73.2s/정화0회·유키 FINAL PASS**·강철의 파쇄자=1차 데모 두 번째 축 확정) → ⑥**다음 = Thirst Abyss Runtime 01**(갈증의 심연). ★기준선 정본은 **세이브 v8.3**(발행 완료)·본 문서 상단/§5의 EP20C 숫자는 구버전.
 - **구현 카드는 번호가 아니라 이름으로 부른다**(카드 번호는 지시서 회차와 충돌 가능 — 08=설계팩1차, 09=설계팩2차로 이미 사용됨).
 
 ## 5. 절대 건드리면 안 되는 것 ⛔
