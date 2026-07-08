@@ -535,8 +535,8 @@ button{font-family:inherit;cursor:pointer}
   <div class="ovKicker">SEED HEALER 01</div>
   <div class="ovTitle">레이드 프레임 사제</div>
   <div class="ovQuote">파티는 알아서 싸운다.<br>나는 죽어가는 순서를 읽고 살린다.</div>
-  <div class="ovH">☠️ 핏빛 예언자 모르가스 — 패턴</div>
-  <ul class="ovList">
+  <div class="ovH" id="ovBossH">☠️ 핏빛 예언자 모르가스 — 패턴</div>
+  <ul class="ovList" id="ovBossList">
    <li>⚡ <b>어둠의 심판</b> — 2.5초 시전, 전원 피해. 도적이 차단을 시도한다</li>
    <li>🩸 <b>피의 낙인</b> — 8초 출혈 + 받는 피해 증가. <b>정화 가능</b></li>
    <li>💥 <b>불안정한 마력</b> — 3초 뒤 폭발. <b>정화로 무효</b></li>
@@ -635,8 +635,41 @@ const SCRIPT=[
  {t:66,e:'judge',j:4},
  {t:70,e:'smash'}
 ];
-function createGame(){
- const B=CFG.boss, K=CFG.skills;
+/* === Iron Crusher Runtime 01: 보스 정의 색인 — A안 최소 분기(docs/30). 무인자=boss01(모르가스) 폴백 === */
+const IRON_BOSS={
+ name:'강철의 파쇄자', sn:'파쇄자', hp:7800,
+ melee:62, meleePer:2.0, enMelee:84, enMeleePer:1.6, offTankMul:1.6,
+ smash:320, enSmash:380, smashBlocked:0.5, smashCast:1.6,
+ winKill:'🏆 강철의 파쇄자 격파! 파티의 버티기가 강철을 이겼습니다!',
+ winSv:'🏆 75초 생존! 강철의 파쇄자가 굉음을 내며 멈춰 섭니다!',
+ openLn:'전투 개시 — 강철의 파쇄자가 육중한 발걸음으로 다가옵니다!'
+};
+/* 파쇄자 고정 스크립트 — 강타/버티기 문법. 기존 어휘만 사용(smash/valor/enrage) · brand/bomb/judge 없음 */
+const IRON_SCRIPT=[
+ {t:6, e:'smash'},
+ {t:13,e:'smash',blk:1},
+ {t:19,e:'smash'},
+ {t:24,e:'valor'},
+ {t:27,e:'smash'},
+ {t:34,e:'smash',blk:1},
+ {t:40,e:'smash'},
+ {t:46,e:'smash'},
+ {t:52,e:'valor'},
+ {t:55,e:'enrage'},
+ {t:58,e:'smash'},
+ {t:64,e:'smash',blk:1},
+ {t:70,e:'smash'}
+];
+const BOSS_DEFS={
+ boss01:{boss:Object.assign({},CFG.boss,{sn:'모르가스',
+  winKill:'🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!',
+  winSv:'🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!',
+  openLn:'전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!'}),script:SCRIPT},
+ shell_iron:{boss:IRON_BOSS,script:IRON_SCRIPT}
+};
+function createGame(bossId){
+ const D=BOSS_DEFS[bossId]||BOSS_DEFS.boss01;
+ const B=D.boss, SC=D.script, K=CFG.skills;
  const al=CFG.allies.map(a=>({id:a.id,name:a.name,emoji:a.emoji,role:a.role,max:a.hp,hp:a.hp,atk:a.atk,per:a.per,alive:true,debuffs:[],shield:null,shieldLock:0,undying:0,nextAtk:0}));
  al[0].nextAtk=1.0; al[1].nextAtk=1.2; al[2].nextAtk=1.5; al[3].nextAtk=1.7;
  const S={
@@ -666,8 +699,8 @@ function createGame(){
  function end(kind,msg){
   if(S.over)return;
   S.over=true;S.result=kind;S.endT=S.t;
-  if(kind==='victory_kill'){L('🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!','lgold');FX('win');}
-  else if(kind==='victory_survive'){L('🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!','lgold');FX('win');}
+  if(kind==='victory_kill'){L(B.winKill,'lgold');FX('win');}
+  else if(kind==='victory_survive'){L(B.winSv,'lgold');FX('win');}
   else{L('☠️ '+(msg||'패배...'),'lr');FX('lose');}
   E({y:'end',rep:report()});
  }
@@ -793,12 +826,12 @@ function createGame(){
     const w=unit('war');const tg=(w&&w.alive)?w:meleeTgt();
     if(!tg)break;
     S.boss.cast={kind:'smash',name:'탱커 강타',start:S.t,end:S.t+B.smashCast,tg:tg.id,blk:ev.blk||0};
-    L('🔨 모르가스가 강타를 준비합니다 → '+tg.name,'lb');FX('bossCast');break}
+    L('🔨 '+B.sn+'가 강타를 준비합니다 → '+tg.name,'lb');FX('bossCast');break}
    case 'judge':{
     const un=ev.j===4;
     S.boss.cast={kind:'judge',name:'어둠의 심판',start:S.t,end:S.t+B.judgeCast,j:ev.j,un};
-    if(un){L('⚡ 광폭화한 모르가스의 어둠의 심판 — 차단 불가!','lr');S.st.ints.push({j:ev.j,ok:-1,r:'광폭화 — 차단 불가'});FX('judgeWarn',{un:1});}
-    else{L('⚡ 모르가스가 어둠의 심판을 시전합니다! (차단 가능)','lb');S.pendJ={t:S.t+0.8,j:ev.j};FX('judgeWarn');}
+    if(un){L('⚡ 광폭화한 '+B.sn+'의 어둠의 심판 — 차단 불가!','lr');S.st.ints.push({j:ev.j,ok:-1,r:'광폭화 — 차단 불가'});FX('judgeWarn',{un:1});}
+    else{L('⚡ '+B.sn+'가 어둠의 심판을 시전합니다! (차단 가능)','lb');S.pendJ={t:S.t+0.8,j:ev.j};FX('judgeWarn');}
     break}
    case 'brand':{
     const tg=unit(ev.tg);if(!tg||!tg.alive)break;
@@ -818,7 +851,7 @@ function createGame(){
     FX('valor');break;
    case 'enrage':
     S.boss.enraged=true;
-    L('🔥 모르가스가 광폭화합니다! 모든 피해가 증가합니다!','lr');
+    L('🔥 '+B.sn+'가 광폭화합니다! 모든 피해가 증가합니다!','lr');
     FX('enrage');break;
   }
  }
@@ -864,7 +897,7 @@ function createGame(){
  function step(dt){
   if(!S.started||S.over)return;
   S.t+=dt;const t=S.t,p=S.pri;
-  while(S.si<SCRIPT.length&&SCRIPT[S.si].t<=t){fireScript(SCRIPT[S.si]);S.si++;if(S.over)return}
+  while(S.si<SC.length&&SC[S.si].t<=t){fireScript(SC[S.si]);S.si++;if(S.over)return}
   if(S.valorUntil&&!S.valorOff&&t>=S.valorUntil){S.valorOff=true;L('전투 의지가 잦아듭니다.','lg');FX('valorOff');}
   p.mana=Math.min(p.manaMax,p.mana+(CFG.mana.regen+(inValor()?CFG.mana.valorBonus:0))*dt);
   addHoly(CFG.holy.regen*dt);
@@ -971,11 +1004,11 @@ function createGame(){
  }
  function nextPattern(){
   const NM={smash:'🔨 탱커 강타',judge:'⚡ 어둠의 심판',brand:'🩸 피의 낙인',bomb:'💥 불안정한 마력',valor:'🌀 전투 의지',enrage:'🔥 광폭화'};
-  if(S.si<SCRIPT.length){const e=SCRIPT[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
+  if(S.si<SC.length){const e=SC[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
   return null;
  }
- function start(){S.started=true;L('전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!','lb');FX('start');}
- return {S,step,useSkill,select,cancelCast,start,nextPattern,report,
+ function start(){S.started=true;L(B.openLn,'lb');FX('start');}
+ return {S,step,useSkill,select,cancelCast,start,nextPattern,report,script:SC,
   meleeTgtId:()=>{const m=meleeTgt();return m?m.id:null}};
 }
 if(typeof module!=='undefined'&&module.exports)module.exports={CFG,SCRIPT,createGame};
@@ -1034,9 +1067,19 @@ const SFX={
 let G=null,acc=0,lastTs=0,lastHitFx=0,toastTm=0,vignTm=0;
 const IDS=['war','rog','mage','sham','pri'];
 const SKL=['heal','big','shield','dispel','pray','save'];
-function newGame(){
+var CUR_BOSS='boss01';   /* 세션 현재 보스 — 재도전 시 유지 · 저장 안 함 */
+var BOSS_OV={
+ boss01:{h:'☠️ 핏빛 예언자 모르가스 — 패턴',list:'<li>⚡ <b>어둠의 심판</b> — 2.5초 시전, 전원 피해. 도적이 차단을 시도한다</li><li>🩸 <b>피의 낙인</b> — 8초 출혈 + 받는 피해 증가. <b>정화 가능</b></li><li>💥 <b>불안정한 마력</b> — 3초 뒤 폭발. <b>정화로 무효</b></li><li>🔨 <b>탱커 강타</b> — 전사에게 큰 피해. 시전 바를 보고 미리 대비</li><li>🔥 <b>광폭화</b> — 60초부터. 심판을 차단할 수 없다</li>'},
+ shell_iron:{h:'☠️ 강철의 파쇄자 — 패턴',list:'<li>🔨 <b>탱커 강타</b> — 1.6초 시전, 전사에게 큰 피해. <b>보호막을 미리</b></li><li>🛡️ <b>방패 막기</b> — 전사가 일부 강타를 방패로 받아낸다 (피해 절반)</li><li>🌀 <b>전투 의지</b> — 주술사의 외침. 시전 가속·마나 회복의 창</li><li>🔥 <b>광폭화</b> — 55초부터. 강타와 발걸음이 더 무거워진다</li>'}
+};
+function newGame(slot){
+ if(slot!==undefined)CUR_BOSS=BOSS_DEFS[slot]?slot:'boss01';
  ledgerReset();
- G=createGame();
+ G=createGame(CUR_BOSS);
+ var _bd=(BOSS_DEFS[CUR_BOSS]||BOSS_DEFS.boss01).boss,_ov=BOSS_OV[CUR_BOSS]||BOSS_OV.boss01;
+ var _bn=$('bossName');if(_bn)_bn.textContent='☠️ '+_bd.name;
+ var _oh=$('ovBossH');if(_oh)_oh.textContent=_ov.h;
+ var _ol=$('ovBossList');if(_ol)_ol.innerHTML=_ov.list;
  renderSkillSlots();
  var _lg=$('log');if(_lg)_lg.innerHTML='';
  IDS.forEach(id=>{$('fl-'+id).innerHTML='';});
@@ -1083,11 +1126,14 @@ const BOSSES=[{
  blurb:'파티는 알아서 싸운다. 너는 죽어가는 순서를 읽어라.',
  goal:'75초 생존 또는 처치'
 },{
- /* === Guild Board Monster Select 01: 준비 중 셸 — 전투/SCRIPT 미연결 (docs/15 §3) === */
- slot:'shell_iron', shell:1,
+ /* === Iron Crusher Runtime 01: 파쇄자 개방(A안 — docs/30·31). 심연은 아래 준비 중 셸 유지(docs/15 §3) === */
+ slot:'shell_iron',
+ tier:'숙련',
  name:'강철의 파쇄자',
  q:'네 마나는 나의 파괴보다 오래 버티는가?',
- tags:['🔨 탱커 폭사','⏳ 마나 압박']
+ tags:['🔨 탱커 폭사','⏳ 마나 압박'],
+ blurb:'강타는 예고된다. 버틸 준비는 네 몫이다.',
+ goal:'75초 생존 또는 처치'
 },{
  slot:'shell_thirst', shell:1,
  name:'갈증의 심연',
@@ -1164,7 +1210,7 @@ function renderChapel(){
 }
 function renderGuild(){
  $('guild-list').innerHTML=BOSSES.map(function(b){
-  const name=b.shell?b.name:CFG.boss.name;
+  const name=b.name||CFG.boss.name;
   const tier=b.shell?'준비 중':('난이도 · '+b.tier);
   let h='<div class="twBoss"'+(b.shell?' data-shell="'+b.slot+'"':'')+'>'+
    '<div class="twBossTop"><span class="twBossE">'+(b.shell?'🔒':'☠️')+'</span>'+
@@ -1183,16 +1229,51 @@ function renderGuild(){
 }
 /* === Sortie Confirm 01: 답(로드아웃)과 문제(태그)를 맞대보는 화면 — 경고만, 잠금 아님 === */
 function sortieGo(){enterBattle(SELECTED_BOSS);}
+/* ===== 29: Matrix -> Sortie Warning 01 — 출정 경고 v0 (docs/29 계약) =====
+   경고는 안내일 뿐 · 출정 차단 없음 · 코어 무접촉(CFG/LOADOUT 읽기) · 셸은 데이터 후보(런타임 미표시) */
+var SORTIE_WARN_LV={info:1,caution:2,danger:3};
+var SORTIE_WARN_LABEL={info:'💫 안내',caution:'⚠️ 주의',danger:'🔴 위험'};
+var SORTIE_WARN_ROWS={
+ boss01:[
+  {lv:'danger', when:function(L,A){return L.indexOf('dispel')<0;},               msg:'정화가 없어 낙인 대응이 어렵습니다.'},
+  {lv:'caution',when:function(L,A){return A.indexOf('rog')<0;},                  msg:'도적이 없어 차단 기회가 약합니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('dispel')>=0&&A.indexOf('rog')>=0;}, msg:'낙인을 정화하면 차단 기회가 열립니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0;},               msg:'성심 집중으로 정화·보호막·소생·기도씨앗을 아껴 쓸 수 있습니다.'}
+ ],
+ /* shell_iron은 Runtime 01에서 실전투 개방(경고 런타임 표시) — shell_thirst만 셸 유지(출정 렌더 b.shell 반환·표시 0) */
+ shell_iron:[
+  {lv:'danger', when:function(L,A){return L.indexOf('shield')<0;},               msg:'보호막이 없어 큰 피해 대응이 약합니다.'},
+  {lv:'caution',when:function(L,A){return A.indexOf('war')<0;},                  msg:'전사가 없어 전열 기준점이 약합니다.'},
+  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사의 지원으로 버티는 창이 넓어집니다.'}
+ ],
+ shell_thirst:[
+  {lv:'caution',when:function(L,A){return L.indexOf('focus')<0;},               msg:'성심 집중이 없어 장기전 마나 절약 수단이 약합니다.'},
+  {lv:'caution',when:function(L,A){return L.indexOf('renew')<0&&L.indexOf('seed')<0;}, msg:'소생·기도씨앗이 없어 지속 회복이 약합니다.'},
+  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사의 지원으로 파티 안정 시간이 늘어납니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0&&(L.indexOf('renew')>=0||L.indexOf('seed')>=0);}, msg:'장기전 절약 운영이 가능합니다.'}
+ ]
+};
+function sortieWarnings(slot,L,A){
+ var rows=SORTIE_WARN_ROWS[slot]||[],out=[],i;
+ for(i=0;i<rows.length;i++){if(rows[i].when(L,A))out.push(rows[i]);}
+ out.sort(function(x,y){return SORTIE_WARN_LV[y.lv]-SORTIE_WARN_LV[x.lv];});
+ return out.slice(0,2);   /* v0 최대 2줄 */
+}
+function sortieWarnHtml(slot,L,A){
+ var w=sortieWarnings(slot,L,A);
+ if(!w.length)return '💫 안내 — 준비가 균형 잡혀 있습니다.';
+ return w.map(function(r){return SORTIE_WARN_LABEL[r.lv]+' — '+r.msg;}).join('<br>');
+}
 function renderSortie(){
  var b=null;for(var i=0;i<BOSSES.length;i++){if(BOSSES[i].slot===SELECTED_BOSS){b=BOSSES[i];break;}}
  if(!b||b.shell){showScreen('guild');return;}
- var hasD=LOADOUT.indexOf('dispel')>=0;
- var warn=hasD?'💫 정화 준비됨 — 낙인과 차단 기회를 읽으세요':'⚠️ 정화 없음 — 낙인/차단 연계가 어려워집니다';
+ var allyIds=CFG.allies.map(function(a){return a.id;});
+ var warn=sortieWarnHtml(SELECTED_BOSS,LOADOUT,allyIds);
  var lo=LOADOUT.map(function(k){return '<span class="twTag">'+(SK_ICON[k]||'')+' '+ldName(k)+'</span>';}).join('');
  var al=CFG.allies.map(function(a){return '<span class="twTag">'+a.emoji+' '+a.name+' · '+a.role+'</span>';}).join('');
  $('sortie-body').innerHTML=
   '<div class="twBoss">'+
-   '<div class="twBossTop"><span class="twBossE">☠️</span><div class="twBossName"><b>'+CFG.boss.name+'</b><span class="twBossTier">난이도 · '+b.tier+'</span></div></div>'+
+   '<div class="twBossTop"><span class="twBossE">☠️</span><div class="twBossName"><b>'+(b.name||CFG.boss.name)+'</b><span class="twBossTier">난이도 · '+b.tier+'</span></div></div>'+
    '<div class="twTags">'+b.tags.map(function(t){return '<span class="twTag">'+t+'</span>';}).join('')+'</div>'+
    '<div class="twBlurb">❓ "'+b.q+'"</div>'+
   '</div>'+
@@ -1211,7 +1292,7 @@ function renderSortie(){
 function enterBattle(slot){
  if(LOADOUT.length!==6){showToast('스킬 6개를 장착하세요 ('+LOADOUT.length+'/6)');showScreen('chapel');return;}
  ainit();
- newGame();
+ newGame(slot);
  showScreen('battle');
  $('startOv').classList.remove('hidden');
 }
@@ -1236,8 +1317,8 @@ $('guild-list').addEventListener('click',guildBoardTap);
 $('toTownBtn').addEventListener('click',function(){showScreen('village');});
 
 /* ========== DEBUG / TEST HELPERS ========== */
-window.__seedHealer={CFG:CFG,SCRIPT:SCRIPT,createGame:createGame,SAVE:SAVE,go:showScreen,
- smoke:function(){var g=createGame();g.start();var n=0;while(!g.S.over&&n<4000){g.step(0.05);n++;}return {over:g.S.over,result:g.S.result,t:+g.S.t.toFixed(1),steps:n};}};
+window.__seedHealer={CFG:CFG,SCRIPT:SCRIPT,BOSS_DEFS:BOSS_DEFS,createGame:createGame,SAVE:SAVE,go:showScreen,
+ smoke:function(bossId){var g=createGame(bossId);g.start();var n=0;while(!g.S.over&&n<4000){g.step(0.05);n++;}return {over:g.S.over,result:g.S.result,t:+g.S.t.toFixed(1),steps:n};}};
 
 
 /* --- 입력 바인딩 --- */
@@ -1528,8 +1609,9 @@ function chipsHTML(u,S,mt,t){
 /* === Threat Lookahead 01: 위협 배지 실데이터화 — SCRIPT/S.si 읽기 전용 (14 §4 · 유키 승인 1단계) === */
 var THREAT_LOOKAHEAD_SEC=6; /* lookahead 창 — 손맛 값, 나라 폰 실기로 튜닝 */
 function nextThreatFor(id,S,t,mt){
- for(var i=S.si;i<SCRIPT.length;i++){
-  var ev=SCRIPT[i];
+ var sc=(G&&G.script)?G.script:SCRIPT; /* A안: 보스별 스크립트 직독 — docs/30 */
+ for(var i=S.si;i<sc.length;i++){
+  var ev=sc[i];
   if(ev.t>t+THREAT_LOOKAHEAD_SEC)break;
   if((ev.e==='brand'||ev.e==='bomb')&&ev.tg===id)return true;
   if(ev.e==='smash'&&mt===id)return true; /* 강타 예정 대상=현재 전열(확실 해석 범위) — judge/valor/enrage는 대상 상승 미표시 */
