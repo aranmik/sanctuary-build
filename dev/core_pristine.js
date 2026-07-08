@@ -73,12 +73,39 @@ const IRON_SCRIPT=[
  {t:64,e:'smash',blk:1},
  {t:70,e:'smash'}
 ];
+/* === Thirst Abyss Runtime 01: 갈증의 심연 — 마나 압박/절약 문법(docs/32). 새 어휘 drain 1개 === */
+const ABYSS_BOSS={
+ name:'갈증의 심연', sn:'심연', hp:8400,
+ melee:50, meleePer:2.2, enMelee:66, enMeleePer:1.9, offTankMul:1.4,
+ drain:62, enDrain:95, drainDmg:42, enDrainDmg:64,
+ winKill:'🏆 갈증의 심연을 메웠습니다! 마르지 않는 손이 심연을 이겼습니다!',
+ winSv:'🏆 75초 생존! 갈증의 심연이 잠잠해집니다!',
+ openLn:'전투 개시 — 갈증의 심연이 마나를 탐하며 입을 벌립니다!'
+};
+/* 심연 고정 스크립트 — drain(마나 흡수+약광역) 위주 · 큰 피해 아님 · valor 2회=마나 숨통 · enrage 후반 압박 강화 */
+const ABYSS_SCRIPT=[
+ {t:5, e:'drain'},
+ {t:11,e:'drain'},
+ {t:16,e:'valor'},
+ {t:19,e:'drain'},
+ {t:25,e:'drain'},
+ {t:31,e:'drain'},
+ {t:37,e:'drain'},
+ {t:42,e:'valor'},
+ {t:45,e:'drain'},
+ {t:51,e:'drain'},
+ {t:56,e:'enrage'},
+ {t:59,e:'drain'},
+ {t:65,e:'drain'},
+ {t:71,e:'drain'}
+];
 const BOSS_DEFS={
  boss01:{boss:Object.assign({},CFG.boss,{sn:'모르가스',
   winKill:'🏆 핏빛 예언자 모르가스 처치! 파티가 살아서 이겼습니다!',
   winSv:'🏆 75초 생존! 모르가스가 어둠 속으로 물러갑니다!',
   openLn:'전투 개시 — 파티가 핏빛 예언자에게 달려듭니다!'}),script:SCRIPT},
- shell_iron:{boss:IRON_BOSS,script:IRON_SCRIPT}
+ shell_iron:{boss:IRON_BOSS,script:IRON_SCRIPT},
+ shell_thirst:{boss:ABYSS_BOSS,script:ABYSS_SCRIPT}
 };
 function createGame(bossId){
  const D=BOSS_DEFS[bossId]||BOSS_DEFS.boss01;
@@ -266,6 +293,18 @@ function createGame(bossId){
     S.boss.enraged=true;
     L('🔥 '+B.sn+'가 광폭화합니다! 모든 피해가 증가합니다!','lr');
     FX('enrage');break;
+   case 'drain':{
+    const burn=S.boss.enraged?B.enDrain:B.drain;
+    const d=S.boss.enraged?B.enDrainDmg:B.drainDmg;
+    const before=S.pri.mana;
+    S.pri.mana=Math.max(0,S.pri.mana-burn);
+    if(S.pri.mana<S.st.manaMin)S.st.manaMin=S.pri.mana;
+    if(!S.st.oomT&&S.pri.mana<40)S.st.oomT=S.t;
+    aliveAll().slice().forEach(a=>dmg(a,d,'aoe'));
+    if(!S.over)dmg(S.pri,d,'aoe');
+    if(!S.over)S.st.aoes.push({t:S.t,tot:d*5,h0:S.st.heal,done:false});
+    L('🌊 '+B.sn+'이 마나를 삼킵니다 — 마나 '+Math.round(before-S.pri.mana)+' 소실 · 파티 '+d+' 피해','lb');
+    FX('aoe');break}
   }
  }
  function tryInterrupt(j){
@@ -416,7 +455,7 @@ function createGame(bossId){
   };
  }
  function nextPattern(){
-  const NM={smash:'🔨 탱커 강타',judge:'⚡ 어둠의 심판',brand:'🩸 피의 낙인',bomb:'💥 불안정한 마력',valor:'🌀 전투 의지',enrage:'🔥 광폭화'};
+  const NM={smash:'🔨 탱커 강타',judge:'⚡ 어둠의 심판',brand:'🩸 피의 낙인',bomb:'💥 불안정한 마력',valor:'🌀 전투 의지',enrage:'🔥 광폭화',drain:'🌊 마나 갈증'};
   if(S.si<SC.length){const e=SC[S.si];return{nm:NM[e.e],eta:e.t-S.t}}
   return null;
  }

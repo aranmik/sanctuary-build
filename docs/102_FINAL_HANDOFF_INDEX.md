@@ -50,7 +50,9 @@
 - Matrix → Sortie Warning 01 (구현 · 커밋 `460c40a` · 유키 FINAL PASS)
 - Boss Core Gate Decision 01 ([30](./30_BOSS_CORE_GATE_DECISION.md) · A안 최소 분기형 확정 · EP21)
 - Iron Crusher Runtime 01 ([31](./31_IRON_CRUSHER_RUNTIME.md) · 파쇄자 실전투 개방 · p15 · **FINAL PASS**(나라 1트 클리어+유키) · 강철의 파쇄자=1차 데모 2번째 축 · 재-baseline)
-- 세이브 v8.3 발행(EP21 · 현행 정본 · 기준선 112,359/1,838/`8e7ee68a…` · v8.2는 이관 스냅샷) · 다음 = Thirst Abyss Runtime 01
+- 세이브 v8.3 발행(EP21 · 기준선 112,359/1,838/`8e7ee68a…` · v8.2는 이관 스냅샷)
+- Thirst Abyss Runtime 01 ([32](./32_THIRST_ABYSS_RUNTIME.md) · 갈증의 심연 실전투 · p16 · 새 어휘 drain · 생존 버티기형 · **FINAL PASS**(나라 1트 클리어 75초 생존승+유키) · 재-baseline 114,688/1,882/`e5c7ca06…`)
+- 세이브 v8.4 발행(EP21 · 현행 정본 · **3보스 전원 실전투+실기 완료** · v8.2·v8.3은 이전 스냅샷) · 다음 = First Demo Completion QA(27 §4 · 3보스 순회)
 
 ## 3. 1차 데모 정의 (27 정본)
 

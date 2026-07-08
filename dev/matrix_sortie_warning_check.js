@@ -52,8 +52,8 @@ chk('출정 버튼 disabled 미도입', !/sortie-go[\s\S]{0,120}disabled/.test(s
 // 7. 셸은 데이터 후보만 · 실전투/진입 미개방
 chk('파쇄자·심연 데이터 후보 존재', (sb.SORTIE_WARN_ROWS.shell_iron || []).length > 0 && (sb.SORTIE_WARN_ROWS.shell_thirst || []).length > 0);
 chk('renderSortie 셸 즉시반환 유지', /if\(!b\|\|b\.shell\)\{showScreen\('guild'\);return;\}/.test(src));
-// Iron Crusher Runtime 01 이후: 파쇄자는 개방(shell:1 제거), 심연만 셸 유지
-chk('파쇄자 개방·심연만 셸 유지', !/slot:'shell_iron', shell:1/.test(src) && /slot:'shell_iron',\n tier:/.test(src) && /slot:'shell_thirst', shell:1/.test(src));
+// Thirst Abyss Runtime 01 이후: 세 보스 전부 개방(shell:1 잔여 0) — 경고는 셋 다 런타임 표시
+chk('세 보스 전부 개방(shell:1 잔여 0)', !/shell:1/.test(src) && /slot:'shell_iron',\n tier:/.test(src) && /slot:'shell_thirst',\n tier:/.test(src));
 
 // 8. 미래 7종 동료 런타임 미구현 — CFG.allies는 4종 고정
 const allies = sb.window.__seedHealer.CFG.allies;

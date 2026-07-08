@@ -93,14 +93,11 @@ chk('c5 파쇄자 무입력 스모크 defeat/48.5/971', si.over === true && si.r
 // 10. 심연은 여전히 셸 — 길드 잠금 + 출정 렌더 반환 + 코어 폴백
 const sortieBody = sb.document.getElementById('sortie-body'); /* lazy 프록시 선생성 */
 {
-  const gl = h._els['guild-list'].innerHTML;
-  const guildLocked = gl.indexOf('data-shell="shell_thirst"') >= 0;
-  sortieBody.innerHTML = '';
-  sb.SELECTED_BOSS = 'shell_thirst';
-  sb.renderSortie();
-  const bounced = sortieBody.innerHTML === '';
+  // ※ Thirst Abyss Runtime 01(docs/32)에서 심연도 개방됨 — 이 검사는 "파쇄자 개방이 모르가스를 안 깼다"만 확인.
+  //   심연 개방 자체의 검증은 dev/thirst_abyss_runtime_check.js 소관.
   const gt = sh.createGame('shell_thirst');
-  chk('c10 심연 미개방(길드 잠금·출정 반환·createGame 폴백=모르가스)', guildLocked && bounced && gt.S.boss.max === 7200, '');
+  chk('c10 심연 개방 후에도 모르가스 폴백 무손상(무인자=7200·명시=8400)',
+    sh.createGame().S.boss.max === 7200 && gt.S.boss.max === 8400, 'noarg=' + sh.createGame().S.boss.max + ' thirst=' + gt.S.boss.max);
 }
 
 // 11. 출정 화면 — 파쇄자 이름/질문/경고/출정 버튼(비활성 아님)
