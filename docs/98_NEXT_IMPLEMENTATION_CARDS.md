@@ -153,7 +153,7 @@
 
 ## 카드 밖 대기 목록 (착공 금지 — 참조용)
 
-**Core Gate Decision**(소실 본체 — 유키 별도 카드) ⏸️ · **Boss Core Gate Decision**(신규 보스 실전투의 코어 경로 — [24 §1-1·§8](./24_DEMO_BOSS_DECISION.md) · 지금 발주하지 않음, 시점은 유키) ⏸️ · **Matrix→Sortie Warning 01**(22 §6-1 어휘를 출정 경고 2호로 — 게이트 전 다듬기 후보) 🔷 · **Threat Lookahead 실기 마감**(97 §2 개별 판정 대기) 🔷 · 패시브 규칙(09 §4-6~8) ⏸️ · 3번째 보스 확정+대정화(데모 목표선 — 유키) ⏸️ · Preset Save/Unlock Shell(19 채택됨, 구현은 데모 이후) ⏸️ · 07-HF 시인성(나라 실기 피드백 대기) 🔷 · **성장/재화/동료 실구현(16·21·22 채택 — 장기 보류 유지 · 동료는 준게이트 범위 표 필수[22]) ⏸️** · Core Gate 재검토 목록에 성심 집중 refund 패턴 포함([23 §8](./23_SACRED_FOCUS_IMPLEMENTATION_CONTRACT.md)) ⏸️.
+**Core Gate Decision**(소실 본체 — 유키 별도 카드) ⏸️ · **Boss Core Gate Decision** ✅ **[30](./30_BOSS_CORE_GATE_DECISION.md)에서 A안 최소 분기형 확정**(EP21 · 구현 0) → 다음 = Iron Crusher Runtime 01 · **Matrix→Sortie Warning 01** ✅ **구현 완료**(커밋 `460c40a` · 유키 FINAL PASS · 폰 실기 OK) · **Threat Lookahead 실기 마감** ✅ 폰 실기 PASS · 패시브 규칙(09 §4-6~8) ⏸️ · 3번째 보스 확정+대정화(데모 목표선 — 유키) ⏸️ · Preset Save/Unlock Shell(19 채택됨, 구현은 데모 이후) ⏸️ · 07-HF 시인성(나라 실기 피드백 대기) 🔷 · **성장/재화/동료 실구현(16·21·22 채택 — 장기 보류 유지 · 동료는 준게이트 범위 표 필수[22]) ⏸️** · Core Gate 재검토 목록에 성심 집중 refund 패턴 포함([23 §8](./23_SACRED_FOCUS_IMPLEMENTATION_CONTRACT.md)) ⏸️.
 
 ---
 *— 렌, EP10 활주로 팩. 티켓 경계는 유키 결정(상단 3건)이 상위 게이트다.*

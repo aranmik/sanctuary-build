@@ -46,6 +46,8 @@
 - First Demo Completion Definition 01
 - Boss Core Gate Prep 01
 - Matrix → Sortie Warning Contract 01
+- Matrix → Sortie Warning 01 (구현 · 커밋 `460c40a` · 유키 FINAL PASS)
+- Boss Core Gate Decision 01 ([30](./30_BOSS_CORE_GATE_DECISION.md) · A안 최소 분기형 확정 · EP21)
 
 ## 3. 1차 데모 정의 (27 정본)
 
@@ -84,7 +86,7 @@
 1. **기준선 검증** (§1 — 세이브 §0 의식 · 4종 전부 일치 전 착공 ⛔)
 2. Threat Lookahead 실기 마감
 3. Matrix → Sortie Warning 01 (착공 입력은 29 계약 + §8 결정)
-4. Boss Core Gate Decision (28의 3안 중 — 렌 추천 이력: 구조 A·시점 이관 후)
+4. Boss Core Gate Decision ✅ [30](./30_BOSS_CORE_GATE_DECISION.md)에서 **A안 최소 분기형 확정**(EP21) — 다음 카드 = Iron Crusher Runtime 01
 5. 강철의 파쇄자 실전투
 6. 갈증의 심연 실전투
 
