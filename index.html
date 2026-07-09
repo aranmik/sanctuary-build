@@ -1279,22 +1279,22 @@ var SORTIE_WARN_LV={info:1,caution:2,danger:3};
 var SORTIE_WARN_LABEL={info:'💫 안내',caution:'⚠️ 주의',danger:'🔴 위험'};
 var SORTIE_WARN_ROWS={
  boss01:[
-  {lv:'danger', when:function(L,A){return L.indexOf('dispel')<0;},               msg:'정화가 없어 낙인 대응이 어렵습니다.'},
-  {lv:'caution',when:function(L,A){return A.indexOf('rog')<0;},                  msg:'도적이 없어 차단 기회가 약합니다.'},
-  {lv:'info',   when:function(L,A){return L.indexOf('dispel')>=0&&A.indexOf('rog')>=0;}, msg:'낙인을 정화하면 차단 기회가 열립니다.'},
-  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0;},               msg:'성심 집중으로 정화·보호막·소생·기도씨앗을 아껴 쓸 수 있습니다.'}
+  {lv:'danger', when:function(L,A){return L.indexOf('dispel')<0;},               msg:'정화가 없으면 낙인을 지울 수 없어 도적의 차단이 흔들립니다.'},
+  {lv:'caution',when:function(L,A){return A.indexOf('rog')<0;},                  msg:'도적이 없으면 정화로 열어줄 차단 기회가 없습니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('dispel')>=0&&A.indexOf('rog')>=0;}, msg:'낙인을 정화하면 도적의 차단 기회가 살아납니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0;},               msg:'성심 집중이 있으면 흔들리는 순간에도 정화·치유를 아껴 수습할 수 있습니다.'}
  ],
  /* 세 보스 전부 실전투 개방(Runtime 01·02) — 경고 런타임 표시. 셸 잔여 0 */
  shell_iron:[
-  {lv:'danger', when:function(L,A){return L.indexOf('shield')<0;},               msg:'보호막이 없어 큰 피해 대응이 약합니다.'},
-  {lv:'caution',when:function(L,A){return A.indexOf('war')<0;},                  msg:'전사가 없어 전열 기준점이 약합니다.'},
-  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사의 지원으로 버티는 창이 넓어집니다.'}
+  {lv:'danger', when:function(L,A){return L.indexOf('shield')<0;},               msg:'보호막이 없으면 전사가 강타를 그대로 받아 전선이 먼저 무너집니다.'},
+  {lv:'caution',when:function(L,A){return A.indexOf('war')<0;},                  msg:'전사가 없으면 강타를 받쳐줄 전열 기준이 없습니다.'},
+  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사가 있으면 전사가 강타를 버티는 창이 넓어집니다.'}
  ],
  shell_thirst:[
-  {lv:'caution',when:function(L,A){return L.indexOf('focus')<0;},               msg:'성심 집중이 없어 장기전 마나 절약 수단이 약합니다.'},
-  {lv:'caution',when:function(L,A){return L.indexOf('renew')<0&&L.indexOf('seed')<0;}, msg:'소생·기도씨앗이 없어 지속 회복이 약합니다.'},
-  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사의 지원으로 파티 안정 시간이 늘어납니다.'},
-  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0&&(L.indexOf('renew')>=0||L.indexOf('seed')>=0);}, msg:'장기전 절약 운영이 가능합니다.'}
+  {lv:'caution',when:function(L,A){return L.indexOf('focus')<0;},               msg:'성심 집중이 없으면 마나가 마를 때 아껴 쓸 카드가 부족합니다.'},
+  {lv:'caution',when:function(L,A){return L.indexOf('renew')<0&&L.indexOf('seed')<0;}, msg:'소생·기도씨앗이 없으면 큰 치유에만 기대다 마나가 먼저 바닥납니다.'},
+  {lv:'info',   when:function(L,A){return A.indexOf('sham')>=0;},                msg:'주술사가 있으면 마나가 말라도 파티가 버티는 시간이 늘어납니다.'},
+  {lv:'info',   when:function(L,A){return L.indexOf('focus')>=0&&(L.indexOf('renew')>=0||L.indexOf('seed')>=0);}, msg:'오래 버티는 도구가 갖춰져 마나가 말라도 생존선을 지킬 수 있습니다.'}
  ]
 };
 function sortieWarnings(slot,L,A){
