@@ -57,6 +57,7 @@
 - Boss-Specific Report Hint 01 ([34](./34_BOSS_SPECIFIC_REPORT_HINT.md) · EP22 · p17 · 결과 화면 보스별 거울 최대 2줄 · 어댑터 전용 CORE 무접촉 · 재-baseline 117,251/1,920/`9829b5b0…` · 실기 대기)
 - Sortie Warning Copy Polish 01 ([35](./35_SORTIE_WARNING_COPY_POLISH.md) · EP22 · p18 · 출격 전 거울 문장 정리 · 전투 후 거울과 어휘 짝맞춤 · copy polish only · 어댑터 전용 CORE 무접촉 · 재-baseline 117,532/1,920/`2630669c…` · 커밋 `a7b1e58`)
 - First Demo Closure Handoff 01 ([36](./36_FIRST_DEMO_CLOSURE_HANDOFF.md) · EP22 · 문서-only · **1차 데모 종료 기준점** — 3보스/두 거울/기준선/완료 카드 11종/다음 후보 5종/금지선/역할 · 다음 진입문)
+- Save v8.5 / First Demo Final Save 01 (`성소판_세이브_v8.5.md` · EP22 · **1차 데모 최종 세이브 정본** · 현행 기준선 117,532/1,920/`2630669c…`·CORE 466/22,521 반영 · 부록 C 세이브 계보 v8.2~v8.5 · v8.2~v8.4 스냅샷 보존)
 
 ## 3. 1차 데모 정의 (27 정본)
 

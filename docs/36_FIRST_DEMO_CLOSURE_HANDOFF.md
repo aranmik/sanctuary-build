@@ -90,7 +90,7 @@
 - boss_specific_report_hint_check: **10 PASS / 0 FAIL**
 - sortie_warning_copy_polish_check: **14 PASS / 0 FAIL**
 
-정본 세이브: `성소판_세이브_v8.4.md`(부팅 6숫자 = 117,532 이전 스냅샷 아님 주의 — v8.4는 114,688 시점 발행이므로, **본 문서 E항 숫자가 현행**이며 세이브 v8.5 발행 시 반영 예정).
+정본 세이브: **`성소판_세이브_v8.5.md`**(First Demo Final Save · EP22 · 본 E항 기준선 117,532/1,920/2630669c 반영 발행 완료 · v8.2~v8.4는 이전 시점 스냅샷 보존 · 부록 C 세이브 계보표 참조).
 
 ## F. 현재까지 완료된 핵심 카드
 
