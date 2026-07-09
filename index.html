@@ -1826,6 +1826,44 @@ function pickReportHint(r){
  if(resv>0)return '다음 판: 예약한 치유가 실제 회복으로 이어졌는지 다시 비교해보세요.';
  return '다음 판: 같은 패턴에서 더 적은 마나로 살아남아보세요.';
 }
+/* === Boss-Specific Report Hint 01: 보스별 결과 거울 (docs/34). r 스탯 + CUR_BOSS 읽기 전용 · 최대 2줄 · 공용 힌트 폴백 존치 === */
+var BOSS_HINT_FN={
+ boss01:function(r){
+  var win=r.r.indexOf('victory')===0,o=[];
+  if(win){o.push('정화와 차단 연결이 전장을 살렸습니다.');return o;}
+  var failBrand=r.ints&&r.ints.some(function(i){return i.ok===0&&i.r&&i.r.indexOf('낙인')>=0;});
+  if(failBrand)o.push('차단이 흔들렸다면 정화 타이밍과 긴급 수습 스킬을 같이 보세요.');
+  else o.push('낙인을 정화해야 도적의 차단 기회가 살아납니다.');
+  o.push('다음 판: 성당의 정화, 도적의 차단 타이밍, 그 사이 수습을 함께 보세요.');
+  return o;
+ },
+ shell_iron:function(r){
+  var win=r.r.indexOf('victory')===0,o=[];
+  if(win){o.push('전사는 버티고, 사제는 살리고, 딜러는 고통을 끝냈습니다.');return o;}
+  var warDead=r.deaths&&r.deaths.some(function(d){return d.id==='war';});
+  if(warDead)o.push('전사가 무너지면 전장이 무너집니다. 강타 타이밍을 먼저 보세요.');
+  else if((r.abs||0)<800)o.push('강타 전에 전사에게 보호막을 맞추면 전선이 오래 버팁니다.');
+  else o.push('강타를 보호막으로 받아냈습니다. 마나가 버틴다면 처치까지 노려보세요.');
+  o.push('다음 판: 보호막을 쥐고 갔는지, 강타 예고에 미리 걸었는지 확인해보세요.');
+  return o;
+ },
+ shell_thirst:function(r){
+  var win=r.r.indexOf('victory')===0,o=[];
+  if(win){o.push('마나가 말라도 끝까지 버틴 것이 승리의 답이었습니다.');return o;}
+  if(r.oomT>0&&r.oomT<40)o.push('마나가 일찍 바닥났습니다. 초반 큰 치유를 줄이고 소생·성심 집중 타이밍을 보세요.');
+  else if((r.ohPct||0)>=20)o.push('넘치는 치유는 심연에서 곧 마나 손실이 됩니다. 딱 필요한 만큼만.');
+  else o.push('마나가 마르기 전에, 무엇을 안 쓸지 먼저 정해보세요.');
+  o.push('다음 판: 소생·기도씨앗·성심 집중을 챙겼는지, 큰 치유를 아꼈는지 확인해보세요.');
+  return o;
+ }
+};
+function bossHintLines(bossId,r){var fn=BOSS_HINT_FN[bossId];var o=fn?(fn(r)||[]):[];return o.slice(0,2);}
+function reportMirror(r){
+ var b=(typeof CUR_BOSS!=='undefined')?CUR_BOSS:'boss01';
+ var o=bossHintLines(b,r);
+ if(!o.length)o=[pickReportHint(r)];   /* 공용 폴백 — 공용 힌트 함수 존치(미인식 보스·빈 결과) */
+ return o.slice(0,2);
+}
 /* --- 리포트 --- */
 function showReport(r){
  const win=r.r.indexOf('victory')===0;
@@ -1855,7 +1893,7 @@ function showReport(r){
  ];
  var _si=5;if(_lgR>0){rows.splice(_si,0,['· 소생',_lgR+'']);_si++;}if(_lgS>0){rows.splice(_si,0,['· 기도씨앗',_lgS+'']);_si++;}
  sH($('endStats'),rows.map(x=>'<div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div>').join(''));
- sH($('endIns'),(r.ins.map(i=>'<div class="ins '+i.c+'">'+i.m+'</div>').join('')||'<div class="ins">특이사항 없음</div>')+'<div class="ins gold">💡 '+pickReportHint(r)+'</div>');
+ sH($('endIns'),(r.ins.map(i=>'<div class="ins '+i.c+'">'+i.m+'</div>').join('')||'<div class="ins">특이사항 없음</div>')+reportMirror(r).map(function(m){return '<div class="ins gold">💡 '+m+'</div>';}).join(''));
  $('endOv').classList.remove('hidden');
 }
 

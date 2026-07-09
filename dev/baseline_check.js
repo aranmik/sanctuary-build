@@ -1,7 +1,7 @@
 'use strict';
 // Sanctuary Build baseline check — run: node dev/baseline_check.js
-// 기준선(EP21 · Thirst Abyss Runtime 01 재-baseline): 114,688 B / 1,882줄 / md5 e5c7ca06ecfef24a3256500dd2a957c0
-// CORE 466줄/22,521 B · 모르가스 스모크 defeat/51.4/1029(무인자 폴백) · 파쇄자 defeat/48.5/971 · 심연 defeat/61.8/1236
+// 기준선(EP22 · Boss-Specific Report Hint 01 — 어댑터 전용 확장, CORE 무변): 117,251 B / 1,920줄 / md5 9829b5b0b9c344cadbb3c5c0d1134d79
+// CORE 466줄/22,521 B (불변 · 코어 무접촉) · 모르가스 스모크 defeat/51.4/1029(무인자 폴백) · 파쇄자 defeat/48.5/971 · 심연 defeat/61.8/1236
 // 보존 grep 14 · 금지 grep 0 · div 188/188 · section 8/8
 // (이력: EP20C 106,650/1,756/34addd9c…·CORE 394/19,545 → Iron Crusher 112,359/1,838/8e7ee68a…·CORE 427/20,818 → 본 Thirst · docs/31·32 참조)
 const fs=require('fs');const path=require('path');const crypto=require('crypto');const vm=require('vm');
@@ -15,9 +15,9 @@ const lineCount=p=>lines.filter(l=>l.includes(p)).length;      // grep -c 동등
 const occCount=p=>src.split(p).length-1;                        // grep -o 동등(발생 횟수)
 
 // 1. 원본 바이트/줄/md5
-chk('bytes',buf.length,114688);
-chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),1882);
-chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'e5c7ca06ecfef24a3256500dd2a957c0');
+chk('bytes',buf.length,117251);
+chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),1920);
+chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'9829b5b0b9c344cadbb3c5c0d1134d79');
 
 // 2. CORE 추출 (awk 동등: START 다음 줄 ~ END 직전 줄)
 {let f=0,core=[];for(const l of lines){if(l.includes('//__CORE_START__')){f=1;continue;}if(l.includes('//__CORE_END__'))f=0;if(f)core.push(l);}
