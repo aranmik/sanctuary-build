@@ -223,6 +223,14 @@ button{font-family:inherit;cursor:pointer}
 .fxPri.fp-shield{stroke:#8fdcff}
 .fxPri.fp-dispel{stroke:#e0b6ff}
 .fxPri.fp-save{stroke:#ffd76a}
+.fxFore{stroke:#9db3cf;stroke-width:5;stroke-linecap:round}
+#fxSvg .fxFore.on{opacity:.3}
+.fxFore.near{stroke:#bccfe8;stroke-width:6}
+#fxSvg .fxFore.near.on{opacity:.55}
+.fxFore.impact{stroke:#ffd9a8;stroke-width:6;filter:drop-shadow(0 0 3px rgba(255,180,90,.65))}
+#fxSvg .fxFore.impact.on{opacity:.9}
+.fxGuard{stroke:#8fdcff;stroke-width:4;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(120,200,255,.75))}
+#fxSvg .fxGuard.on{opacity:.95}
 
 /* ===== 02B-HF1: 하단 상태 라벨 슬롯 고정 (위험/위독 표시 시 카드 높이·정렬 불변) ===== */
 .cState,.fState{margin-top:3px;height:15px;min-height:15px;line-height:15px;overflow:hidden;white-space:nowrap;text-align:center;font-size:9.5px;font-weight:800;transition:color .15s ease}
@@ -476,7 +484,7 @@ button{font-family:inherit;cursor:pointer}
   <div id="bossAvatar">☠️</div>
   <div id="fxAoe"></div>
   <div id="fxAoeDecal"></div>
-  <svg id="fxSvg" xmlns="http://www.w3.org/2000/svg"><line id="fxBossLine" class="fxBoss"/><line id="fxIntLine" class="fxInt"/><line id="fxPriLine" class="fxPri"/></svg>
+  <svg id="fxSvg" xmlns="http://www.w3.org/2000/svg"><line id="fxBossLine" class="fxBoss"/><line id="fxIntLine" class="fxInt"/><line id="fxPriLine" class="fxPri"/><line id="fxSmashFore" class="fxFore"/><line id="fxSmashGuard" class="fxGuard"/></svg>
   <div id="calloutBox"></div>
   <div id="stageAllies">
    <div class="fig fig-war" id="sa-war"><span class="figAura"></span><span class="figBody"></span><span class="figRing" id="fxr-war"></span><span class="figFlash" id="fxf-war"></span></div>
@@ -1131,6 +1139,7 @@ function newGame(slot){
  if(slot!==undefined)CUR_BOSS=BOSS_DEFS[slot]?slot:'boss01';
  ledgerReset();
  G=createGame(CUR_BOSS);
+ if(typeof IC_FORE!=='undefined'){IC_FORE.cast=null;IC_FORE.hitT=-1;}
  var _bd=(BOSS_DEFS[CUR_BOSS]||BOSS_DEFS.boss01).boss,_ov=BOSS_OV[CUR_BOSS]||BOSS_OV.boss01;
  var _bn=$('bossName');if(_bn)_bn.textContent='☠️ '+_bd.name;
  var _oh=$('ovBossH');if(_oh)_oh.textContent=_ov.h;
@@ -1739,6 +1748,7 @@ function fxBeam(tg,kind){
 function fxWave(){
  ['war','rog','mage','sham'].forEach(function(id){var fl=$('fxf-'+id);if(fl){fl.className='figFlash ff-heal on';setTimeout((function(x){return function(){x.className='figFlash';};})(fl),560);}});
 }
+var IC_FORE={cast:null,hitT:-1}; /* 파쇄자 압박선 잔상 상태 (docs/40) */
 function renderFx(S,t,p,mt){
  if(!A)A=fxAnchors(); if(!A)return;
  var bc=S.boss.cast;
@@ -1758,6 +1768,26 @@ function renderFx(S,t,p,mt){
   if(al&&al.alive){ if(smashTg===id)cls='figRing fr-target'; else if(aoe)cls='figRing fr-aoe'; else if(S.sel===id)cls='figRing fr-sel'; }
   if(ring.className!==cls)ring.className=cls;
  }
+ /* — 파쇄자 강타 압박선 (Iron Crusher Action Line Proto 01 · docs/40 · 39 §G-1) — 시각 전용 · 판정 무접촉 — */
+ var iron=(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron');
+ if(iron){ if(IC_FORE.cast&&!smashTg)IC_FORE.hitT=S.t; IC_FORE.cast=smashTg; }
+ var fw=null; for(var w2=0;w2<S.al.length;w2++){if(S.al[w2].id==='war')fw=S.al[w2];}
+ var foreOn=false,foreCls='fxFore',guardOn=false;
+ if(iron&&IC_FORE.hitT>=0&&S.t>=IC_FORE.hitT&&S.t-IC_FORE.hitT<0.45){foreOn=true;foreCls='fxFore impact';}
+ else if(iron&&!S.over&&!bc&&fw&&fw.alive){
+  var ne=(G.script&&S.si<G.script.length)?G.script[S.si]:null;
+  if(ne&&ne.e==='smash'){
+   foreOn=true;
+   if(ne.t-S.t<=3.0)foreCls='fxFore near';
+   if(fw.shield&&fw.shield.amt>0)guardOn=true;
+  }
+ }
+ var fp=A.war;
+ if(guardOn&&A.boss&&A.war)fp={x:A.boss.x+(A.war.x-A.boss.x)*0.8,y:A.boss.y+(A.war.y-A.boss.y)*0.8};
+ fxLn('fxSmashFore',A.boss,fp,foreOn,foreCls);
+ var g1=null,g2=null,gOn=foreOn&&guardOn;
+ if(gOn){var gdx=A.war.x-A.boss.x,gdy=A.war.y-A.boss.y,gdl=Math.sqrt(gdx*gdx+gdy*gdy)||1;g1={x:fp.x+gdy/gdl*8,y:fp.y-gdx/gdl*8};g2={x:fp.x-gdy/gdl*8,y:fp.y+gdx/gdl*8};}
+ fxLn('fxSmashGuard',g1,g2,gOn,'fxGuard');
 }
 function render(){
  if(!G)return;
