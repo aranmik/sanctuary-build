@@ -53,8 +53,9 @@ chk('c11 구현 순서 5카드',
 chk('c12 마을 핵심 원칙(전투 전 준비 공간·정답 아님)', has('전투 전 준비 공간') && has('정답'), '');
 
 // 12. index.html 변경 없음 (현행 기준선 md5)
-chk('c13 index.html 무변경(md5 2630669c…)',
-  crypto.createHash('md5').update(buf).digest('hex') === '2630669c87a2b56409dd22558d31d24e', '');
+// ※ 라이브 index.html 가드 — Chapel Loadout UI 01(EP23) 재-baseline로 현행 md5 갱신(docs/37은 index.html 미수정 카드였음)
+chk('c13 index.html 현행 기준선(md5 172e4660…)',
+  crypto.createHash('md5').update(buf).digest('hex') === '02a512c5c2eaf5e3ca3f0f4ebf4190e7', '');
 
 // 13. CORE 숫자 유지
 {

@@ -53,8 +53,9 @@ chk('c13 다음 후보 카드', hasAll(['Phone Check', 'Tell Polish', 'Variant B
 chk('c14 완료 카드 목록(11종 핵심)', hasAll(['Repo Foundation 01', 'Iron Crusher Runtime 01', 'Thirst Abyss Runtime 01', 'Boss Grammar 01', 'Sortie Warning Copy Polish 01']), '');
 
 // 11. index.html 변경 없음 (현행 기준선 md5와 동일)
-chk('c15 index.html 무변경(md5 2630669c…)',
-  crypto.createHash('md5').update(buf).digest('hex') === '2630669c87a2b56409dd22558d31d24e', '');
+// ※ 라이브 index.html 가드 — Chapel Loadout UI 01(EP23) 재-baseline로 현행 md5 갱신(docs/36 §E 기록 숫자는 1차 데모 스냅샷으로 유지)
+chk('c15 index.html 현행 기준선(md5 172e4660…)',
+  crypto.createHash('md5').update(buf).digest('hex') === '02a512c5c2eaf5e3ca3f0f4ebf4190e7', '');
 
 // 12. CORE 숫자 유지
 {

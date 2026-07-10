@@ -341,7 +341,9 @@ button{font-family:inherit;cursor:pointer}
 .twBtnGo{margin-top:16px}
 .twNote{margin-top:14px;font-size:10.5px;color:var(--ink2);text-align:center;line-height:1.5}
 .twSkill.ldSel{cursor:pointer;transition:border-color .12s,background .12s}
-.twSkill.ldSel.on{border-color:#5ee08a;background:linear-gradient(180deg,#16351f,#0f2417)}
+.twSkill.ldSel.on{border-color:#3f9a54;background:linear-gradient(180deg,#e6f5e8,#d6eed9);box-shadow:inset 3px 0 0 #3f9a54}
+.twSkill.ldSel.on .twSkillB b{color:#1f5b2c}
+.twSkill.ldSel.on .twSkillD{color:#4a3620}
 .ldTick{margin-left:auto;flex:none;align-self:center;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0f2417;background:#5ee08a}
 .twSkill.ldSel:not(.on) .ldTick{background:#2a2247;color:transparent}
 .ldHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
@@ -352,6 +354,18 @@ button{font-family:inherit;cursor:pointer}
 .ldSlot{height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;border:1.5px solid #3b2d5e;background:#161027;min-width:0}
 .ldSlot.empty{color:#5a4a80;border-style:dashed}
 .ldSlot.filled{border-color:#6a5b93;background:linear-gradient(180deg,#231b3d,#161027)}
+.ldSlot.sel{border-color:#e8b53c;box-shadow:0 0 0 2px rgba(232,181,60,.5) inset}
+#chapel-fixed{position:sticky;top:0;z-index:2;background:var(--parch);margin:0 -16px;padding:2px 16px 9px;box-shadow:0 5px 9px -5px rgba(74,54,32,.35)}
+.ldCat{display:flex;gap:5px;margin-top:10px}
+.ldCatBtn{flex:1;font-size:10.5px;font-weight:800;padding:6px 3px;border-radius:9px;background:#2a2247;color:#c9bdea;border:1px solid #3b2d5e;cursor:pointer}
+.ldCatBtn.on{background:#3a2f5e;color:#fff;border-color:#6a5b93}
+.ldSum{display:flex;flex-direction:column;gap:3px;margin-bottom:2px;min-height:50px}
+.ldSumLine{font-size:10.5px;font-weight:700;line-height:1.35}
+.ldSumLine.warn{color:#a35a2a}
+.ldSumLine.ok{color:var(--sprout)}
+.twSkillC.rMana{color:#2f6fd0}
+.twSkillC.rHoly{color:#c98f1d}
+#chapel-foot{flex:none;padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
 .twBtn[disabled]{opacity:.45;cursor:not-allowed}
 .twFoot{margin-top:14px;font-size:10px;color:var(--ink2);letter-spacing:.16em}
 .twHero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;padding:20px}
@@ -418,8 +432,9 @@ button{font-family:inherit;cursor:pointer}
   <div class="twBar"><button class="twBack" id="back-chapel">‹</button><div><div class="twTitle">성당</div><div class="twSub">손이 기억하는 여섯 개의 기도</div></div></div>
   <div class="twScroll">
    <div id="chapel-skills"></div>
-   <div class="twNote">8개 중 6개를 골라 손에 익히세요. 이 구성으로 출정합니다. (새로고침 시 기본 구성으로 돌아갑니다)</div>
+   <div class="twNote">9개 중 6개를 골라 손에 익히세요. 출정은 토벌 게시판에서. (새로고침 시 기본 구성)</div>
   </div>
+  <div id="chapel-foot"><button class="twBtn" id="chapel-save">🏛️ 저장하고 마을로</button></div>
  </div>
 </section>
 <!-- ===== GUILD BOARD ===== -->
@@ -1233,24 +1248,42 @@ function chapelSaveReturn(){
  else{showToast('로드아웃 저장됨 — 이번 세션 동안 유지됩니다');}
  showScreen('village');
 }
+/* === Chapel Loadout UI 01: 카테고리 = "어떤 전장 문제를 수습하는가" 기준(docs/38) · data-driven === */
+var SKILL_CAT={heal:'치유',big:'치유',pray:'치유',shield:'보호',save:'보호',dispel:'정화·유틸',renew:'지속·자원',seed:'지속·자원',focus:'지속·자원'};
+var CHAPEL_CATS=['치유','보호','정화·유틸','지속·자원'];
+var CHAPEL_CAT='치유';   /* 세션 활성 탭 · 저장 안 함 */
+function chapelSummary(){   /* 구성의 일반 성향(보스 무관) — 최대 3줄 · docs/37 §E 성당 단계 */
+ var L=LOADOUT,o=[];
+ var hasD=L.indexOf('dispel')>=0,hasSh=L.indexOf('shield')>=0,hasHot=(L.indexOf('renew')>=0||L.indexOf('seed')>=0),hasPr=L.indexOf('pray')>=0,hasBig=L.indexOf('big')>=0;
+ if(!hasD)o.push(['warn','정화 없음 — 상태 사고 대응이 약합니다.']);
+ if(!hasSh)o.push(['warn','보호 부족 — 큰 단일 피해를 미리 받치기 어렵습니다.']);
+ if(!hasHot)o.push(['warn','지속 회복 부족 — 장기전에서 마나 부담이 커질 수 있습니다.']);
+ if(hasBig&&!hasHot)o.push(['warn','큰 치유 과다 — 순간 복구는 강하지만 장기전 부담이 커질 수 있습니다.']);
+ if(hasPr)o.push(['ok','광역 회복 있음 — 파티 전체 흔들림을 수습할 수 있습니다.']);
+ if(!o.length)o.push(['ok','구성이 균형 잡혀 있습니다.']);
+ return o.slice(0,3);
+}
+function chapelCatSet(c){CHAPEL_CAT=c;renderChapel();}
 function renderChapel(){
  var eq=LOADOUT_POOL.filter(function(k){return LOADOUT.indexOf(k)>=0;});
- var cnt=LOADOUT.length,warn=LOADOUT.indexOf('dispel')<0;
- var head='<div class="ldHead"><span class="ldCount'+(cnt===6?' ok':'')+'">장착 '+cnt+' / 6</span>'+(warn?'<span class="ldWarn">⚠️ 정화 없음 — 낙인/차단 연계가 어려워집니다</span>':'')+'</div>';
- var slots='<div class="ldSlots">'+[0,1,2,3,4,5].map(function(i){var k=eq[i];return k?'<div class="ldSlot filled">'+SK_ICON[k]+'</div>':'<div class="ldSlot empty">＋</div>';}).join('')+'</div>';
- var list=LOADOUT_POOL.map(function(k){
+ var cnt=LOADOUT.length;
+ var head='<div class="ldHead"><span class="ldCount'+(cnt===6?' ok':'')+'">장착 '+cnt+' / 6</span></div>';
+ var slots='<div class="ldSlots">'+[0,1,2,3,4,5].map(function(i){var k=eq[i];if(!k)return '<div class="ldSlot empty">＋</div>';var sel=(SKILL_CAT[k]===CHAPEL_CAT)?' sel':'';return '<div class="ldSlot filled'+sel+'">'+SK_ICON[k]+'</div>';}).join('')+'</div>';
+ var sum='<div class="ldSum">'+chapelSummary().map(function(s){return '<div class="ldSumLine '+s[0]+'">'+s[1]+'</div>';}).join('')+'</div>';
+ var tabs='<div class="ldCat">'+CHAPEL_CATS.map(function(c){return '<button class="ldCatBtn'+(c===CHAPEL_CAT?' on':'')+'" data-cat="'+c+'">'+c+'</button>';}).join('')+'</div>';
+ var fixed='<div id="chapel-fixed">'+head+slots+sum+tabs+'</div>';
+ var catSk=LOADOUT_POOL.filter(function(k){return SKILL_CAT[k]===CHAPEL_CAT;});
+ var list='<div id="chapel-list">'+catSk.map(function(k){
   var on=LOADOUT.indexOf(k)>=0;
   return '<div class="twSkill ldSel'+(on?' on':'')+'" data-ld="'+k+'"><span class="twSkillE">'+SK_ICON[k]+'</span>'+
-   '<div class="twSkillB"><b>'+ldName(k)+'</b><span class="twSkillC">'+ldCost(k)+'</span><span class="twSkillD">'+LD_DESC[k]+'</span></div>'+
+   '<div class="twSkillB"><b>'+ldName(k)+'</b><span class="twSkillC '+(ldCost(k).indexOf('신성력')>=0?'rHoly':'rMana')+'">'+(ldCost(k).indexOf('신성력')>=0?'✦ ':'💧 ')+ldCost(k)+'</span><span class="twSkillD">'+LD_DESC[k]+'</span></div>'+
    '<span class="ldTick">'+(on?'✓':'')+'</span></div>';
- }).join('');
- var start='<button class="twBtn twBtnGo" id="chapel-start"'+(cnt===6?'':' disabled')+'>▶ 이 구성으로 전투 시작</button>';
- var save='<button class="twBtn" id="chapel-save">🏛️ 저장하고 마을로</button>';
- $('chapel-skills').innerHTML=head+slots+list+start+save;
+ }).join('')+'</div>';
+ $('chapel-skills').innerHTML=fixed+list;
+ var cats=$('chapel-skills').querySelectorAll('.ldCatBtn');
+ for(var c=0;c<cats.length;c++){(function(el){el.addEventListener('click',function(){chapelCatSet(el.dataset.cat);});})(cats[c]);}
  var items=$('chapel-skills').querySelectorAll('.ldSel');
  for(var i=0;i<items.length;i++){(function(el){el.addEventListener('click',function(){loadoutToggle(el.dataset.ld);});})(items[i]);}
- var sb=$('chapel-start');if(sb)sb.addEventListener('click',function(){enterBattle(1);});
- var vb=$('chapel-save');if(vb)vb.addEventListener('click',chapelSaveReturn);
 }
 function renderGuild(){
  $('guild-list').innerHTML=BOSSES.map(function(b){
@@ -1348,6 +1381,7 @@ $('nav-chapel').addEventListener('click',function(){showScreen('chapel');});
 $('nav-guild').addEventListener('click',function(){showScreen('guild');});
 $('back-inn').addEventListener('click',function(){showScreen('village');});
 $('back-chapel').addEventListener('click',function(){showScreen('village');});
+$('chapel-save').addEventListener('click',chapelSaveReturn);
 $('back-guild').addEventListener('click',function(){showScreen('village');});
 $('back-sortie').addEventListener('click',function(){showScreen('guild');});
 $('inn-rest').addEventListener('click',function(){showToast('파티가 숨을 골랐다 — 준비 완료');showScreen('village');});

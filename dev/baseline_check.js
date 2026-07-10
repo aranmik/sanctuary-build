@@ -1,8 +1,7 @@
 'use strict';
 // Sanctuary Build baseline check — run: node dev/baseline_check.js
-// 기준선(EP22 · Sortie Warning Copy Polish 01 — 경고 문장 정리, 어댑터 전용·CORE 무변·줄 수 불변): 117,532 B / 1,920줄 / md5 2630669c87a2b56409dd22558d31d24e
-// CORE 466줄/22,521 B (불변 · 코어 무접촉) · 모르가스 스모크 defeat/51.4/1029(무인자 폴백) · 파쇄자 defeat/48.5/971 · 심연 defeat/61.8/1236
-// 보존 grep 14 · 금지 grep 0 · div 188/188 · section 8/8
+// 기준선(EP23 · Chapel Loadout UI 01 v2 — 성당 UI 개편 + 실기 피드백 4항목, 어댑터/UI 전용·CORE 무변): 120,418 B / 1,954줄 / md5 02a512c5c2eaf5e3ca3f0f4ebf4190e7
+// CORE 466줄/22,521 B (불변 · 코어 무접촉) · 모르가스 스모크 defeat/51.4/1029(무인자 폴백) · 파쇄자 defeat/48.5/971 · 심연 defeat/61.8/1236 · div 194/194(성당 재구성+chapel-foot)
 // (이력: EP20C 106,650/1,756/34addd9c…·CORE 394/19,545 → Iron Crusher 112,359/1,838/8e7ee68a…·CORE 427/20,818 → 본 Thirst · docs/31·32 참조)
 const fs=require('fs');const path=require('path');const crypto=require('crypto');const vm=require('vm');
 const ROOT=path.join(__dirname,'..');
@@ -15,9 +14,9 @@ const lineCount=p=>lines.filter(l=>l.includes(p)).length;      // grep -c 동등
 const occCount=p=>src.split(p).length-1;                        // grep -o 동등(발생 횟수)
 
 // 1. 원본 바이트/줄/md5
-chk('bytes',buf.length,117532);
-chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),1920);
-chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'2630669c87a2b56409dd22558d31d24e');
+chk('bytes',buf.length,120418);
+chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),1954);
+chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'02a512c5c2eaf5e3ca3f0f4ebf4190e7');
 
 // 2. CORE 추출 (awk 동등: START 다음 줄 ~ END 직전 줄)
 {let f=0,core=[];for(const l of lines){if(l.includes('//__CORE_START__')){f=1;continue;}if(l.includes('//__CORE_END__'))f=0;if(f)core.push(l);}
@@ -29,7 +28,7 @@ chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'2630669c87a2b56409
 for(const p of ['Math.random','base64','<img','.png','assets'])chk(`forbidden "${p}"`,lineCount(p),0);
 
 // 4. 태그 균형
-chk('div open/close',`${occCount('<div')}/${occCount('</div>')}`,'188/188');
+chk('div open/close',`${occCount('<div')}/${occCount('</div>')}`,'194/194');
 chk('section open/close',`${occCount('<section')}/${occCount('</section>')}`,'8/8');
 
 // 5. 보존 grep 14종
