@@ -341,7 +341,9 @@ button{font-family:inherit;cursor:pointer}
 .twBtnGo{margin-top:16px}
 .twNote{margin-top:14px;font-size:10.5px;color:var(--ink2);text-align:center;line-height:1.5}
 .twSkill.ldSel{cursor:pointer;transition:border-color .12s,background .12s}
-.twSkill.ldSel.on{border-color:#5ee08a;background:linear-gradient(180deg,#16351f,#0f2417)}
+.twSkill.ldSel.on{border-color:#3f9a54;background:linear-gradient(180deg,#e6f5e8,#d6eed9);box-shadow:inset 3px 0 0 #3f9a54}
+.twSkill.ldSel.on .twSkillB b{color:#1f5b2c}
+.twSkill.ldSel.on .twSkillD{color:#4a3620}
 .ldTick{margin-left:auto;flex:none;align-self:center;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0f2417;background:#5ee08a}
 .twSkill.ldSel:not(.on) .ldTick{background:#2a2247;color:transparent}
 .ldHead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
@@ -357,10 +359,13 @@ button{font-family:inherit;cursor:pointer}
 .ldCat{display:flex;gap:5px;margin-top:10px}
 .ldCatBtn{flex:1;font-size:10.5px;font-weight:800;padding:6px 3px;border-radius:9px;background:#2a2247;color:#c9bdea;border:1px solid #3b2d5e;cursor:pointer}
 .ldCatBtn.on{background:#3a2f5e;color:#fff;border-color:#6a5b93}
-.ldSum{display:flex;flex-direction:column;gap:3px;margin-bottom:2px}
+.ldSum{display:flex;flex-direction:column;gap:3px;margin-bottom:2px;min-height:50px}
 .ldSumLine{font-size:10.5px;font-weight:700;line-height:1.35}
 .ldSumLine.warn{color:#a35a2a}
 .ldSumLine.ok{color:var(--sprout)}
+.twSkillC.rMana{color:#2f6fd0}
+.twSkillC.rHoly{color:#c98f1d}
+#chapel-foot{flex:none;padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
 .twBtn[disabled]{opacity:.45;cursor:not-allowed}
 .twFoot{margin-top:14px;font-size:10px;color:var(--ink2);letter-spacing:.16em}
 .twHero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;padding:20px}
@@ -429,6 +434,7 @@ button{font-family:inherit;cursor:pointer}
    <div id="chapel-skills"></div>
    <div class="twNote">9개 중 6개를 골라 손에 익히세요. 출정은 토벌 게시판에서. (새로고침 시 기본 구성)</div>
   </div>
+  <div id="chapel-foot"><button class="twBtn" id="chapel-save">🏛️ 저장하고 마을로</button></div>
  </div>
 </section>
 <!-- ===== GUILD BOARD ===== -->
@@ -1270,16 +1276,14 @@ function renderChapel(){
  var list='<div id="chapel-list">'+catSk.map(function(k){
   var on=LOADOUT.indexOf(k)>=0;
   return '<div class="twSkill ldSel'+(on?' on':'')+'" data-ld="'+k+'"><span class="twSkillE">'+SK_ICON[k]+'</span>'+
-   '<div class="twSkillB"><b>'+ldName(k)+'</b><span class="twSkillC">'+ldCost(k)+'</span><span class="twSkillD">'+LD_DESC[k]+'</span></div>'+
+   '<div class="twSkillB"><b>'+ldName(k)+'</b><span class="twSkillC '+(ldCost(k).indexOf('신성력')>=0?'rHoly':'rMana')+'">'+(ldCost(k).indexOf('신성력')>=0?'✦ ':'💧 ')+ldCost(k)+'</span><span class="twSkillD">'+LD_DESC[k]+'</span></div>'+
    '<span class="ldTick">'+(on?'✓':'')+'</span></div>';
  }).join('')+'</div>';
- var save='<button class="twBtn" id="chapel-save">🏛️ 저장하고 마을로</button>';
- $('chapel-skills').innerHTML=fixed+list+save;
+ $('chapel-skills').innerHTML=fixed+list;
  var cats=$('chapel-skills').querySelectorAll('.ldCatBtn');
  for(var c=0;c<cats.length;c++){(function(el){el.addEventListener('click',function(){chapelCatSet(el.dataset.cat);});})(cats[c]);}
  var items=$('chapel-skills').querySelectorAll('.ldSel');
  for(var i=0;i<items.length;i++){(function(el){el.addEventListener('click',function(){loadoutToggle(el.dataset.ld);});})(items[i]);}
- var vb=$('chapel-save');if(vb)vb.addEventListener('click',chapelSaveReturn);
 }
 function renderGuild(){
  $('guild-list').innerHTML=BOSSES.map(function(b){
@@ -1377,6 +1381,7 @@ $('nav-chapel').addEventListener('click',function(){showScreen('chapel');});
 $('nav-guild').addEventListener('click',function(){showScreen('guild');});
 $('back-inn').addEventListener('click',function(){showScreen('village');});
 $('back-chapel').addEventListener('click',function(){showScreen('village');});
+$('chapel-save').addEventListener('click',chapelSaveReturn);
 $('back-guild').addEventListener('click',function(){showScreen('village');});
 $('back-sortie').addEventListener('click',function(){showScreen('guild');});
 $('inn-rest').addEventListener('click',function(){showToast('파티가 숨을 골랐다 — 준비 완료');showScreen('village');});
