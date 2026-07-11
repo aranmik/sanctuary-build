@@ -62,6 +62,8 @@
 - Chapel Loadout UI 01 ([38](./38_CHAPEL_LOADOUT_UI.md) · EP23 · p19 · **성당 장착 UX 첫 구현** — 6칸 sticky 고정 · 카테고리 4탭 · 구성 요약 · 전투 시작 버튼 제거 · 어댑터/UI 전용 CORE 무접촉 · 재-baseline 120,418/1,954/`02a512c5…` · 실기 반영 완료)
 - Save v8.6 / Chapel UX Milestone Save 01 (`성소판_세이브_v8.6.md` · EP23 · **2차 마을 UX 첫 성공 세이브 정본** · 커밋 `983e390` 기준 · 1차 데모 v8.5 위에 성당 준비 화면 UX 첫 성공 기준점 · 현행 live 120,418/1,954/`02a512c5…`·CORE 466/22,521 반영 · v8.5 역사 스냅샷 `2630669c…` 보존[섞지 말 것] · 부록 C 계보 v8.2~v8.6 · 나라님 실기 성공 기록 · 금지선 없었음 · `dev/save_v86_check.js` 17/17)
 - Battle Visual Identity Contract 01 ([39](./39_BATTLE_VISUAL_IDENTITY_CONTRACT.md) · EP24 · 문서-only · **전투 시각 문법 기준 문서** — 텍스트 예고 유지[테트리스 다음 블록]·행동선=보조 힌트[정답 강조 ⛔]·보스 3실루엣[꼬는/부수는/마시는]·동료 미니 피규어·브릭 토이 조립형·행동선 5종[압박/연결/누수/보호/수습]·정보 과잉 방지 · 첫 구현 후보 Iron Crusher Action Line Proto 01[후속: Morgas Connection Line / Thirst Abyss Drain Line] · 착공 대기 · `battle_visual_identity_contract_check` 19/19)
+- Iron Crusher Action Line Proto 01 (⏸️ **HOLD** · EP24 · 실험 구현 기능 검증 완료 후 커밋 보류 — 기능 실패 아님·보는 맛 기준 상향·산출물 미보존 · 검증 지식은 [41 §L](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md) 기록 · Iron Crusher Smash Line Rework 02가 승계 예정)
+- Battle Figure Kit Import Contract 01 ([41](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md) · EP24 · 문서-only · **성소판 전용 미니피규어 정장/규격 계약** — "선을 먼저 그리지 않는다. 피규어가 전장에 서게 만든다" · 옆 프로젝트 규칙만 흡수[3층 transform/part 조립/6파츠/4색/앵커 선]·코드 복붙 ⛔ · `sb-` 네임스페이스 · 4동료+3보스 피규어 방향 · 행동선/임펄스 6종 · 다음=Battle Figure Kit Preview 01→Figure Rework→Smash Line Rework 02 · `battle_figure_kit_import_contract_check` 20/20)
 
 ## 3. 1차 데모 정의 (27 정본)
 
