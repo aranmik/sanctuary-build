@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성소판 · Battle Figure Kit Preview 01 — 전사 &amp; 강철의 파쇄자</title>
+<style>
+/* ============================================================
+   Battle Figure Kit Preview 01 (docs/42 · 계약 docs/41)
+   전투와 분리된 독립 프리뷰 — 전사 + 강철의 파쇄자 2종만.
+   행동선 구현 0 · 전투 런타임 연동 0 · 외부 에셋 0.
+   3층 transform: .sb-unit(배치) / .sb-react(자세) / .sb-fig(호흡)
+   (+ .sb-fit = 스케일·좌우 반전 보정층)
+   ============================================================ */
+:root{
+  /* 공용 무대 */
+  --sb-night:#131120; --sb-night2:#1c1830; --sb-ground:#242038; --sb-ink:#e8e2f2;
+  --sb-panel:#1e1a30; --sb-panel-edge:#3a3358;
+  /* 전사 4색+ */
+  --sb-w-main:#6c8fd0; --sb-w-deep:#31497a; --sb-w-edge:#1f2a45;
+  --sb-w-metal:#cdd8ec; --sb-w-gold:#e5b45f; --sb-w-face:#ffd9b8; --sb-w-glow:#7da4ff;
+  /* 파쇄자 4색+ */
+  --sb-ic-main:#5c6374; --sb-ic-deep:#2b303c; --sb-ic-edge:#14161e;
+  --sb-ic-metal:#a7b0c2; --sb-ic-glow:#ff8c3a; --sb-ic-ember:#ffb45e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--sb-night);color:var(--sb-ink);
+  font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+.sb-page{max-width:520px;margin:0 auto;padding:14px 12px 40px}
+h1{font-size:17px;letter-spacing:.5px;text-align:center;margin:6px 0 2px}
+h1 small{display:block;font-size:11px;color:#9a8fc0;font-weight:400;margin-top:3px}
+h2{font-size:13px;color:#b9aee0;margin:22px 2px 8px;border-left:3px solid var(--sb-w-gold);padding-left:8px}
+.sb-note{font-size:10.5px;color:#7d739f;margin:4px 2px;line-height:1.5}
+
+/* ---------- A. 전장 무대 ---------- */
+.sb-figure-stage{position:relative;height:248px;border-radius:14px;overflow:hidden;
+  background:
+    radial-gradient(120% 90% at 50% 118%, #34305200 30%, #0d0b16 100%),
+    radial-gradient(60% 46% at 30% 96%, rgba(125,164,255,.10), transparent 70%),
+    radial-gradient(70% 50% at 72% 98%, rgba(255,140,58,.12), transparent 70%),
+    linear-gradient(180deg, var(--sb-night2) 0%, var(--sb-night2) 55%, var(--sb-ground) 100%);
+  border:1px solid var(--sb-panel-edge);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.5);}
+.sb-figure-stage::before{ /* 지평선 */
+  content:"";position:absolute;left:0;right:0;bottom:58px;height:2px;
+  background:linear-gradient(90deg,transparent,#4a4370 30%,#4a4370 70%,transparent);opacity:.5}
+.sb-figure-stage::after{ /* 무대 먼지빛 */
+  content:"";position:absolute;left:8%;right:8%;bottom:10px;height:44px;border-radius:50%;
+  background:radial-gradient(50% 60% at 50% 50%, rgba(122,104,180,.14), transparent 75%)}
+.sb-stage-label{position:absolute;top:8px;left:12px;font-size:10px;color:#6f6595;letter-spacing:1px}
+
+/* ---------- 3층 transform 계층 ---------- */
+.sb-unit{position:absolute;bottom:0;transform-origin:50% 100%}   /* 1층: 전장 배치/원근 */
+.sb-react{transform-origin:50% 100%;transition:transform .25s ease} /* 2층: 자세/반응 */
+.sb-fit{transform-origin:50% 100%}                                /* 보정층: 스케일·좌우 반전 */
+.sb-fig{position:relative;transform-origin:50% 100%;animation:sbBreathe 3.4s ease-in-out infinite} /* 3층: idle 호흡 */
+.sb-iron-crusher .sb-fig{animation-duration:4.6s;animation-name:sbBreatheHeavy}
+.sb-still .sb-fig{animation:none}
+@keyframes sbBreathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1.6px) scaleY(1.012)}}
+@keyframes sbBreatheHeavy{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1px) scaleY(1.006)}}
+.sb-flip .sb-fit{transform:scaleX(-1)}
+.sb-part{position:absolute;display:block}
+.sb-anchor{position:absolute;width:0;height:0} /* 미래 행동선 앵커 — 시각 출력 없음 */
+
+/* ============================================================
+   전사 (sb-warrior) — 작고 단단한 보호자 · 기본 우향(보스를 본다)
+   ============================================================ */
+.sb-warrior .sb-fig{width:104px;height:126px}
+/* 그림자/오라 */
+.sb-warrior .sb-shadow{left:50%;bottom:0;width:62px;height:13px;transform:translateX(-50%);
+  border-radius:50%;background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.5), transparent 72%)}
+.sb-warrior .sb-aura{left:50%;bottom:1px;width:74px;height:22px;transform:translateX(-50%);
+  border-radius:50%;background:radial-gradient(50% 50% at 50% 50%, rgba(125,164,255,.30), transparent 70%)}
+/* 검(sb-role) — 등 뒤로 비껴 든 한손검 */
+.sb-warrior .sb-w-sword{left:24px;bottom:44px;width:6px;height:34px;border-radius:3px 3px 2px 2px;
+  background:linear-gradient(90deg,#f0f5ff,var(--sb-w-metal) 55%,#8fa2c4);
+  box-shadow:0 0 0 1.5px var(--sb-w-edge);transform:rotate(-26deg)}
+.sb-warrior .sb-w-sword::before{ /* 코등이 */
+  content:"";position:absolute;left:-5px;bottom:-3px;width:16px;height:5px;border-radius:3px;
+  background:linear-gradient(180deg,var(--sb-w-gold),#b8863c);box-shadow:0 0 0 1.5px var(--sb-w-edge)}
+.sb-warrior .sb-w-sword::after{ /* 손잡이 */
+  content:"";position:absolute;left:1px;bottom:-12px;width:4px;height:10px;border-radius:2px;
+  background:#7a5a34;box-shadow:0 0 0 1.5px var(--sb-w-edge)}
+/* 몸통(sb-body) — 단단한 흉갑 + 뭉툭한 발 */
+.sb-warrior .sb-w-body{left:50%;bottom:13px;width:42px;height:37px;transform:translateX(-50%);
+  border-radius:12px 12px 9px 9px;
+  background:linear-gradient(160deg,#8aa8dd 0%,var(--sb-w-main) 42%,var(--sb-w-deep) 100%);
+  box-shadow:0 0 0 2px var(--sb-w-edge), inset 0 3px 0 rgba(255,255,255,.28), inset 0 -7px 0 rgba(10,16,40,.30)}
+.sb-warrior .sb-w-body::before{ /* 발 2개 */
+  content:"";position:absolute;left:5px;bottom:-11px;width:13px;height:11px;border-radius:5px 5px 4px 4px;
+  background:linear-gradient(180deg,#3d5382,#28395c);
+  box-shadow:0 0 0 2px var(--sb-w-edge), 19px 0 0 -0px #33486f, 19px 0 0 2px var(--sb-w-edge)}
+.sb-warrior .sb-w-body::after{ /* 허리띠+버클 */
+  content:"";position:absolute;left:3px;right:3px;bottom:7px;height:6px;border-radius:3px;
+  background:linear-gradient(180deg,#4a3a26,#2e2417);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.4), 0 0 0 0 transparent;
+  background-image:radial-gradient(circle at 50% 50%, var(--sb-w-gold) 2.4px, transparent 3px),
+                   linear-gradient(180deg,#4a3a26,#2e2417)}
+/* 어깨판(sb-extra) — 왼어깨(등쪽) */
+.sb-warrior .sb-w-pauldron{left:22px;bottom:42px;width:17px;height:12px;border-radius:8px 8px 5px 5px;
+  background:linear-gradient(160deg,var(--sb-w-metal),#7e93b8 70%);
+  box-shadow:0 0 0 2px var(--sb-w-edge), inset 0 2px 0 rgba(255,255,255,.4)}
+/* 머리(sb-head) — 투구+둥근 얼굴+점눈 */
+.sb-warrior .sb-w-head{left:50%;bottom:44px;width:38px;height:33px;transform:translateX(-50%);
+  border-radius:48% 48% 44% 44%;
+  background:linear-gradient(165deg,#9db8e6 0%,var(--sb-w-main) 45%,var(--sb-w-deep) 100%);
+  box-shadow:0 0 0 2px var(--sb-w-edge), inset 0 3px 1px rgba(255,255,255,.32)}
+.sb-warrior .sb-w-head::before{ /* 투구 볏 */
+  content:"";position:absolute;left:50%;top:-6px;width:10px;height:9px;transform:translateX(-50%);
+  border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--sb-w-gold),#b8863c);
+  box-shadow:0 0 0 2px var(--sb-w-edge)}
+.sb-warrior .sb-w-head::after{ /* 얼굴창: 살구빛+점눈+볼터치 */
+  content:"";position:absolute;left:50%;bottom:3px;width:24px;height:14px;transform:translateX(-50%);
+  border-radius:9px;background:
+    radial-gradient(circle at 32% 42%, #33384a 2.1px, transparent 2.8px),
+    radial-gradient(circle at 68% 42%, #33384a 2.1px, transparent 2.8px),
+    radial-gradient(circle at 17% 74%, rgba(255,138,128,.55) 2.4px, transparent 3.4px),
+    radial-gradient(circle at 83% 74%, rgba(255,138,128,.55) 2.4px, transparent 3.4px),
+    linear-gradient(180deg,#ffe4c8,var(--sb-w-face));
+  box-shadow:inset 0 0 0 1.5px rgba(31,42,69,.55)}
+/* 방패(sb-hand) — 전사의 정체성 · 전방(오른쪽) */
+.sb-warrior .sb-w-shield{left:63px;bottom:11px;width:30px;height:38px;
+  border-radius:46% 46% 50% 50% / 34% 34% 62% 62%;
+  background:linear-gradient(160deg,#e6edf8 0%,var(--sb-w-metal) 35%,#8fa2c4 75%,#6c7fa2 100%);
+  box-shadow:0 0 0 2px var(--sb-w-edge), inset 0 0 0 3.5px var(--sb-w-gold), inset 0 -5px 8px rgba(20,30,60,.28);
+  z-index:4}
+.sb-warrior .sb-w-shield::before{ /* 문장: 새싹 원 */
+  content:"";position:absolute;left:50%;top:46%;width:11px;height:11px;transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(circle at 40% 35%, #9fd6a8, #4e9860 70%);
+  box-shadow:0 0 0 1.5px var(--sb-w-edge)}
+.sb-warrior .sb-w-shield::after{ /* 상단 리벳 2개 */
+  content:"";position:absolute;left:9px;top:6px;width:3px;height:3px;border-radius:50%;background:var(--sb-w-gold);
+  box-shadow:9px 0 0 var(--sb-w-gold)}
+/* 앵커(시각 없음): 방패 중심/가슴 */
+.sb-warrior .sb-anchor[data-anchor="hand"]{left:78px;bottom:30px}
+.sb-warrior .sb-anchor[data-anchor="core"]{left:52px;bottom:32px}
+
+/* 전사 포즈 */
+.sb-warrior[data-pose="guard"] .sb-react{transform:translateX(4px)}
+.sb-warrior[data-pose="guard"] .sb-w-shield{transform:translateX(7px) translateY(-2px) scale(1.12)}
+.sb-warrior[data-pose="guard"] .sb-w-head{transform:translateX(calc(-50% + 3px)) rotate(3deg)}
+.sb-warrior[data-pose="guard"] .sb-w-sword{transform:rotate(-44deg) translateY(3px)}
+.sb-warrior[data-pose="brace"] .sb-react{transform:rotate(-2.5deg) translateY(1px)}
+.sb-warrior[data-pose="brace"] .sb-w-shield{transform:translateY(-7px) rotate(-8deg)}
+.sb-warrior[data-pose="brace"] .sb-w-head{transform:translateX(calc(-50% + 1px)) translateY(1.5px)}
+.sb-part, .sb-warrior .sb-w-shield, .sb-warrior .sb-w-head, .sb-warrior .sb-w-sword{transition:transform .25s ease}
+
+/* ============================================================
+   강철의 파쇄자 (sb-iron-crusher) — 크고 무거운 장난감 레이드 보스
+   ============================================================ */
+.sb-iron-crusher .sb-fig{width:190px;height:212px}
+/* 그림자 — 무거운 압력 */
+.sb-iron-crusher .sb-shadow{left:50%;bottom:0;width:138px;height:22px;transform:translateX(-50%);
+  border-radius:50%;background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.62), transparent 74%)}
+.sb-iron-crusher .sb-aura{left:50%;bottom:2px;width:170px;height:40px;transform:translateX(-50%);
+  border-radius:50%;background:radial-gradient(50% 50% at 50% 50%, rgba(255,140,58,.16), transparent 68%)}
+/* 몸통 — 큰 금속 블록 + 리벳 + 거대한 발 */
+.sb-iron-crusher .sb-ic-body{left:50%;bottom:18px;width:96px;height:72px;transform:translateX(-50%);
+  border-radius:18px 18px 12px 12px;
+  background:
+    radial-gradient(circle at 12px 12px, var(--sb-ic-metal) 2.6px, transparent 3.4px),
+    radial-gradient(circle at 84px 12px, var(--sb-ic-metal) 2.6px, transparent 3.4px),
+    radial-gradient(circle at 12px 58px, var(--sb-ic-metal) 2.6px, transparent 3.4px),
+    radial-gradient(circle at 84px 58px, var(--sb-ic-metal) 2.6px, transparent 3.4px),
+    linear-gradient(160deg,#7b8296 0%,var(--sb-ic-main) 38%,var(--sb-ic-deep) 100%);
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), inset 0 4px 0 rgba(255,255,255,.16), inset 0 -12px 0 rgba(5,8,16,.35)}
+.sb-iron-crusher .sb-ic-body::before{ /* 발 2개 — 육중 */
+  content:"";position:absolute;left:10px;bottom:-15px;width:28px;height:16px;border-radius:7px 7px 5px 5px;
+  background:linear-gradient(180deg,#3a404e,var(--sb-ic-deep));
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), 48px 0 0 0 #353b48, 48px 0 0 2.5px var(--sb-ic-edge)}
+.sb-iron-crusher .sb-ic-body::after{ /* 허리 장갑 스커트 */
+  content:"";position:absolute;left:6px;right:6px;bottom:4px;height:10px;border-radius:5px;
+  background:repeating-linear-gradient(90deg,#3d4350 0 14px,#2b303c 14px 16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 0 rgba(0,0,0,.4)}
+/* 용광로 코어(sb-role) — 가슴 발광 */
+.sb-iron-crusher .sb-ic-core{left:50%;bottom:56px;width:22px;height:22px;transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 42% 36%, #ffe2b0 0%, var(--sb-ic-ember) 34%, #ff7a1a 62%, #7a3410 100%);
+  box-shadow:0 0 0 3px #1c2029, 0 0 0 4.5px #3d4350, 0 0 14px 2px rgba(255,140,58,.55);
+  animation:sbCore 2.8s ease-in-out infinite}
+@keyframes sbCore{0%,100%{box-shadow:0 0 0 3px #1c2029,0 0 0 4.5px #3d4350,0 0 12px 1px rgba(255,140,58,.45)}
+  50%{box-shadow:0 0 0 3px #1c2029,0 0 0 4.5px #3d4350,0 0 18px 4px rgba(255,140,58,.7)}}
+.sb-still .sb-ic-core{animation:none}
+/* 어깨 장갑(sb-extra) — 좌우 대형 파울드론 */
+.sb-iron-crusher .sb-ic-pauldrons{left:50%;bottom:77px;width:0;height:0;transform:translateX(-50%)}
+.sb-iron-crusher .sb-ic-pauldrons::before{
+  content:"";position:absolute;left:-60px;top:0;width:34px;height:22px;border-radius:12px 12px 7px 7px;
+  background:linear-gradient(160deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep));
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), inset 0 3px 0 rgba(255,255,255,.2),
+    inset 0 -4px 0 rgba(5,8,16,.3);
+  background-image:radial-gradient(circle at 50% 40%, var(--sb-ic-metal) 2.2px, transparent 3px),
+    linear-gradient(160deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep))}
+.sb-iron-crusher .sb-ic-pauldrons::after{
+  content:"";position:absolute;left:26px;top:0;width:34px;height:22px;border-radius:12px 12px 7px 7px;
+  background:linear-gradient(200deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep));
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), inset 0 3px 0 rgba(255,255,255,.2),
+    inset 0 -4px 0 rgba(5,8,16,.3);
+  background-image:radial-gradient(circle at 50% 40%, var(--sb-ic-metal) 2.2px, transparent 3px),
+    linear-gradient(200deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep))}
+/* 머리(sb-head) — 철투구 + T-바이저 속 주황 눈 */
+.sb-iron-crusher .sb-ic-head{left:50%;bottom:86px;width:56px;height:42px;transform:translateX(-50%);
+  border-radius:14px 14px 10px 10px;
+  background:linear-gradient(165deg,#868da0 0%,var(--sb-ic-main) 42%,var(--sb-ic-deep) 100%);
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), inset 0 3px 0 rgba(255,255,255,.2)}
+.sb-iron-crusher .sb-ic-head::before{ /* 투구 능선 */
+  content:"";position:absolute;left:50%;top:-7px;width:14px;height:10px;transform:translateX(-50%);
+  border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#9aa3b5,#4a505e);
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge)}
+.sb-iron-crusher .sb-ic-head::after{ /* 바이저 슬릿 + 두 눈 발광 */
+  content:"";position:absolute;left:50%;bottom:10px;width:38px;height:9px;transform:translateX(-50%);
+  border-radius:5px;background:
+    radial-gradient(circle at 30% 50%, var(--sb-ic-ember) 2.6px, rgba(255,140,58,.5) 3.6px, transparent 5px),
+    radial-gradient(circle at 70% 50%, var(--sb-ic-ember) 2.6px, rgba(255,140,58,.5) 3.6px, transparent 5px),
+    linear-gradient(180deg,#0c0e14,#181c26);
+  box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.6), 0 0 8px rgba(255,140,58,.25)}
+/* 대형 망치(sb-hand) — 정체성 무기 · 지면에 세워 든 파쇄 메이스 */
+.sb-iron-crusher .sb-ic-hammer{left:144px;bottom:14px;width:11px;height:96px;
+  border-radius:5px;transform-origin:50% 96%;
+  background:linear-gradient(90deg,#4a3a2c,#6b543c 45%,#33261b);
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge);z-index:4;transition:transform .3s ease}
+.sb-iron-crusher .sb-ic-hammer::before{ /* 망치 머리 — 거대 블록 */
+  content:"";position:absolute;left:-24px;top:-12px;width:58px;height:40px;border-radius:10px;
+  background:
+    radial-gradient(circle at 9px 9px, var(--sb-ic-metal) 2.4px, transparent 3.2px),
+    radial-gradient(circle at 49px 9px, var(--sb-ic-metal) 2.4px, transparent 3.2px),
+    radial-gradient(circle at 9px 31px, var(--sb-ic-metal) 2.4px, transparent 3.2px),
+    radial-gradient(circle at 49px 31px, var(--sb-ic-metal) 2.4px, transparent 3.2px),
+    linear-gradient(160deg,#8a92a6 0%,var(--sb-ic-main) 40%,#20242e 100%);
+  box-shadow:0 0 0 2.5px var(--sb-ic-edge), inset 0 3px 0 rgba(255,255,255,.2), inset 0 -6px 0 rgba(5,8,16,.4)}
+.sb-iron-crusher .sb-ic-hammer::after{ /* 손잡이 금속 밴드 */
+  content:"";position:absolute;left:-2px;top:44px;width:15px;height:7px;border-radius:3px;
+  background:linear-gradient(180deg,var(--sb-ic-metal),#5a6172);
+  box-shadow:0 0 0 2px var(--sb-ic-edge)}
+/* 앵커: 망치 머리/코어 */
+.sb-iron-crusher .sb-anchor[data-anchor="hand"]{left:150px;bottom:100px}
+.sb-iron-crusher .sb-anchor[data-anchor="core"]{left:95px;bottom:60px}
+
+/* 파쇄자 포즈 */
+.sb-iron-crusher[data-pose="windup"] .sb-react{transform:rotate(-3deg) translateY(-2px)}
+.sb-iron-crusher[data-pose="windup"] .sb-ic-hammer{transform:rotate(-16deg) translate(2px,-18px)}
+.sb-iron-crusher[data-pose="windup"] .sb-ic-head{transform:translateX(calc(-50% - 3px)) rotate(-4deg)}
+.sb-iron-crusher .sb-ic-head{transition:transform .3s ease}
+
+/* ---------- 무대 배치 (위계: 파쇄자 ≫ 전사) ---------- */
+.sb-figure-stage .sb-warrior{left:8%;bottom:24px;transform:scale(.92)}
+.sb-figure-stage .sb-iron-crusher{right:5%;bottom:22px;transform:scale(1.0)}
+
+/* ---------- B. 개별 확인 구역 ---------- */
+.sb-zoom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sb-zoom-card{position:relative;height:300px;border-radius:14px;overflow:hidden;
+  background:linear-gradient(180deg,var(--sb-panel) 0%,#171326 100%);
+  border:1px solid var(--sb-panel-edge)}
+.sb-zoom-card .sb-pedestal{position:absolute;left:50%;bottom:16px;width:120px;height:26px;
+  transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 42%, #37315a, #221d3a 75%);
+  box-shadow:inset 0 3px 6px rgba(0,0,0,.5), 0 2px 0 #443c6e}
+.sb-zoom-card .sb-unit{left:50%;bottom:30px}
+.sb-zoom-card .sb-warrior{transform:translateX(-50%) scale(1.62)}
+.sb-zoom-card .sb-iron-crusher{transform:translateX(-50%) scale(1.06)}
+.sb-zoom-name{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:12px;
+  color:#cfc4ee;letter-spacing:.5px}
+.sb-zoom-name small{display:block;font-size:9.5px;color:#7d739f;margin-top:2px}
+
+/* ---------- C. 포즈/보기 버튼 ---------- */
+.sb-controls{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.sb-btn{font-size:11px;padding:6px 10px;border-radius:8px;border:1px solid var(--sb-panel-edge);
+  background:#251f3e;color:#cfc4ee;cursor:pointer;font-family:inherit}
+.sb-btn:active{transform:translateY(1px)}
+.sb-btn.sb-on{background:#3b3161;border-color:#5d519a;color:#fff}
+.sb-foot{margin-top:22px;font-size:10px;color:#615884;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="sb-page">
+ <h1>⚒️ Battle Figure Kit Preview 01
+  <small>성소판 전용 미니피규어 정장 확인 — 전사 &amp; 강철의 파쇄자 (docs/41 계약 · docs/42)</small>
+ </h1>
+
+ <h2>A. 전장 — 마주 선 두 피규어</h2>
+ <div class="sb-figure-stage" id="sbStage">
+  <span class="sb-stage-label">STAGE · 성소판 전장 거리감</span>
+
+  <div class="sb-unit sb-ally sb-warrior" id="sbWar" data-actor="war" data-pose="">
+   <div class="sb-react"><div class="sb-fit"><div class="sb-fig">
+    <span class="sb-part sb-shadow"></span>
+    <span class="sb-part sb-aura"></span>
+    <span class="sb-part sb-role sb-w-sword"></span>
+    <span class="sb-part sb-body sb-w-body"></span>
+    <span class="sb-part sb-extra sb-w-pauldron"></span>
+    <span class="sb-part sb-head sb-w-head"></span>
+    <span class="sb-part sb-hand sb-w-shield"></span>
+    <span class="sb-anchor" data-anchor="hand"></span>
+    <span class="sb-anchor" data-anchor="core"></span>
+   </div></div></div>
+  </div>
+
+  <div class="sb-unit sb-foe sb-iron-crusher sb-flip" id="sbIron" data-actor="shell_iron" data-pose="">
+   <div class="sb-react"><div class="sb-fit"><div class="sb-fig">
+    <span class="sb-part sb-shadow"></span>
+    <span class="sb-part sb-aura"></span>
+    <span class="sb-part sb-body sb-ic-body"></span>
+    <span class="sb-part sb-role sb-ic-core"></span>
+    <span class="sb-part sb-extra sb-ic-pauldrons"></span>
+    <span class="sb-part sb-head sb-ic-head"></span>
+    <span class="sb-part sb-hand sb-ic-hammer"></span>
+    <span class="sb-anchor" data-anchor="hand"></span>
+    <span class="sb-anchor" data-anchor="core"></span>
+   </div></div></div>
+  </div>
+ </div>
+ <p class="sb-note">위계 확인: 파쇄자는 전사의 약 1.8배 · 무기/그림자/오라의 무게가 다르게 읽혀야 정상. 행동선은 이 단계에서 없음(계약: 피규어 먼저).</p>
+
+ <h2>B. 개별 피규어 확인</h2>
+ <div class="sb-zoom-grid">
+  <div class="sb-zoom-card">
+   <div class="sb-zoom-name">🛡️ 전사<small>작고 단단한 보호자 · 방패=정체성</small></div>
+   <div class="sb-pedestal"></div>
+   <div class="sb-unit sb-ally sb-warrior" id="sbWarZoom" data-pose="">
+    <div class="sb-react"><div class="sb-fit"><div class="sb-fig">
+     <span class="sb-part sb-shadow"></span>
+     <span class="sb-part sb-aura"></span>
+     <span class="sb-part sb-role sb-w-sword"></span>
+     <span class="sb-part sb-body sb-w-body"></span>
+     <span class="sb-part sb-extra sb-w-pauldron"></span>
+     <span class="sb-part sb-head sb-w-head"></span>
+     <span class="sb-part sb-hand sb-w-shield"></span>
+    </div></div></div>
+   </div>
+  </div>
+  <div class="sb-zoom-card">
+   <div class="sb-zoom-name">🔨 강철의 파쇄자<small>둔중한 장난감 레이드 보스 · 망치=정체성</small></div>
+   <div class="sb-pedestal"></div>
+   <div class="sb-unit sb-foe sb-iron-crusher" id="sbIronZoom" data-pose="">
+    <div class="sb-react"><div class="sb-fit"><div class="sb-fig">
+     <span class="sb-part sb-shadow"></span>
+     <span class="sb-part sb-aura"></span>
+     <span class="sb-part sb-body sb-ic-body"></span>
+     <span class="sb-part sb-role sb-ic-core"></span>
+     <span class="sb-part sb-extra sb-ic-pauldrons"></span>
+     <span class="sb-part sb-head sb-ic-head"></span>
+     <span class="sb-part sb-hand sb-ic-hammer"></span>
+    </div></div></div>
+   </div>
+  </div>
+ </div>
+
+ <h2>C. 자세 확인 (정적 포즈 — 애니 실험 아님)</h2>
+ <div class="sb-controls" id="sbWarCtl">
+  <button class="sb-btn sb-on" data-target="war" data-pose="">전사: 기본</button>
+  <button class="sb-btn" data-target="war" data-pose="guard">방패 앞세움</button>
+  <button class="sb-btn" data-target="war" data-pose="brace">피격 대비</button>
+ </div>
+ <div class="sb-controls" id="sbIronCtl">
+  <button class="sb-btn sb-on" data-target="iron" data-pose="">파쇄자: 기본</button>
+  <button class="sb-btn" data-target="iron" data-pose="windup">강타 준비</button>
+ </div>
+ <div class="sb-controls">
+  <button class="sb-btn" id="sbFlipBtn">↔ 좌우 반전(무대 파쇄자)</button>
+  <button class="sb-btn" id="sbStillBtn">⏸ 숨쉬기 정지</button>
+ </div>
+
+ <p class="sb-foot">Battle Figure Kit Preview 01 · 전투 런타임/행동선/수치 연동 없음 · 외부 에셋 0<br>
+ 3층 transform: sb-unit(배치) / sb-react(자세) / sb-fig(호흡) + sb-fit(반전·스케일)</p>
+</div>
+
+<script>
+/* 프리뷰 보조 스크립트 — 포즈 클래스 토글만. 전투/행동선/난수 없음. */
+(function(){
+ 'use strict';
+ var map={war:['sbWar','sbWarZoom'],iron:['sbIron','sbIronZoom']};
+ function setPose(t,p,btn){
+  map[t].forEach(function(id){var e=document.getElementById(id);if(e)e.setAttribute('data-pose',p);});
+  var ctl=document.getElementById(t==='war'?'sbWarCtl':'sbIronCtl');
+  ctl.querySelectorAll('.sb-btn').forEach(function(b){b.classList.toggle('sb-on',b===btn);});
+ }
+ document.querySelectorAll('[data-target]').forEach(function(b){
+  b.addEventListener('click',function(){setPose(b.getAttribute('data-target'),b.getAttribute('data-pose'),b);});
+ });
+ document.getElementById('sbFlipBtn').addEventListener('click',function(){
+  document.getElementById('sbIron').classList.toggle('sb-flip');
+ });
+ document.getElementById('sbStillBtn').addEventListener('click',function(){
+  var on=document.body.classList.toggle('sb-still');
+  this.textContent=on?'▶ 숨쉬기 재생':'⏸ 숨쉬기 정지';
+ });
+ /* 검증용 해시 프리셋(#war=guard&iron=windup&still=1) — 스크린샷 확인 보조 · 전투 무관 */
+ var h=location.hash.replace('#','');
+ if(h){h.split('&').forEach(function(kv){var p=kv.split('=');
+  if(p[0]==='war'||p[0]==='iron'){map[p[0]].forEach(function(id){var e=document.getElementById(id);if(e)e.setAttribute('data-pose',p[1]||'');});}
+  if(p[0]==='still'&&p[1]==='1')document.body.classList.add('sb-still');});}
+})();
+</script>
+</body>
+</html>
