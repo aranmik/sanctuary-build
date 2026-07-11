@@ -172,7 +172,7 @@
 ## J. 첫 구현 순서 제안 (🔷 전부 착공 대기 · 본 카드 구현 ⛔)
 
 1. **`Battle Figure Kit Preview 01`** — 전투와 분리된 미니피규어 프리뷰(dev preview 또는 문서). **전사 + 파쇄자만 먼저.** 수치/전투 무관. "귀엽고 예쁜가"를 가장 싸게 확인.
-2. **`Iron Crusher Figure Rework 01`** — 파쇄자/전사 피규어를 전투 화면에 제한 적용. **행동선 없이 피규어만** 먼저 확인.
+2. **`Iron Crusher Figure Rework 01`** — 파쇄자/전사 피규어를 전투 화면에 제한 적용. **행동선 없이 피규어만** 먼저 확인. ✅ **구현됨** → [44](./44_IRON_CRUSHER_FIGURE_REWORK_01.md)(p21·shell_iron 전투에만·CORE byte-identical·스모크 불변·모르가스/심연 회귀 0·스테이지 실측 338px·재-baseline 134,911/2,039/`b1e92536`·실기 대기).
 3. **`Iron Crusher Smash Line Rework 02`** — 피규어 anchor 기반 강타선 + 보호막에 걸리는 연출. ⏸️HOLD된 압박선 실험(§L)의 검증 지식(상태 4단·시전 핸드오프·80% 방패층)을 여기서 승계하되, **그대로 커밋하지 않는다**.
 4. **`Morgas Connection Line Proto 01`** — 낙인/차단선.
 5. **`Thirst Abyss Drain Line Proto 01`** — 갈증/마나 누수선.

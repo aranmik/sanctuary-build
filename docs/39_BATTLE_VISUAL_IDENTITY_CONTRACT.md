@@ -233,7 +233,7 @@
 
 **단, 이번 문서에서는 어느 것도 구현하지 않는다** — 본 카드는 계약이다.
 
-> **진행 (EP24)**: `Iron Crusher Action Line Proto 01`은 실험 구현으로 기능 검증(압박선 4상태·시전 핸드오프·방패층 걸림·스모크 무영향)까지 마쳤으나 **⏸️HOLD(커밋 보류·산출물 미보존)** — 기능 실패가 아니라 보는 맛 기준 상향 때문([41 §L](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md)). 피규어 정장 계약([41](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md))이 먼저 서고, 다음 구현은 **Battle Figure Kit Preview 01**(피규어 먼저 · 41 §J 순서)부터.
+> **진행 (EP24)**: `Iron Crusher Action Line Proto 01`은 실험 구현으로 기능 검증(압박선 4상태·시전 핸드오프·방패층 걸림·스모크 무영향)까지 마쳤으나 **⏸️HOLD(커밋 보류·산출물 미보존)** — 기능 실패가 아니라 보는 맛 기준 상향 때문([41 §L](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md)). 피규어 정장 계약([41](./41_BATTLE_FIGURE_KIT_IMPORT_CONTRACT.md))이 먼저 서고, 다음 구현은 **Battle Figure Kit Preview 01**(피규어 먼저 · 41 §J 순서)부터. → **진행: Preview 01([42](./42_BATTLE_FIGURE_KIT_PREVIEW_01.md)·전사+파쇄자 조형)·Pose Pack 01([43](./43_BATTLE_FIGURE_POSE_PACK_01.md)·포즈 5+5) 확정 → Iron Crusher Figure Rework 01([44](./44_IRON_CRUSHER_FIGURE_REWORK_01.md)·실전투 이식·행동선 여전히 0) 구현. 선(§G)은 그 다음 Smash Line Rework 02.**
 
 ## J. 기존 문서와의 연결
 

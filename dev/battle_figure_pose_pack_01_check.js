@@ -95,9 +95,9 @@ chk('c14 전투 연동 0(Math.random/localStorage/__seedHealer/createGame 부재
     .every(t => pv.indexOf(t) < 0), '');
 
 // 15. index.html 기준선 유지
-chk('c15 index.html 무변경(120,418 B · md5 02a512c5…)',
-  buf.length === 120418 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '02a512c5c2eaf5e3ca3f0f4ebf4190e7', '');
+chk('c15 index.html 무변경(135,458 B · md5 b1366130…)',
+  buf.length === 135458 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
 
 // 16. CORE 기준선 유지 (실측)
 {

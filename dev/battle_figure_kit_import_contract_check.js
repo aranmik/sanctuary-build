@@ -92,8 +92,8 @@ chk('c16 금지 목록(.part/.body/.bt/.sig-av·render.js·좌표계)',
   hasAll(['.sig-av', '.monster', 'render.js', '390×680', '좌표계']), '');
 
 // 17. index.html 무변경 (v8.6 정본 md5 · CSS/JS 포함 단일 파일)
-chk('c17 index.html 무변경(md5 02a512c5… · CSS/JS 무변 포함)',
-  crypto.createHash('md5').update(buf).digest('hex') === '02a512c5c2eaf5e3ca3f0f4ebf4190e7', '');
+chk('c17 index.html 무변경(md5 b1366130… · CSS/JS 무변 포함)',
+  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
 
 // 18. CORE 숫자 유지 (실측)
 {
@@ -104,9 +104,9 @@ chk('c17 index.html 무변경(md5 02a512c5… · CSS/JS 무변 포함)',
   chk('c18 CORE 466줄/22,521 B 유지(실측)', core.length === 466 && bytes === 22521, core.length + '줄/' + bytes + 'B');
 }
 
-// 19. sb- 클래스가 아직 index에 구현되지 않음 (문서-only 증명)
-chk('c19 sb- 피규어 클래스 미구현(문서-only)',
-  ['sb-unit', 'sb-fig', 'sb-impulse', 'sb-anchor'].every(s => html.indexOf(s) < 0), '');
+// 19. 행동선 클래스는 여전히 미구현 (41 계약 = 선은 다음 · sb-unit/sb-fig/sb-anchor는 이후 Figure Rework 01[docs/44]에서 실구현)
+chk('c19 행동선 클래스(sb-impulse/sb-line) 미구현 — 계약대로 선은 다음',
+  ['sb-impulse', 'sb-line'].every(s => html.indexOf(s) < 0), '');
 
 // 20. 금지 grep 유지 (index.html)
 {
