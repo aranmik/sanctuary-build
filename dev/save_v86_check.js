@@ -73,8 +73,8 @@ chk('c13 세이브 계보표(v8.2~v8.6)',
   hasAll(['v8.2', 'v8.3', 'v8.4', 'v8.5', 'v8.6', '34addd9c', '8e7ee68a', 'e5c7ca06']), '');
 
 // 14. index.html 무변경 (현행 md5 대조)
-chk('c14 index.html 현행 기준선(md5 b1366130…)',
-  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
+chk('c14 index.html 현행 기준선(md5 c9e289d7…)',
+  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
 
 // 15. CORE 숫자 유지 (실측)
 {

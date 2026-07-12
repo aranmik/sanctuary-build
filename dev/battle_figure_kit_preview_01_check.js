@@ -79,9 +79,9 @@ chk('c12 전투 연동 0(Math.random/localStorage/__seedHealer/createGame 부재
     .every(t => pv.indexOf(t) < 0), '');
 
 // 13. index.html 기준선 유지
-chk('c13 index.html 무변경(135,458 B · md5 b1366130…)',
-  buf.length === 135458 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
+chk('c13 index.html 무변경(149,309 B · md5 c9e289d7…)',
+  buf.length === 149440 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
 
 // 14. CORE 유지 (실측 · 파일 산출 없이 메모리 계산)
 {

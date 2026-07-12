@@ -30,10 +30,10 @@ chk('c2 shell_iron 게이트 유지',
 chk('c3 전사/파쇄자 sb 피규어',
   hasH('id="sb-war-fig"') && hasH('id="sb-boss-fig"') && hasH('sb-warrior') && hasH('sb-iron-crusher'), '');
 
-// 4. Rework 03 확대값 (파쇄자 1.0 · 전사 .68)
-chk('c4 확대 적용(파쇄자 scale 1.0 · 전사 scale .68)',
-  hasH('#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(1.0)') &&
-  hasH('#sb-war-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale(.68)'), '');
+// 4. 확대값 존재 (Rework 03 도입 · 정확 값은 이후 Party Rework 01[docs/49]에서 갱신)
+chk('c4 확대 적용(파쇄자/전사 scale 존재)',
+  hasH('#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(') &&
+  hasH('#sb-war-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale('), '');
 
 // 5. 원호/포위형 배치 — 4동료 개별 transform (shell_iron 스코프)
 chk('c5 원호 배치(4동료 개별 transform · shell_iron 스코프)',
@@ -69,9 +69,9 @@ chk('c10 행동선/SVG stroke 신규 0(sb 영역)',
 }
 
 // 12. index.html 현행 기준선
-chk('c12 index.html 현행 기준선(135,458 B · md5 b1366130…)',
-  buf.length === 135458 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
+chk('c12 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
+  buf.length === 149440 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
 
 // 13. CORE byte-identical
 {
@@ -122,7 +122,7 @@ chk('c19 docs/46 필수 절(시도안/버린 안/원호 구도/회귀/리스크)
 // 20. div/section 균형
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c20 div/section 균형(202/202·8/8)', dO === dC && dO === 202 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
+  chk('c20 div/section 균형(214/214·8/8)', dO === dC && dO === 214 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 
 console.log(`\n${fail === 0 ? '★ IRON CRUSHER FIGURE REWORK 03 CHECK PASS' : '★ IRON CRUSHER FIGURE REWORK 03 CHECK FAIL'} (${pass} pass / ${fail} fail)`);

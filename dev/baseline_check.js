@@ -14,9 +14,9 @@ const lineCount=p=>lines.filter(l=>l.includes(p)).length;      // grep -c 동등
 const occCount=p=>src.split(p).length-1;                        // grep -o 동등(발생 횟수)
 
 // 1. 원본 바이트/줄/md5
-chk('bytes',buf.length,135458);
-chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),2046);
-chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'b13661305ce1c563a328d4e3b6c95f0b');
+chk('bytes',buf.length,149440);
+chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),2098);
+chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'bb7fc1476dc5cbcd12642c9e13dad0ca');
 
 // 2. CORE 추출 (awk 동등: START 다음 줄 ~ END 직전 줄)
 {let f=0,core=[];for(const l of lines){if(l.includes('//__CORE_START__')){f=1;continue;}if(l.includes('//__CORE_END__'))f=0;if(f)core.push(l);}
@@ -28,7 +28,7 @@ chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'b13661305ce1c563a3
 for(const p of ['Math.random','base64','<img','.png','assets'])chk(`forbidden "${p}"`,lineCount(p),0);
 
 // 4. 태그 균형
-chk('div open/close',`${occCount('<div')}/${occCount('</div>')}`,'202/202');
+chk('div open/close',`${occCount('<div')}/${occCount('</div>')}`,'214/214');
 chk('section open/close',`${occCount('<section')}/${occCount('</section>')}`,'8/8');
 
 // 5. 보존 grep 14종

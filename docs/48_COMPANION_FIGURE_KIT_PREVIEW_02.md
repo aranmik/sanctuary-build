@@ -113,7 +113,7 @@
 
 ## 21. 다음 단계 후보 (자동 확정 아님)
 
-1. 🔷 `Companion Figure Party Rework 01` — 3동료 정장(색 보정본)을 실제 전투 화면에 이식.
+1. `Companion Figure Party Rework 01` — 3동료 정장(색 보정본)을 실제 전투 화면에 이식. ✅ **구현됨** → [49](./49_COMPANION_FIGURE_PARTY_REWORK_01.md)(p22·shell_iron 전투에 3동료 sb 정장+4인 원호·CORE byte-identical·스모크 불변·회귀 0·★fig width 누락 버그 수정·재-baseline 149,309/2,097/`c9e289d7`).
 2. 🔷 `Party Figure Layout Rework 01` — 4인 전장 배치 확정(주술사 위치 포함).
 3. 🔷 `Companion Figure Pose Pack 01` — 3동료 포즈 어휘.
 4. 🔷 `Iron Crusher Smash Line Rework 02` — 강타선(파티 정장 정리 후).

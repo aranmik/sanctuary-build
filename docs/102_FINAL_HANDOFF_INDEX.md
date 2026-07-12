@@ -71,6 +71,8 @@
 - Iron Crusher Figure Rework 03 ([46](./46_IRON_CRUSHER_FIGURE_REWORK_03.md) · EP24 · **파티 배치 구도** — 일렬 횡대→∧자 원호/포위형(4동료 개별 transform)·파쇄자 .90→1.0·전사 .60→.68·CSS 배치값만 CORE 무변·모르가스/심연 회귀 0·clashGap 24px·재-baseline 135,458/2,046/`b1366130…`·`iron_crusher_figure_rework_03_check` 20/20·실기 대기)
 - Companion Figure Kit Preview 01 ([47](./47_COMPANION_FIGURE_KIT_PREVIEW_01.md) · EP24 · dev 프리뷰 · **3동료 정장 확보**(도적 sb-rogue·마법사 sb-mage·주술사 sb-shaman) · Preview 01 언어 계승 · 4인 파티 같은 세계 확인 · 실루엣 폭 84/70/66/80(색놀이 아님) · **index.html 무접촉** · `companion_figure_kit_preview_01_check` 19/19 · 실기 대기)
 - Companion Figure Kit Preview 02 — Material & Color Rework ([48](./48_COMPANION_FIGURE_KIT_PREVIEW_02.md) · EP24 · dev 프리뷰 · **3동료 색/재질 보정** — 전신 대표색→중립 몸통(차콜/남색/회청)+대표색은 강조 표식(두건/모자/부적)·후레쉬맨 인상 완화·실루엣/구조 Preview 01 유지·before/after 비교·**index.html 무접촉**·`companion_figure_kit_preview_02_check` 25/25·실기 대기)
+- Companion Figure Party Rework 01 ([49](./49_COMPANION_FIGURE_PARTY_REWORK_01.md) · EP24 · p22 · **3동료 정장 실전 이식 + 4인 원호** — shell_iron 전투에 도적/마법사/주술사 sb 정장(Preview 02 승인색)·전사와 4인 원호·기존 fxr/fxf 링·플래시 유지·어댑터/CSS/HTML 전용 **CORE byte-identical**·스모크 불변·**모르가스/심연 회귀 0**·★fig width 누락 버그 수정·재-baseline 149,309/2,097/`c9e289d7…`·`companion_figure_party_rework_01_check` 25/25·실기 대기)
+- Party Figure Layout Rework 01 ([50](./50_PARTY_FIGURE_LAYOUT_REWORK_01.md) · EP24 · p23 · **안 B 과감한 포위 확대** — 파쇄자 전투 4인 파티 크기·간격·원호 재조정. 전사.80/도적.74/마법사.76/주술사.74·파쇄자 1.04·좌우 날개 ±24로 좌우 스팬 156→**252px**(스테이지 359의 70%)·gap 12→26·인접 gap 전부 양수(겹침 0)·좌우 여백 12/15·overflow 0·3안(A/B/C) 실측 비교 후 B 채택·기존 fxr/fxf·CORE byte-identical·스모크 불변·**모르가스/심연 회귀 0**·재-baseline 149,440/2,098/`bb7fc147…`·`party_figure_layout_rework_01_check` 27/27·실기 대기)
 
 ## 3. 1차 데모 정의 (27 정본)
 

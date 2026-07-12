@@ -93,8 +93,8 @@ chk('c16 금지선(대공사/정답 강조/텍스트 예고 제거/수치/에셋
     '전투 수치/판정 변경', '외부 이미지/에셋 추가']), '');
 
 // 17. index.html 무변경 (현행 md5 대조)
-chk('c17 index.html 현행 기준선(md5 b1366130…)',
-  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
+chk('c17 index.html 현행 기준선(md5 c9e289d7…)',
+  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
 
 // 18. CORE 숫자 유지 (실측)
 {

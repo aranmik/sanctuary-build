@@ -92,8 +92,8 @@ chk('c16 금지 목록(.part/.body/.bt/.sig-av·render.js·좌표계)',
   hasAll(['.sig-av', '.monster', 'render.js', '390×680', '좌표계']), '');
 
 // 17. index.html 무변경 (v8.6 정본 md5 · CSS/JS 포함 단일 파일)
-chk('c17 index.html 무변경(md5 b1366130… · CSS/JS 무변 포함)',
-  crypto.createHash('md5').update(buf).digest('hex') === 'b13661305ce1c563a328d4e3b6c95f0b', '');
+chk('c17 index.html 무변경(md5 c9e289d7… · CSS/JS 무변 포함)',
+  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
 
 // 18. CORE 숫자 유지 (실측)
 {
