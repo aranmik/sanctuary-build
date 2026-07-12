@@ -132,7 +132,7 @@ pane 런타임 실측(375 뷰포트, 값 오버라이드 후 getBoundingClientRe
 ## 25. 다음 단계 후보 (자동 확정 아님)
 
 - 🔷 `Iron Crusher Smash Line Rework 02` — 이제 확보한 전장 위로 강타선 설계.
-- 🔷 `Companion Figure Pose Pack 01` — 3동료 포즈 어휘.
+- `Companion Figure Pose Pack 01` — 3동료 포즈 어휘. ✅ **구현됨** → [51](./51_COMPANION_FIGURE_POSE_PACK_01.md)(독립 프리뷰·도적/마법사/주술사 각 5포즈+전사 4비교·4인 Actor Ensemble·프리셋 4종·index.html 무접촉·24체크 PASS).
 - 🔷 `Additional Boss Figure Layout Rework 01` — 모르가스/심연에도 sb 파티(별도 카드).
 - 🔷 `Party Figure Layout Rework 02` — 폰 편차 대응 미세 조정.
 

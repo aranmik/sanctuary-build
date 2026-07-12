@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성소판 · Companion Figure Pose Pack 01 — Actor Ensemble</title>
+<style>
+/* ============================================================
+   Companion Figure Pose Pack 01 (docs/51)
+   도적·마법사·주술사의 "행위 포즈 어휘". 전사 비교 + 4인 Actor Ensemble.
+   조형/색은 Preview 02(docs/48) 그대로 계승. 전사 포즈는 Pose Pack 01(docs/43) 계승.
+   포즈 = .sb-react(무게중심) + 개별 .sb-part(각도/위치). 배치 transform과 분리.
+   전투 런타임/행동선/데칼/수치 없음. index.html 무접촉.
+   ============================================================ */
+:root{
+  --sb-night:#131120; --sb-night2:#1c1830; --sb-ground:#242038; --sb-ink:#e8e2f2;
+  --sb-panel:#1e1a30; --sb-panel-edge:#3a3358; --sb-card:#211c36;
+  --sb-w-main:#6c8fd0; --sb-w-deep:#31497a; --sb-w-edge:#1f2a45;
+  --sb-w-metal:#cdd8ec; --sb-w-gold:#e5b45f; --sb-w-face:#ffd9b8;
+  --sb-r-main:#a58fd6; --sb-r-cloth:#403a52; --sb-r-clothD:#2a2640;
+  --sb-r-leather:#6a5238; --sb-r-blade:#dee6f2; --sb-r-edge:#201b34; --sb-r-face:#ffd9b8;
+  --sb-m-main:#bb85e6; --sb-m-robe:#343150; --sb-m-robeD:#201e38;
+  --sb-m-cream:#d9cdec; --sb-m-gold:#e5c05f; --sb-m-orb:#ffdf9a; --sb-m-edge:#241640; --sb-m-face:#ffe0c4;
+  --sb-s-main:#5fc7d5; --sb-s-cloth:#44606a; --sb-s-clothD:#2c454e;
+  --sb-s-wood:#a5824e; --sb-s-brass:#cba860; --sb-s-glow:#8fe8d8; --sb-s-edge:#123038; --sb-s-face:#ffd9b8;
+  --sb-ic-main:#5c6374; --sb-ic-deep:#2b303c; --sb-ic-edge:#14161e; --sb-ic-metal:#a7b0c2; --sb-ic-ember:#ffb45e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--sb-night);color:var(--sb-ink);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+.sb-page{max-width:560px;margin:0 auto;padding:14px 12px 44px}
+h1{font-size:16px;letter-spacing:.4px;text-align:center;margin:6px 0 2px}
+h1 small{display:block;font-size:11px;color:#9a8fc0;font-weight:400;margin-top:3px}
+h2{font-size:13px;color:#b9aee0;margin:22px 2px 8px;border-left:3px solid var(--sb-s-glow);padding-left:8px}
+.sb-note{font-size:10.5px;color:#7d739f;margin:5px 2px 2px;line-height:1.55}
+
+/* ---------- 3층 transform (Preview 02 계승) ---------- */
+.sb-unit{position:absolute;bottom:0;transform-origin:50% 100%}
+.sb-react{transform-origin:50% 92%;transition:transform .3s cubic-bezier(.34,1.3,.5,1)}
+.sb-fit{transform-origin:50% 100%}
+.sb-fig{position:relative;transform-origin:50% 100%;animation:sbBreathe 3.4s ease-in-out infinite;width:104px;height:126px}
+.sb-rogue .sb-fig{animation-duration:3.0s}
+.sb-shaman .sb-fig{animation-duration:3.8s}
+.sb-iron-crusher .sb-fig{animation-duration:4.6s;animation-name:sbBreatheHeavy;width:190px;height:212px}
+.sb-still .sb-fig{animation:none}
+@keyframes sbBreathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1.6px) scaleY(1.012)}}
+@keyframes sbBreatheHeavy{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1px) scaleY(1.006)}}
+.sb-flip .sb-fit{transform:scaleX(-1)}
+.sb-part{position:absolute;display:block;transition:transform .3s cubic-bezier(.34,1.3,.5,1)}
+.sb-anchor{position:absolute;width:0;height:0}
+
+/* ============================================================ 전사 (Preview 02 그대로) */
+.sb-warrior .sb-shadow{left:50%;bottom:0;width:62px;height:13px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.5),transparent 72%)}
+.sb-warrior .sb-aura{left:50%;bottom:1px;width:74px;height:22px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(125,164,255,.3),transparent 70%)}
+.sb-warrior .sb-w-sword{left:24px;bottom:44px;width:6px;height:34px;border-radius:3px 3px 2px 2px;background:linear-gradient(90deg,#f0f5ff,var(--sb-w-metal) 55%,#8fa2c4);box-shadow:0 0 0 1.5px var(--sb-w-edge);transform:rotate(-26deg);transform-origin:50% 100%}
+.sb-warrior .sb-w-sword::before{content:"";position:absolute;left:-5px;bottom:-3px;width:16px;height:5px;border-radius:3px;background:linear-gradient(180deg,var(--sb-w-gold),#b8863c);box-shadow:0 0 0 1.5px var(--sb-w-edge)}
+.sb-warrior .sb-w-body{left:50%;bottom:13px;width:42px;height:37px;transform:translateX(-50%);border-radius:12px 12px 9px 9px;background:linear-gradient(160deg,#8aa8dd,var(--sb-w-main) 42%,var(--sb-w-deep));box-shadow:0 0 0 2px var(--sb-w-edge),inset 0 3px 0 rgba(255,255,255,.28),inset 0 -7px 0 rgba(10,16,40,.3)}
+.sb-warrior .sb-w-body::before{content:"";position:absolute;left:5px;bottom:-11px;width:13px;height:11px;border-radius:5px 5px 4px 4px;background:linear-gradient(180deg,#3d5382,#28395c);box-shadow:0 0 0 2px var(--sb-w-edge),19px 0 0 -0px #33486f,19px 0 0 2px var(--sb-w-edge)}
+.sb-warrior .sb-w-head{left:50%;bottom:44px;width:38px;height:33px;transform:translateX(-50%);border-radius:48% 48% 44% 44%;background:linear-gradient(165deg,#9db8e6,var(--sb-w-main) 45%,var(--sb-w-deep));box-shadow:0 0 0 2px var(--sb-w-edge),inset 0 3px 1px rgba(255,255,255,.32)}
+.sb-warrior .sb-w-head::before{content:"";position:absolute;left:50%;top:-6px;width:10px;height:9px;transform:translateX(-50%);border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--sb-w-gold),#b8863c);box-shadow:0 0 0 2px var(--sb-w-edge)}
+.sb-warrior .sb-w-head::after{content:"";position:absolute;left:50%;bottom:3px;width:24px;height:14px;transform:translateX(-50%);border-radius:9px;background:radial-gradient(circle at 32% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 68% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 17% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),radial-gradient(circle at 83% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),linear-gradient(180deg,#ffe4c8,var(--sb-w-face));box-shadow:inset 0 0 0 1.5px rgba(31,42,69,.55)}
+.sb-warrior .sb-w-pauldron{left:22px;bottom:42px;width:17px;height:12px;border-radius:8px 8px 5px 5px;background:linear-gradient(160deg,var(--sb-w-metal),#7e93b8 70%);box-shadow:0 0 0 2px var(--sb-w-edge),inset 0 2px 0 rgba(255,255,255,.4)}
+.sb-warrior .sb-w-shield{left:63px;bottom:11px;width:30px;height:38px;border-radius:46% 46% 50% 50% / 34% 34% 62% 62%;background:linear-gradient(160deg,#e6edf8,var(--sb-w-metal) 35%,#8fa2c4 75%,#6c7fa2);box-shadow:0 0 0 2px var(--sb-w-edge),inset 0 0 0 3.5px var(--sb-w-gold),inset 0 -5px 8px rgba(20,30,60,.28);z-index:4;transform-origin:50% 60%}
+.sb-warrior .sb-w-shield::before{content:"";position:absolute;left:50%;top:46%;width:11px;height:11px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 40% 35%,#9fd6a8,#4e9860 70%);box-shadow:0 0 0 1.5px var(--sb-w-edge)}
+
+/* ============================================================ 도적 (Preview 02 그대로) */
+.sb-rogue .sb-shadow{left:50%;bottom:0;width:48px;height:11px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.46),transparent 72%)}
+.sb-rogue .sb-aura{left:50%;bottom:1px;width:56px;height:17px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(165,143,214,.22),transparent 70%)}
+.sb-rogue .sb-r-dagger2{left:24px;bottom:40px;width:4px;height:22px;border-radius:2px;background:linear-gradient(90deg,#eef2fa,var(--sb-r-blade));box-shadow:0 0 0 1.4px var(--sb-r-edge);transform:rotate(-38deg);transform-origin:50% 100%}
+.sb-rogue .sb-r-dagger2::before{content:"";position:absolute;left:-3px;bottom:-2px;width:10px;height:4px;border-radius:2px;background:var(--sb-r-leather);box-shadow:0 0 0 1.4px var(--sb-r-edge)}
+.sb-rogue .sb-r-body{left:50%;bottom:13px;width:30px;height:38px;transform:translateX(-50%);border-radius:11px 11px 8px 8px;background:linear-gradient(160deg,#4f4862,var(--sb-r-cloth) 44%,var(--sb-r-clothD));box-shadow:0 0 0 2px var(--sb-r-edge),inset 0 3px 0 rgba(255,255,255,.14),inset 0 -6px 0 rgba(10,8,20,.34)}
+.sb-rogue .sb-r-body::before{content:"";position:absolute;left:4px;bottom:-10px;width:10px;height:10px;border-radius:4px 4px 3px 3px;background:linear-gradient(180deg,#332c46,#221d34);box-shadow:0 0 0 2px var(--sb-r-edge),13px 0 0 0 #2c263c,13px 0 0 2px var(--sb-r-edge)}
+.sb-rogue .sb-r-body::after{content:"";position:absolute;left:2px;right:2px;bottom:8px;height:5px;border-radius:3px;background:linear-gradient(180deg,var(--sb-r-leather),#4a3925);box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
+.sb-rogue .sb-r-scarf{left:50%;bottom:44px;width:20px;height:8px;transform:translateX(-50%);border-radius:4px 8px 4px 4px;background:linear-gradient(120deg,var(--sb-r-main),#7d68b0);box-shadow:0 0 0 1.6px var(--sb-r-edge);transform-origin:20% 50%}
+.sb-rogue .sb-r-scarf::after{content:"";position:absolute;right:-6px;top:1px;width:10px;height:5px;border-radius:2px 5px 2px 2px;background:var(--sb-r-main);box-shadow:0 0 0 1.5px var(--sb-r-edge);transform:rotate(14deg)}
+.sb-rogue .sb-r-head{left:50%;bottom:44px;width:34px;height:31px;transform:translateX(-50%);border-radius:52% 52% 44% 44%;background:linear-gradient(165deg,#b9a6e0,var(--sb-r-main) 46%,#7c68ac);box-shadow:0 0 0 2px var(--sb-r-edge),inset 0 3px 1px rgba(255,255,255,.3)}
+.sb-rogue .sb-r-head::before{content:"";position:absolute;left:50%;top:-7px;width:14px;height:12px;transform:translateX(-50%) rotate(6deg);border-radius:60% 40% 50% 50%;background:linear-gradient(160deg,var(--sb-r-main),#6d5aa0);box-shadow:0 0 0 2px var(--sb-r-edge)}
+.sb-rogue .sb-r-head::after{content:"";position:absolute;left:50%;bottom:3px;width:22px;height:12px;transform:translateX(-50%);border-radius:8px;background:radial-gradient(circle at 32% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 68% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 17% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),radial-gradient(circle at 83% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),linear-gradient(180deg,#ffe4c8,var(--sb-r-face));box-shadow:inset 0 0 0 1.5px rgba(31,26,50,.5)}
+.sb-rogue .sb-r-dagger{left:60px;bottom:20px;width:5px;height:24px;border-radius:2px 2px 3px 3px;background:linear-gradient(90deg,#f4f7ff,var(--sb-r-blade) 55%,#b7c2d6);box-shadow:0 0 0 1.6px var(--sb-r-edge);transform:rotate(24deg);transform-origin:50% 100%;z-index:4}
+.sb-rogue .sb-r-dagger::before{content:"";position:absolute;left:-4px;bottom:-1px;width:13px;height:5px;border-radius:2px;background:linear-gradient(180deg,var(--sb-r-leather),#3f3021);box-shadow:0 0 0 1.6px var(--sb-r-edge)}
+.sb-rogue .sb-r-dagger::after{content:"";position:absolute;left:1px;bottom:-9px;width:3px;height:8px;border-radius:2px;background:#3a2e1f;box-shadow:0 0 0 1.5px var(--sb-r-edge)}
+
+/* ============================================================ 마법사 (Preview 02 그대로) */
+.sb-mage .sb-shadow{left:50%;bottom:0;width:56px;height:12px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.48),transparent 72%)}
+.sb-mage .sb-aura{left:50%;bottom:1px;width:64px;height:19px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(187,133,230,.24),transparent 70%)}
+.sb-mage .sb-m-body{left:50%;bottom:11px;width:30px;height:40px;transform:translateX(-50%);border-radius:11px 11px 16px 16px;background:linear-gradient(165deg,#413d60,var(--sb-m-robe) 44%,var(--sb-m-robeD));box-shadow:0 0 0 2px var(--sb-m-edge),inset 0 3px 0 rgba(255,255,255,.16),inset 0 -8px 0 rgba(15,12,36,.34)}
+.sb-mage .sb-m-body::before{content:"";position:absolute;left:-4px;bottom:0;width:38px;height:14px;border-radius:8px 8px 12px 12px;background:linear-gradient(180deg,var(--sb-m-main),#7a4db0);box-shadow:0 0 0 2px var(--sb-m-edge)}
+.sb-mage .sb-m-body::after{content:"";position:absolute;left:3px;right:3px;bottom:17px;height:4px;border-radius:3px;background:linear-gradient(180deg,var(--sb-m-cream),#b9addd);opacity:.85}
+.sb-mage .sb-m-star{left:50%;bottom:15px;width:8px;height:8px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#fff4d0,var(--sb-m-gold) 60%);box-shadow:0 0 5px rgba(229,192,95,.7),0 0 0 1px var(--sb-m-edge)}
+.sb-mage .sb-m-head{left:50%;bottom:46px;width:34px;height:30px;transform:translateX(-50%);border-radius:50% 50% 44% 44%;background:linear-gradient(165deg,#c69af0,var(--sb-m-main) 46%,#7a4db0);box-shadow:0 0 0 2px var(--sb-m-edge),inset 0 3px 1px rgba(255,255,255,.3);transform-origin:50% 100%}
+.sb-mage .sb-m-head::before{content:"";position:absolute;left:50%;top:-16px;width:0;height:0;transform:translateX(-50%);border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:20px solid var(--sb-m-main);filter:drop-shadow(0 -1px 0 var(--sb-m-edge))}
+.sb-mage .sb-m-head::after{content:"";position:absolute;left:50%;bottom:3px;width:22px;height:12px;transform:translateX(-50%);border-radius:8px;background:radial-gradient(circle at 32% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 68% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 17% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),radial-gradient(circle at 83% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),linear-gradient(180deg,#ffe4c8,var(--sb-m-face));box-shadow:inset 0 0 0 1.5px rgba(40,22,64,.5)}
+/* 모자 끝 별(금) — 기본은 모자 삼각 꼭짓점에 더 가깝게(bottom 기준·head 위) */
+.sb-mage .sb-m-tip{left:50%;bottom:78px;width:7px;height:7px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,#fff4d0,var(--sb-m-gold) 55%);box-shadow:0 0 7px rgba(229,192,95,.85)}
+.sb-mage .sb-m-orb{left:62px;bottom:30px;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 40% 34%,#fff5d8,var(--sb-m-orb) 42%,#ff9a3a 74%,#7a3a10);box-shadow:0 0 10px 1px rgba(255,200,90,.55),0 0 0 1.5px var(--sb-m-edge);z-index:4;animation:sbOrb 2.6s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes sbOrb{0%,100%{box-shadow:0 0 8px 1px rgba(255,200,90,.45),0 0 0 1.5px var(--sb-m-edge)}50%{box-shadow:0 0 13px 3px rgba(255,200,90,.68),0 0 0 1.5px var(--sb-m-edge)}}
+.sb-still .sb-m-orb{animation:none}
+/* 금빛점 후보: tipB=모자끝 밀착+발광↓ / tipC=제거 */
+.sb-tipB .sb-mage .sb-m-tip{bottom:80px;width:6px;height:6px;box-shadow:0 0 4px rgba(229,192,95,.6)}
+.sb-tipC .sb-mage .sb-m-tip{display:none}
+
+/* ============================================================ 주술사 (Preview 02 그대로) */
+.sb-shaman .sb-shadow{left:50%;bottom:0;width:56px;height:12px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.48),transparent 72%)}
+.sb-shaman .sb-aura{left:50%;bottom:0;width:78px;height:27px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(143,232,216,.38),transparent 68%);animation:sbShAura 3.2s ease-in-out infinite;transform-origin:50% 60%}
+@keyframes sbShAura{0%,100%{opacity:.7}50%{opacity:1}}
+.sb-still .sb-shaman .sb-aura{animation:none}
+.sb-shaman .sb-s-body{left:50%;bottom:12px;width:32px;height:39px;transform:translateX(-50%);border-radius:12px 12px 13px 13px;background:linear-gradient(165deg,#556d76,var(--sb-s-cloth) 44%,var(--sb-s-clothD));box-shadow:0 0 0 2px var(--sb-s-edge),inset 0 3px 0 rgba(255,255,255,.16),inset 0 -7px 0 rgba(8,24,28,.32)}
+.sb-shaman .sb-s-body::before{content:"";position:absolute;left:4px;bottom:-10px;width:11px;height:10px;border-radius:4px 4px 3px 3px;background:linear-gradient(180deg,#334d55,#22383f);box-shadow:0 0 0 2px var(--sb-s-edge),14px 0 0 0 #2e444c,14px 0 0 2px var(--sb-s-edge)}
+.sb-shaman .sb-s-body::after{content:"";position:absolute;left:3px;right:3px;bottom:8px;height:5px;border-radius:3px;background:linear-gradient(180deg,var(--sb-s-brass),#9a7c3e);box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
+.sb-shaman .sb-s-charm{left:50%;bottom:26px;width:12px;height:12px;transform:translateX(-50%);border-radius:50%;border:2.5px solid var(--sb-s-main);background:radial-gradient(circle,rgba(143,232,216,.55),transparent 65%);box-shadow:0 0 0 1.4px var(--sb-s-edge),0 0 8px rgba(143,232,216,.6);transform-origin:50% 50%}
+.sb-shaman .sb-s-head{left:50%;bottom:44px;width:35px;height:31px;transform:translateX(-50%);border-radius:50% 50% 44% 44%;background:linear-gradient(165deg,#6f8890,var(--sb-s-cloth) 48%,var(--sb-s-clothD));box-shadow:0 0 0 2px var(--sb-s-edge),inset 0 3px 1px rgba(255,255,255,.28);transform-origin:50% 100%}
+.sb-shaman .sb-s-head::before{content:"";position:absolute;left:50%;top:-5px;width:26px;height:12px;transform:translateX(-50%);border-radius:50% 50% 40% 40%;background:linear-gradient(180deg,var(--sb-s-clothD),#1e363d);box-shadow:0 0 0 2px var(--sb-s-edge)}
+.sb-shaman .sb-s-head::after{content:"";position:absolute;left:50%;bottom:3px;width:22px;height:12px;transform:translateX(-50%);border-radius:8px;background:radial-gradient(circle at 32% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 68% 42%,#33384a 2px,transparent 2.7px),radial-gradient(circle at 17% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),radial-gradient(circle at 83% 74%,rgba(255,138,128,.5) 2.2px,transparent 3.2px),linear-gradient(180deg,#ffe4c8,var(--sb-s-face));box-shadow:inset 0 0 0 1.5px rgba(18,48,56,.5)}
+.sb-shaman .sb-s-totem{left:64px;bottom:8px;width:5px;height:58px;border-radius:3px;background:linear-gradient(90deg,#7a5f35,var(--sb-s-wood) 45%,#5e4a2a);box-shadow:0 0 0 1.6px var(--sb-s-edge);z-index:4;transform-origin:50% 100%}
+.sb-shaman .sb-s-totem::before{content:"";position:absolute;left:50%;top:-13px;width:16px;height:16px;transform:translateX(-50%);border-radius:50%;border:3px solid var(--sb-s-main);background:radial-gradient(circle,rgba(143,232,216,.55),transparent 62%);box-shadow:0 0 0 1.5px var(--sb-s-edge),0 0 9px rgba(143,232,216,.6)}
+.sb-shaman .sb-s-totem::after{content:"";position:absolute;left:50%;top:2px;width:6px;height:6px;transform:translateX(-50%);border-radius:50%;background:var(--sb-s-glow);box-shadow:0 0 6px var(--sb-s-glow)}
+
+/* ============================================================ 파쇄자 (앙상블 대치용 · Preview 02 그대로) */
+.sb-iron-crusher .sb-shadow{left:50%;bottom:0;width:138px;height:22px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.62),transparent 74%)}
+.sb-iron-crusher .sb-aura{left:50%;bottom:2px;width:170px;height:40px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(255,140,58,.16),transparent 68%)}
+.sb-iron-crusher .sb-ic-body{left:50%;bottom:18px;width:96px;height:72px;transform:translateX(-50%);border-radius:18px 18px 12px 12px;background:radial-gradient(circle at 12px 12px,var(--sb-ic-metal) 2.6px,transparent 3.4px),radial-gradient(circle at 84px 12px,var(--sb-ic-metal) 2.6px,transparent 3.4px),radial-gradient(circle at 12px 58px,var(--sb-ic-metal) 2.6px,transparent 3.4px),radial-gradient(circle at 84px 58px,var(--sb-ic-metal) 2.6px,transparent 3.4px),linear-gradient(160deg,#7b8296,var(--sb-ic-main) 38%,var(--sb-ic-deep));box-shadow:0 0 0 2.5px var(--sb-ic-edge),inset 0 4px 0 rgba(255,255,255,.16),inset 0 -12px 0 rgba(5,8,16,.35)}
+.sb-iron-crusher .sb-ic-body::before{content:"";position:absolute;left:10px;bottom:-15px;width:28px;height:16px;border-radius:7px 7px 5px 5px;background:linear-gradient(180deg,#3a404e,var(--sb-ic-deep));box-shadow:0 0 0 2.5px var(--sb-ic-edge),48px 0 0 0 #353b48,48px 0 0 2.5px var(--sb-ic-edge)}
+.sb-iron-crusher .sb-ic-core{left:50%;bottom:56px;width:22px;height:22px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle at 42% 36%,#ffe2b0,var(--sb-ic-ember) 34%,#ff7a1a 62%,#7a3410);box-shadow:0 0 0 3px #1c2029,0 0 0 4.5px #3d4350,0 0 14px 2px rgba(255,140,58,.55)}
+.sb-iron-crusher .sb-ic-pauldrons{left:50%;bottom:77px;width:0;height:0;transform:translateX(-50%)}
+.sb-iron-crusher .sb-ic-pauldrons::before{content:"";position:absolute;left:-60px;top:0;width:34px;height:22px;border-radius:12px 12px 7px 7px;background-image:radial-gradient(circle at 50% 40%,var(--sb-ic-metal) 2.2px,transparent 3px),linear-gradient(160deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep));box-shadow:0 0 0 2.5px var(--sb-ic-edge),inset 0 3px 0 rgba(255,255,255,.2)}
+.sb-iron-crusher .sb-ic-pauldrons::after{content:"";position:absolute;left:26px;top:0;width:34px;height:22px;border-radius:12px 12px 7px 7px;background-image:radial-gradient(circle at 50% 40%,var(--sb-ic-metal) 2.2px,transparent 3px),linear-gradient(200deg,#8a92a6,var(--sb-ic-main) 55%,var(--sb-ic-deep));box-shadow:0 0 0 2.5px var(--sb-ic-edge),inset 0 3px 0 rgba(255,255,255,.2)}
+.sb-iron-crusher .sb-ic-head{left:50%;bottom:86px;width:56px;height:42px;transform:translateX(-50%);border-radius:14px 14px 10px 10px;background:linear-gradient(165deg,#868da0,var(--sb-ic-main) 42%,var(--sb-ic-deep));box-shadow:0 0 0 2.5px var(--sb-ic-edge),inset 0 3px 0 rgba(255,255,255,.2)}
+.sb-iron-crusher .sb-ic-head::before{content:"";position:absolute;left:50%;top:-7px;width:14px;height:10px;transform:translateX(-50%);border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#9aa3b5,#4a505e);box-shadow:0 0 0 2.5px var(--sb-ic-edge)}
+.sb-iron-crusher .sb-ic-head::after{content:"";position:absolute;left:50%;bottom:10px;width:38px;height:9px;transform:translateX(-50%);border-radius:5px;background:radial-gradient(circle at 30% 50%,var(--sb-ic-ember) 2.6px,rgba(255,140,58,.5) 3.6px,transparent 5px),radial-gradient(circle at 70% 50%,var(--sb-ic-ember) 2.6px,rgba(255,140,58,.5) 3.6px,transparent 5px),linear-gradient(180deg,#0c0e14,#181c26);box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.6)}
+.sb-iron-crusher .sb-ic-hammer{left:144px;bottom:14px;width:11px;height:96px;border-radius:5px;transform-origin:50% 96%;background:linear-gradient(90deg,#4a3a2c,#6b543c 45%,#33261b);box-shadow:0 0 0 2.5px var(--sb-ic-edge);z-index:4}
+.sb-iron-crusher .sb-ic-hammer::before{content:"";position:absolute;left:-24px;top:-12px;width:58px;height:40px;border-radius:10px;background:radial-gradient(circle at 9px 9px,var(--sb-ic-metal) 2.4px,transparent 3.2px),radial-gradient(circle at 49px 9px,var(--sb-ic-metal) 2.4px,transparent 3.2px),radial-gradient(circle at 9px 31px,var(--sb-ic-metal) 2.4px,transparent 3.2px),radial-gradient(circle at 49px 31px,var(--sb-ic-metal) 2.4px,transparent 3.2px),linear-gradient(160deg,#8a92a6,var(--sb-ic-main) 40%,#20242e);box-shadow:0 0 0 2.5px var(--sb-ic-edge),inset 0 3px 0 rgba(255,255,255,.2)}
+
+/* ============================================================
+   포즈 어휘 — .sb-react(무게중심) + 개별 .sb-part(각도/위치)
+   ============================================================ */
+/* ---------- 전사 (Pose Pack 01 계승: guard/brace/resolve) ---------- */
+.sb-warrior[data-pose="guard"] .sb-react{transform:translateX(4px)}
+.sb-warrior[data-pose="guard"] .sb-w-shield{transform:translateX(-15px) translateY(-3px) scale(1.22)}
+.sb-warrior[data-pose="guard"] .sb-w-head{transform:translateX(calc(-50% + 3px))}
+.sb-warrior[data-pose="guard"] .sb-w-sword{transform:rotate(-42deg)}
+.sb-warrior[data-pose="brace"] .sb-react{transform:rotate(-5deg) translateY(4px) scale(.98)}
+.sb-warrior[data-pose="brace"] .sb-w-shield{transform:translateX(-8px) translateY(-9px) rotate(-14deg) scale(1.06)}
+.sb-warrior[data-pose="brace"] .sb-w-head{transform:translateX(calc(-50% - 1px)) translateY(3px) rotate(-4deg)}
+.sb-warrior[data-pose="brace"] .sb-w-sword{transform:rotate(-52deg)}
+.sb-warrior[data-pose="resolve"] .sb-react{transform:translateX(2px) scale(1.04)}
+.sb-warrior[data-pose="resolve"] .sb-w-head{transform:translateX(calc(-50% + 1px)) translateY(-3px) rotate(-5deg)}
+.sb-warrior[data-pose="resolve"] .sb-w-sword{transform:rotate(-8deg) translateY(-4px)}
+.sb-warrior[data-pose="resolve"] .sb-w-shield{transform:translateX(-7px) translateY(-1px) scale(1.12)}
+.sb-warrior[data-pose="resolve"] .sb-aura{transform:translateX(-50%) scale(1.22);opacity:1}
+
+/* ---------- 도적: ready / interrupt / dash / strike / recover ---------- */
+.sb-rogue[data-pose="interrupt"] .sb-react{transform:translateY(4px) rotate(-4deg) scale(.98)}
+.sb-rogue[data-pose="interrupt"] .sb-r-dagger{transform:rotate(-16deg) translate(-4px,-8px) scale(1.05)}
+.sb-rogue[data-pose="interrupt"] .sb-r-head{transform:translateX(calc(-50% + 2px)) translateY(2px) rotate(-3deg)}
+.sb-rogue[data-pose="interrupt"] .sb-r-body{transform:translateX(calc(-50% + 1px)) rotate(-2deg)}
+.sb-rogue[data-pose="dash"] .sb-react{transform:translateX(9px) rotate(6deg)}
+.sb-rogue[data-pose="dash"] .sb-r-scarf{transform:rotate(-24deg) translateX(-4px)}
+.sb-rogue[data-pose="dash"] .sb-r-dagger2{transform:rotate(-58deg) translate(-4px,2px)}
+.sb-rogue[data-pose="dash"] .sb-r-head{transform:translateX(calc(-50% + 3px)) rotate(5deg)}
+.sb-rogue[data-pose="strike"] .sb-react{transform:translateX(11px) rotate(3deg)}
+.sb-rogue[data-pose="strike"] .sb-r-dagger{transform:rotate(74deg) translate(14px,-10px) scale(1.08)}
+.sb-rogue[data-pose="strike"] .sb-r-head{transform:translateX(calc(-50% + 4px)) translateY(1px) rotate(6deg)}
+.sb-rogue[data-pose="strike"] .sb-r-body{transform:translateX(calc(-50% + 2px)) rotate(4deg)}
+.sb-rogue[data-pose="strike"] .sb-r-dagger2{transform:rotate(-20deg)}
+.sb-rogue[data-pose="recover"] .sb-react{transform:translateX(-4px) rotate(-2deg) scale(.99)}
+.sb-rogue[data-pose="recover"] .sb-r-dagger{transform:rotate(6deg) translate(-8px,5px) scale(.94)}
+.sb-rogue[data-pose="recover"] .sb-r-head{transform:translateX(calc(-50% - 1px)) rotate(-3deg)}
+
+/* ---------- 마법사: ready / charge / channel / release / aftercast ---------- */
+.sb-mage[data-pose="charge"] .sb-react{transform:rotate(-2deg) scale(.99)}
+.sb-mage[data-pose="charge"] .sb-m-orb{transform:translate(-30px,3px) scale(1.22)}
+.sb-mage[data-pose="charge"] .sb-m-head{transform:translateX(calc(-50% + 4px)) rotate(-6deg)}
+.sb-mage[data-pose="charge"] .sb-m-body{transform:translateX(calc(-50% + 2px)) rotate(-2deg)}
+.sb-mage[data-pose="channel"] .sb-react{transform:translateY(-2px) scale(1.03)}
+.sb-mage[data-pose="channel"] .sb-m-orb{transform:translate(-22px,8px) scale(1.14)}
+.sb-mage[data-pose="channel"] .sb-m-head{transform:translateX(-50%) translateY(1px) rotate(-3deg)}
+.sb-mage[data-pose="channel"] .sb-aura{transform:translateX(-50%) scale(1.32);opacity:1}
+.sb-mage[data-pose="release"] .sb-react{transform:translateX(6px)}
+.sb-mage[data-pose="release"] .sb-m-orb{transform:translate(16px,-6px) scale(1.06)}
+.sb-mage[data-pose="release"] .sb-m-head{transform:translateX(calc(-50% + 3px)) rotate(4deg)}
+.sb-mage[data-pose="release"] .sb-m-body{transform:translateX(calc(-50% + 2px)) rotate(3deg)}
+.sb-mage[data-pose="aftercast"] .sb-react{transform:translateX(-3px) rotate(3deg) translateY(2px)}
+.sb-mage[data-pose="aftercast"] .sb-m-orb{transform:translate(2px,12px) scale(.82);opacity:.85}
+.sb-mage[data-pose="aftercast"] .sb-m-head{transform:translateX(calc(-50% - 2px)) rotate(6deg)}
+
+/* ---------- 주술사: ready / sustain / cleanse / pulse / rescue ---------- */
+.sb-shaman[data-pose="sustain"] .sb-react{transform:scale(1.01)}
+.sb-shaman[data-pose="sustain"] .sb-aura{transform:translateX(-50%) scale(1.24);opacity:1}
+.sb-shaman[data-pose="sustain"] .sb-s-totem{transform:rotate(0deg) translateY(-1px)}
+.sb-shaman[data-pose="sustain"] .sb-s-charm{transform:scale(1.15)}
+.sb-shaman[data-pose="cleanse"] .sb-react{transform:rotate(-3deg)}
+.sb-shaman[data-pose="cleanse"] .sb-s-charm{transform:translateY(-14px) scale(1.35)}
+.sb-shaman[data-pose="cleanse"] .sb-s-head{transform:translateX(calc(-50% + 2px)) translateY(-2px) rotate(-4deg)}
+.sb-shaman[data-pose="cleanse"] .sb-s-totem{transform:rotate(8deg) translateX(3px)}
+.sb-shaman[data-pose="pulse"] .sb-react{transform:scale(1.04)}
+.sb-shaman[data-pose="pulse"] .sb-aura{transform:translateX(-50%) scale(1.42);opacity:1}
+.sb-shaman[data-pose="pulse"] .sb-s-charm{transform:scale(1.5)}
+.sb-shaman[data-pose="pulse"] .sb-s-totem{transform:translateY(-2px)}
+.sb-shaman[data-pose="pulse"] .sb-s-body{transform:translateX(calc(-50% )) scale(1.02)}
+.sb-shaman[data-pose="rescue"] .sb-react{transform:translateX(-7px) rotate(-5deg) scale(1.02)}
+.sb-shaman[data-pose="rescue"] .sb-s-totem{transform:rotate(-12deg) translate(-4px,-2px)}
+.sb-shaman[data-pose="rescue"] .sb-s-charm{transform:translateY(-6px) scale(1.3)}
+.sb-shaman[data-pose="rescue"] .sb-s-head{transform:translateX(calc(-50% - 2px)) rotate(-6deg)}
+
+/* ============================================================ 화면 */
+.sb-gal{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.sb-gal-card{position:relative;height:150px;border-radius:11px;overflow:hidden;background:linear-gradient(180deg,var(--sb-card),#171326);border:1px solid var(--sb-panel-edge)}
+.sb-gal-card .sb-ped{position:absolute;left:50%;bottom:34px;width:56px;height:12px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(50% 50% at 50% 42%,#312a52,#201b38 78%)}
+.sb-gal-card .sb-unit{left:50%;bottom:44px}
+.sb-gal-card .sb-fig{transform:scale(.72)}
+.sb-gal-nm{position:absolute;left:0;right:0;top:7px;text-align:center;font-size:10.5px;color:#cfc4ee;letter-spacing:.2px;z-index:6}
+.sb-gal-nm small{display:block;font-size:8px;color:#8478a6;margin-top:1px;padding:0 3px;line-height:1.3}
+@media(max-width:520px){.sb-gal{grid-template-columns:repeat(3,1fr)}}
+
+.sb-ens-wrap{position:relative;border-radius:14px;overflow:hidden;background:radial-gradient(120% 90% at 50% 116%,#34305200 30%,#0d0b16 100%),radial-gradient(66% 46% at 50% 30%,rgba(255,140,58,.10),transparent 70%),linear-gradient(180deg,var(--sb-night2),var(--sb-night2) 52%,var(--sb-ground));border:1px solid var(--sb-panel-edge);box-shadow:inset 0 0 40px rgba(0,0,0,.5)}
+.sb-stage{position:relative;height:264px}
+.sb-stage .sb-lbl{position:absolute;top:8px;left:12px;font-size:10px;color:#6f6595;letter-spacing:1px}
+.sb-stage .sb-scene{position:absolute;top:8px;right:12px;font-size:10px;color:#8a7fb5;letter-spacing:.3px}
+.sb-stage .sb-unit{bottom:22px}
+.sb-stage .sb-ally{transform:translateX(-50%)}
+.sb-stage .sb-ally .sb-fig{transform:scale(.8)}
+.sb-stage .sb-iron-crusher{left:50%;top:4px;transform:translateX(-50%) scale(.80)}
+.sb-stage #eWar{left:17%;bottom:40px;z-index:4}
+.sb-stage #eRog{left:39%;bottom:26px}
+.sb-stage #eMage{left:61%;bottom:26px}
+.sb-stage #eSham{left:83%;bottom:36px}
+.sb-posebar{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:10px;color:#a99ed0;letter-spacing:.2px}
+
+.sb-ctl-row{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center;margin-top:7px}
+.sb-ctl-lbl{font-size:10.5px;color:#b6a8dc;width:48px}
+.sb-ctl{display:flex;gap:4px;flex-wrap:wrap}
+.sb-btn{font-size:10px;padding:4px 8px;border-radius:7px;border:1px solid var(--sb-panel-edge);background:#251f3e;color:#cfc4ee;cursor:pointer;font-family:inherit}
+.sb-btn:active{transform:translateY(1px)}
+.sb-btn.sb-on{background:linear-gradient(180deg,#5a4d8c,#463a70);border-color:#7d6cc0;color:#fff}
+.sb-presets{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.sb-btn.sb-preset{font-size:11px;padding:7px 13px;border-color:#4e7a6a}
+.sb-btn.sb-preset.sb-on{background:linear-gradient(180deg,#2f7a6a,#245e53);border-color:#7fd0bc}
+.sb-tools{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.sb-foot{margin-top:20px;font-size:10px;color:#615884;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="sb-page">
+ <h1>🎭 Companion Figure Pose Pack 01 — Actor Ensemble
+  <small>도적·마법사·주술사 행위 포즈 어휘 + 전사 비교 · 무대 위 배우 (docs/51) · 런타임/행동선 연동 없음</small>
+ </h1>
+
+ <h2>A. 🗡️ 도적 포즈 갤러리 — 차단·기민·진입</h2>
+ <div class="sb-gal" id="galRog"></div>
+
+ <h2>B. 🔮 마법사 포즈 갤러리 — 집중·충전·발사</h2>
+ <div class="sb-gal" id="galMage"></div>
+ <div class="sb-tools">
+  <button class="sb-btn" id="tipBtn">모자끝 금빛점: 후보 A(현행)</button>
+ </div>
+ <p class="sb-note">금빛점 후보 — <b>A</b> 모자 삼각 꼭짓점 밀착(bottom 기준·기본) / <b>B</b> 더 밀착 + 발광↓ / <b>C</b> 제거. 실전 이식 때 채택할 시각 후보만 여기서 비교(index.html 무수정).</p>
+
+ <h2>C. 🌿 주술사 포즈 갤러리 — 유지·정화·수습</h2>
+ <div class="sb-gal" id="galSham"></div>
+
+ <h2>D. 🎬 4인 Actor Ensemble — 각 배우 포즈 독립 선택</h2>
+ <div class="sb-ens-wrap">
+  <div class="sb-stage" id="ensStage">
+   <span class="sb-lbl">STAGE · 파쇄자 대치</span>
+   <span class="sb-scene" id="sceneName">기본 대치</span>
+   <div class="sb-unit sb-foe sb-iron-crusher sb-flip" id="eIron"></div>
+   <div class="sb-unit sb-ally sb-warrior" id="eWar" data-pose=""></div>
+   <div class="sb-unit sb-ally sb-rogue"   id="eRog" data-pose=""></div>
+   <div class="sb-unit sb-ally sb-mage"    id="eMage" data-pose=""></div>
+   <div class="sb-unit sb-ally sb-shaman"  id="eSham" data-pose=""></div>
+   <div class="sb-posebar" id="poseBar"></div>
+  </div>
+ </div>
+ <div class="sb-ctl-row"><div class="sb-ctl-lbl">🛡 전사</div><div class="sb-ctl" id="ctlWar"></div></div>
+ <div class="sb-ctl-row"><div class="sb-ctl-lbl">🗡 도적</div><div class="sb-ctl" id="ctlRog"></div></div>
+ <div class="sb-ctl-row"><div class="sb-ctl-lbl">🔮 법사</div><div class="sb-ctl" id="ctlMage"></div></div>
+ <div class="sb-ctl-row"><div class="sb-ctl-lbl">🌿 술사</div><div class="sb-ctl" id="ctlSham"></div></div>
+
+ <h2>E. 🎞 추천 장면 프리셋 — 네 배우 조합</h2>
+ <div class="sb-presets" id="presets"></div>
+ <p class="sb-note">프리셋 하나로 네 배우가 각자 다른 일을 한다. <b>기본 대치</b>(같은 배우 세트) → <b>강타 대응</b>(각자 준비) → <b>파티 행동 폭발</b>(동시 수행) → <b>수습과 회수</b>(결과·회복).</p>
+
+ <div class="sb-tools"><button class="sb-btn" id="stillBtn">⏸ 숨쉬기·발광 정지</button></div>
+ <p class="sb-foot">Companion Figure Pose Pack 01 · 정적 포즈 문법 프리뷰 · 전투 런타임/행동선/데칼/공격FX/수치 연동 0 · index.html 무접촉 · 외부 에셋 0<br>
+ 조형·색은 Preview 02 계승 · 전사 포즈는 Pose Pack 01 계승 · 포즈=.sb-react+.sb-part · sb- 네임스페이스 · 3층 transform</p>
+</div>
+
+<script>
+/* 보조 스크립트 — 피규어 조립 + 포즈 전환 + 프리셋. 전투/행동선/난수 없음. */
+(function(){
+ 'use strict';
+ var FIG={
+  warrior:'<span class="sb-part sb-shadow"></span><span class="sb-part sb-aura"></span><span class="sb-part sb-w-sword"></span><span class="sb-part sb-w-body"></span><span class="sb-part sb-w-pauldron"></span><span class="sb-part sb-w-head"></span><span class="sb-part sb-w-shield"></span>',
+  rogue:'<span class="sb-part sb-shadow"></span><span class="sb-part sb-aura"></span><span class="sb-part sb-r-dagger2"></span><span class="sb-part sb-r-body"></span><span class="sb-part sb-r-scarf"></span><span class="sb-part sb-r-head"></span><span class="sb-part sb-r-dagger"></span>',
+  mage:'<span class="sb-part sb-shadow"></span><span class="sb-part sb-aura"></span><span class="sb-part sb-m-body"></span><span class="sb-part sb-m-star"></span><span class="sb-part sb-m-head"></span><span class="sb-part sb-m-tip"></span><span class="sb-part sb-m-orb"></span>',
+  shaman:'<span class="sb-part sb-shadow"></span><span class="sb-part sb-aura"></span><span class="sb-part sb-s-body"></span><span class="sb-part sb-s-charm"></span><span class="sb-part sb-s-head"></span><span class="sb-part sb-s-totem"></span>',
+  iron:'<span class="sb-part sb-shadow"></span><span class="sb-part sb-aura"></span><span class="sb-part sb-ic-body"></span><span class="sb-part sb-ic-core"></span><span class="sb-part sb-ic-pauldrons"></span><span class="sb-part sb-ic-head"></span><span class="sb-part sb-ic-hammer"></span>'
+ };
+ function wrap(kind){return '<div class="sb-react"><div class="sb-fit"><div class="sb-fig">'+FIG[kind]+'</div></div></div>';}
+ var CLS={warrior:'sb-warrior',rogue:'sb-rogue',mage:'sb-mage',shaman:'sb-shaman'};
+
+ // 포즈 어휘 정의: [pose값, 이름, 전투의미, runtime후보]
+ var POSE={
+  rogue:[
+   ['','기본 / Ready','가벼운 중심·앞 단검','idle 복귀'],
+   ['interrupt','차단 준비 / Interrupt Ready','몸 낮춤·단검 세움·다음 시전 노림','interrupt ready 상태'],
+   ['dash','진입 / Dash In','전방 쏠림·스카프 뒤로','근접 진입 순간'],
+   ['strike','차단 성공 / Interrupt Hit','짧고 날카롭게 끊고 빠짐','실제 차단 성공 이벤트'],
+   ['recover','복귀 / Recover','단검 회수·다음 기회 대기','idle 복귀(긴장 유지)']
+  ],
+  mage:[
+   ['','기본 / Ready','후열 시전자·안정','idle'],
+   ['charge','충전 / Charge','구체를 몸 가까이 모음·집중','시전 중(전조)'],
+   ['channel','시전 집중 / Channel','몸 전체 주문 유지·오라 확장','지속 시전'],
+   ['release','발사 직전 / Release Ready','구체 보스 방향·앞 전환','공격 직전(행동선 앵커)'],
+   ['aftercast','시전 후 / Aftercast','구체 낮아짐·뒤로 여운','시전 종료']
+  ],
+  shaman:[
+   ['','기본 / Ready','외곽 지지·안정','idle'],
+   ['sustain','유지 집중 / Sustain','오라 파티쪽 열림·계속 떠받침','지원 효과 유지'],
+   ['cleanse','정화 준비 / Cleanse Ready','부적 들어올림·대상 응시','정화 준비/성공'],
+   ['pulse','지원 파동 / Support Pulse','고리·부적 확장·파티쪽 열림','특정 지원 스킬'],
+   ['rescue','위기 수습 / Rescue','전방 기울임·토템+부적 동시','위기 대상 발생']
+  ],
+  warrior:[
+   ['','기본','대치 기본','idle'],
+   ['guard','방패 앞세움','위험 예고·방패 전면','보스 예고/도발'],
+   ['brace','피격 대비 / Brace','충격 대비·웅크림','피격 직전'],
+   ['resolve','버티기·결의','버티며 오라 확장','저지/결의']
+  ]
+ };
+
+ // 갤러리 렌더
+ function gallery(id,kind){
+  var el=document.getElementById(id),h='';
+  POSE[kind].forEach(function(p){
+   h+='<div class="sb-gal-card"><div class="sb-gal-nm">'+p[1]+'<small>'+p[2]+'</small></div><div class="sb-ped"></div>'+
+      '<div class="sb-unit '+CLS[kind]+'" data-pose="'+p[0]+'" style="transform:translateX(-50%)">'+wrap(kind)+'</div></div>';
+  });
+  el.innerHTML=h;
+ }
+ gallery('galRog','rogue'); gallery('galMage','mage'); gallery('galSham','shaman');
+
+ // 앙상블
+ [['eWar','warrior'],['eRog','rogue'],['eMage','mage'],['eSham','shaman'],['eIron','iron']].forEach(function(o){
+  document.getElementById(o[0]).innerHTML=wrap(o[1]);
+ });
+
+ var cur={war:'',rog:'',mage:'',sham:''};
+ function applyEns(){
+  document.getElementById('eWar').setAttribute('data-pose',cur.war);
+  document.getElementById('eRog').setAttribute('data-pose',cur.rog);
+  document.getElementById('eMage').setAttribute('data-pose',cur.mage);
+  document.getElementById('eSham').setAttribute('data-pose',cur.sham);
+  function nm(kind,val){var f=POSE[kind].filter(function(p){return p[0]===val;})[0];return f?f[1].split(' / ')[0].split(' ·')[0]:val;}
+  document.getElementById('poseBar').textContent='전사 '+nm('warrior',cur.war)+' · 도적 '+nm('rogue',cur.rog)+' · 법사 '+nm('mage',cur.mage)+' · 술사 '+nm('shaman',cur.sham);
+  [['ctlWar','warrior','war'],['ctlRog','rogue','rog'],['ctlMage','mage','mage'],['ctlSham','shaman','sham']].forEach(function(c){
+   document.querySelectorAll('#'+c[0]+' .sb-btn').forEach(function(b){b.classList.toggle('sb-on',b.getAttribute('data-pose')===cur[c[2]]);});
+  });
+ }
+ // 직업별 컨트롤 버튼
+ [['ctlWar','warrior','war'],['ctlRog','rogue','rog'],['ctlMage','mage','mage'],['ctlSham','shaman','sham']].forEach(function(c){
+  var el=document.getElementById(c[0]),h='';
+  POSE[c[1]].forEach(function(p){
+   var short=p[1].split(' / ')[0];
+   h+='<button class="sb-btn" data-pose="'+p[0]+'">'+short+'</button>';
+  });
+  el.innerHTML=h;
+  el.querySelectorAll('.sb-btn').forEach(function(b){b.addEventListener('click',function(){cur[c[2]]=b.getAttribute('data-pose');document.getElementById('sceneName').textContent='자유 조합';setPresetSel(null);applyEns();});});
+ });
+
+ // 프리셋
+ var PRESETS=[
+  ['기본 대치',{war:'',rog:'',mage:'',sham:''}],
+  ['강타 대응',{war:'guard',rog:'interrupt',mage:'charge',sham:'sustain'}],
+  ['파티 행동 폭발',{war:'brace',rog:'strike',mage:'release',sham:'pulse'}],
+  ['수습과 회수',{war:'resolve',rog:'recover',mage:'aftercast',sham:'rescue'}]
+ ];
+ var pv=document.getElementById('presets'),ph='';
+ PRESETS.forEach(function(p,i){ph+='<button class="sb-btn sb-preset" data-i="'+i+'">'+p[0]+'</button>';});
+ pv.innerHTML=ph;
+ function setPresetSel(idx){document.querySelectorAll('#presets .sb-preset').forEach(function(b,i){b.classList.toggle('sb-on',i===idx);});}
+ pv.querySelectorAll('.sb-preset').forEach(function(b,i){b.addEventListener('click',function(){
+  var st=PRESETS[i][1];cur={war:st.war,rog:st.rog,mage:st.mage,sham:st.sham};
+  document.getElementById('sceneName').textContent=PRESETS[i][0];setPresetSel(i);applyEns();
+ });});
+
+ // 마법사 금빛점 후보 토글
+ var tips=['A(현행)','B(밀착+발광↓)','C(제거)'],tipCls=['','sb-tipB','sb-tipC'],ti=0;
+ document.getElementById('tipBtn').addEventListener('click',function(){
+  document.body.classList.remove('sb-tipB','sb-tipC');
+  ti=(ti+1)%3; if(tipCls[ti])document.body.classList.add(tipCls[ti]);
+  this.textContent='모자끝 금빛점: 후보 '+tips[ti];
+ });
+
+ // 숨쉬기/발광 정지
+ document.getElementById('stillBtn').addEventListener('click',function(){
+  var on=document.body.classList.toggle('sb-still');this.textContent=on?'▶ 숨쉬기·발광 재생':'⏸ 숨쉬기·발광 정지';});
+
+ // 초기: 강타 대응 프리셋으로 시작(차이가 잘 보이게)
+ cur={war:'guard',rog:'interrupt',mage:'charge',sham:'sustain'};
+ document.getElementById('sceneName').textContent='강타 대응';setPresetSel(1);applyEns();
+})();
+</script>
+</body>
+</html>
