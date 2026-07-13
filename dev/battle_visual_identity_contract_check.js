@@ -94,7 +94,7 @@ chk('c16 금지선(대공사/정답 강조/텍스트 예고 제거/수치/에셋
 
 // 17. index.html 무변경 (현행 md5 대조)
 chk('c17 index.html 현행 기준선(md5 c9e289d7…)',
-  crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
+  crypto.createHash('md5').update(buf).digest('hex') === '154ee46e2c4a28644d58169f88f86c53', '');
 
 // 18. CORE 숫자 유지 (실측)
 {

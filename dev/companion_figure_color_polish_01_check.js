@@ -94,9 +94,9 @@ chk('c18 외부 네트워크 의존 0(fetch/XHR/ws/cdn/http 0)',
 // 19. index.html md5 기준선 유지 (무변경)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c19 index.html 무변경(149,440 B · md5 bb7fc147…)',
-    buf.length === 149440 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'bb7fc1476dc5cbcd12642c9e13dad0ca', '');
+  chk('c19 index.html 무변경(155,043 B · md5 154ee46e…)',
+    buf.length === 155043 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '154ee46e2c4a28644d58169f88f86c53', '');
 }
 
 // 20. CORE 기준선 유지

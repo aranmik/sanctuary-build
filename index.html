@@ -380,6 +380,23 @@ button{font-family:inherit;cursor:pointer}
 #stage.sb-boss-iron #sa-rog{transform:translate(-8px,8px)}
 #stage.sb-boss-iron #sa-mage{transform:translate(8px,8px)}
 #stage.sb-boss-iron #sa-sham{transform:translate(24px,-6px)}
+/* Smash Line Rework 02(docs/55): shell_iron 강타 관계선 — 철·용광로 문법(빨간 UI 레이저 아님) */
+#fxSvg line.fxSmash{stroke:#7d5a34;stroke-width:2;stroke-linecap:round;filter:drop-shadow(0 0 2px rgba(255,140,58,.4));transition:opacity .18s ease,stroke-width .25s ease}
+#fxSvg line.fxSmash.on{opacity:.5}
+#fxSvg line.fxSmash.commit{stroke:#a97b3f;stroke-width:3.2}
+#fxSvg line.fxSmash.commit.on{opacity:.82}
+/* 접촉 분리: 물리 방패 막기(blk)=철 섬광 / 사제 보호막 흡수=청광 / 병존=철+청 여운 / 직격=몸 충격.
+   방패 파츠는 포즈 transform과 충돌하지 않게 filter만 애니(변형 없음). */
+#stage.sb-boss-iron #sb-war-fig.sbhit-blk .sb-w-shield{animation:sbHitShield .38s ease-out}
+#stage.sb-boss-iron #sb-war-fig.sbhit-blkabs .sb-w-shield{animation:sbHitShieldAbs .46s ease-out}
+#stage.sb-boss-iron #sb-war-fig.sbhit-abs .sb-w-shield{animation:sbHitAbsorb .46s ease-out}
+#stage.sb-boss-iron .sb-unit.sbhit-body .sb-fig{animation:sbHitBody .32s ease-out}
+#stage.sb-boss-iron #sb-war-fig.sbhit-body .sb-w-body{animation:sbHitFlash .32s ease-out}
+@keyframes sbHitShield{0%{filter:none}28%{filter:brightness(1.7)}100%{filter:none}}
+@keyframes sbHitShieldAbs{0%{filter:none}28%{filter:brightness(1.6) drop-shadow(0 0 5px rgba(143,220,255,.85))}68%{filter:drop-shadow(0 0 3px rgba(143,220,255,.4))}100%{filter:none}}
+@keyframes sbHitAbsorb{0%{filter:none}35%{filter:brightness(1.3) drop-shadow(0 0 6px rgba(143,220,255,.9))}100%{filter:none}}
+@keyframes sbHitBody{0%{transform:none}25%{transform:translateX(4px)}55%{transform:translateX(-2px)}100%{transform:none}}
+@keyframes sbHitFlash{0%{filter:none}30%{filter:brightness(1.5)}100%{filter:none}}
 /* 포즈 어휘 (연결분만: 전사 guard/brace · 파쇄자 windup) */
 #stage .sb-warrior[data-pose="guard"] .sb-react{transform:translateX(4px)}
 #stage .sb-warrior[data-pose="guard"] .sb-w-shield{transform:translateX(-15px) translateY(-3px) scale(1.22)}
@@ -1871,6 +1888,76 @@ function fxBeam(tg,kind){
 function fxWave(){
  ['war','rog','mage','sham'].forEach(function(id){var fl=$('fxf-'+id);if(fl){fl.className='figFlash ff-heal on';setTimeout((function(x){return function(){x.className='figFlash';};})(fl),560);}});
 }
+/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리 (render 전용·판정 무접촉·docs/55)
+   - source=망치 파츠 rect(자루 상단) / target=실대상 파츠 rect — 유령 좌표(숨겨진 아바타) 제거
+   - cast 중 관계선과 resolve 결과는 별개 판정: blk(각본 물리 막기)/absorb(S.st.abs delta)/직격 세 신호 분리 */
+var SB_SM=null; /* render 전용 시각 스냅샷(전투 상태 S에 저장하지 않음·새 타이머 없음) */
+var SB_DIRTY=false; /* 접촉 class 잔존 표시 — 보스 전환/전투 이탈 시 확실 정리 */
+var SB_BODY={war:['sb-war-fig','sb-w-body'],rog:['sb-rog-fig','sb-r-body'],mage:['sb-mage-fig','sb-m-body'],sham:['sb-sham-fig','sb-s-body']};
+function sbPt(figId,part,topBias){
+ var st=$('stage'),fig=$(figId); if(!st||!fig)return null;
+ var el=fig.querySelector('.'+part); if(!el)return null;
+ var r=el.getBoundingClientRect(); if(!r.width&&!r.height)return null;
+ var sr=st.getBoundingClientRect(); if(!sr.width)return null;
+ return {x:r.left-sr.left+r.width/2,y:r.top-sr.top+(topBias?r.height*0.12:r.height/2)};
+}
+function sbHitClear(){
+ for(var k in SB_BODY){var e=$(SB_BODY[k][0]);if(e)e.classList.remove('sbhit-blk','sbhit-abs','sbhit-blkabs','sbhit-body');}
+}
+function sbSmashFx(S,t){
+ var iron=(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron');
+ var ln=$('fxBossLine'); if(!ln)return iron;
+ if(!iron){ if(SB_SM||SB_DIRTY){SB_SM=null;SB_DIRTY=false;sbHitClear();} return false; }
+ var bc=S.boss.cast, casting=!!(bc&&bc.kind==='smash');
+ if(casting){
+  var tgU=null; for(var i=0;i<S.al.length;i++){if(S.al[i].id===bc.tg)tgU=S.al[i];}
+  if(!SB_SM||SB_SM.S!==S||SB_SM.start!==bc.start){
+   sbHitClear();
+   SB_SM={S:S,start:bc.start,end:bc.end,tg:bc.tg,blk:!!bc.blk,
+          sh0:!!(tgU&&tgU.shield&&tgU.shield.amt>0),absL:S.st.abs,aliveL:!!(tgU&&tgU.alive)};
+  }
+  SB_SM.absL=S.st.abs; SB_SM.aliveL=!!(tgU&&tgU.alive);
+  var src=sbPt('sb-boss-fig','sb-ic-hammer',1), dst=null;
+  if(tgU&&tgU.alive){
+   if(bc.tg==='war')dst=sbPt('sb-war-fig',(SB_SM.blk||SB_SM.sh0)?'sb-w-shield':'sb-w-body');
+   else if(SB_BODY[bc.tg])dst=sbPt(SB_BODY[bc.tg][0],SB_BODY[bc.tg][1]);
+  }
+  var on=!!(src&&dst); /* anchor 부재/대상 무효 → 선 숨김(모서리 fallback 없음) */
+  if(on){ln.setAttribute('x1',src.x);ln.setAttribute('y1',src.y);ln.setAttribute('x2',dst.x);ln.setAttribute('y2',dst.y);}
+  var pr=(t-bc.start)/Math.max(0.001,bc.end-bc.start);
+  var nc='fxSmash'+(pr>=0.6?' commit':'')+(on?' on':'');
+  if(ln.getAttribute('class')!==nc)ln.setAttribute('class',nc);
+  return true;
+ }
+ if(SB_SM){
+  var sm=SB_SM; SB_SM=null;
+  if(ln.getAttribute('class')!=='fxSmash')ln.setAttribute('class','fxSmash');
+  /* 실제 resolve 근거: 같은 전투(S 동일)+시전 만료 도달+마지막 프레임 대상 생존(미스 배제) */
+  if(sm.S===S&&t>=sm.end-0.05&&sm.aliveL){
+   var abs=(S.st.abs-sm.absL)>0; /* 같은 tick 흡수 발생 근거(직전 프레임 대비 delta) */
+   var fig=SB_BODY[sm.tg]?$(SB_BODY[sm.tg][0]):null;
+   if(fig){
+    var cls;
+    if(sm.tg==='war')cls=sm.blk?(abs?'sbhit-blkabs':'sbhit-blk'):(abs?'sbhit-abs':'sbhit-body');
+    else cls='sbhit-body';
+    fig.classList.remove('sbhit-blk','sbhit-abs','sbhit-blkabs','sbhit-body');
+    void fig.offsetWidth;
+    fig.classList.add(cls);SB_DIRTY=true;
+   }
+  }
+ }else{
+  if(ln.getAttribute('class')==='fxSmash on'||ln.getAttribute('class')==='fxSmash commit on')ln.setAttribute('class','fxSmash');
+ }
+ return true;
+}
+(function(){ /* 접촉 class 수명: animationend로 정리(새 setTimeout 없음) */
+ for(var k in SB_BODY){(function(id){
+  var e=document.getElementById(id);
+  if(e)e.addEventListener('animationend',function(ev){
+   if(ev.animationName&&ev.animationName.indexOf('sbHit')===0)e.classList.remove('sbhit-blk','sbhit-abs','sbhit-blkabs','sbhit-body');
+  });
+ })(SB_BODY[k][0]);}
+})();
 /* Iron Crusher Figure Rework 01: 기존 전투 상태 → sb 피규어 포즈 class (시각 전용·판정 무접촉·docs/44) */
 function sbFigPose(S){
  if(typeof CUR_BOSS==='undefined'||CUR_BOSS!=='shell_iron')return;
@@ -1887,7 +1974,7 @@ function renderFx(S,t,p,mt){
  if(!A)A=fxAnchors(); if(!A)return;
  var bc=S.boss.cast;
  var smashTg=(bc&&bc.kind==='smash')?bc.tg:null;
- fxLn('fxBossLine',A.boss,smashTg?A[smashTg]:null,!!smashTg,'fxBoss');
+ if(!sbSmashFx(S,t))fxLn('fxBossLine',A.boss,smashTg?A[smashTg]:null,!!smashTg,'fxBoss');
  var aoe=!!(bc&&bc.kind==='judge');
  fxToggle('fxAoe',aoe); fxToggle('fxAoeDecal',aoe);
  var rog=null; for(var i=0;i<S.al.length;i++){if(S.al[i].id==='rog')rog=S.al[i];}
