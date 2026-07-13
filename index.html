@@ -15,17 +15,17 @@ button{font-family:inherit;cursor:pointer}
 .hidden{display:none!important}
 
 /* ===== HUD ===== */
-#hud{padding:8px 11px 9px;flex:none}
+#hud{padding:6px 11px 6px;flex:none} /* Rebalance 01: 상단 압축(정보 불변·docs/56) */
 .hudTop{display:flex;justify-content:space-between;align-items:center;gap:6px}
 #bossName{font-size:14px;font-weight:800;color:#e9b8c4;letter-spacing:.02em;text-shadow:0 0 8px rgba(192,38,60,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hudR{display:flex;align-items:center;gap:6px;flex:none}
 #clock{font-size:11px;color:#c9bfe6;font-variant-numeric:tabular-nums;white-space:nowrap}
 #enrageTag{color:#ff8a95;font-weight:800;font-size:10px;animation:blinkA .5s infinite alternate;white-space:nowrap}
 #sndBtn{background:#241b3f;border:1px solid #453569;border-radius:8px;color:#e8e2f4;font-size:13px;padding:3px 8px}
-.bossbar{position:relative;height:20px;margin-top:7px;background:#3a0d16;border:1px solid #6b1d2a;border-radius:10px;overflow:hidden}
+.bossbar{position:relative;height:20px;margin-top:5px;background:#3a0d16;border:1px solid #6b1d2a;border-radius:10px;overflow:hidden}
 #bossFill{position:absolute;top:0;left:0;bottom:0;width:100%;background:linear-gradient(180deg,#e04358,#8f1626)}
 #bossTxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ffe3e8;text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
-.castwrap{position:relative;height:17px;margin-top:5px;background:#221a3c;border:1px solid #4a3a78;border-radius:8px;overflow:hidden}
+.castwrap{position:relative;height:17px;margin-top:3px;background:#221a3c;border:1px solid #4a3a78;border-radius:8px;overflow:hidden}
 .castFill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,#7c4fd0,#b18cff)}
 .castwrap.noInt{border-color:#c0263c}
 .castwrap.noInt .castFill{background:linear-gradient(90deg,#c0263c,#ff7a8a)}
@@ -35,7 +35,7 @@ button{font-family:inherit;cursor:pointer}
 
 /* ===== WARN BAR ===== */
 #warnBar{display:flex;gap:6px;flex:none}
-#warnBar>div{flex:1;display:flex;align-items:center;gap:5px;padding:6px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;border:1px solid}
+#warnBar>div{flex:1;display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;border:1px solid}
 .warnIco{flex:none;font-size:12px}
 .warnL{background:rgba(60,30,10,.5);border-color:#7a4a1e;color:#ffcf9d}
 #nextPat{overflow:hidden;text-overflow:ellipsis}
@@ -143,7 +143,8 @@ button{font-family:inherit;cursor:pointer}
 .skName{font-size:11px;font-weight:800}
 .skCost{font-size:9.5px;color:#a795d1}
 .skill.noMana .skCost{color:#ff8a95}
-.skill.gLock{opacity:.78}
+.skill{transition:opacity .18s ease} /* 잠금 해제 시 자연 복귀(플래시 없음) */
+.skill.gLock{opacity:.66}
 .skill.dis{opacity:.5}
 .skVeil{position:absolute;left:0;right:0;bottom:0;height:0%;background:rgba(6,4,14,.68);display:flex;align-items:center;justify-content:center;pointer-events:none}
 .skCdNum{font-size:14px;font-weight:900;color:#efe8ff;text-shadow:0 1px 3px #000;font-variant-numeric:tabular-nums}
@@ -151,7 +152,7 @@ button{font-family:inherit;cursor:pointer}
 .skill.passive{border-style:dashed;border-color:#5a4a80;background:linear-gradient(180deg,#231b3d,#161027)}
 .skill.passive .skCost{color:#9d8cc9}
 .skOn{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:900;color:#8fe3a5;background:rgba(20,50,30,.6);border:1px solid #3fae62;border-radius:5px;padding:0 4px}
-#gcdBar{height:3px;background:#241b3f;border-radius:2px;overflow:hidden;flex:none}
+#gcdBar{height:3px;background:#241b3f;border-radius:2px;overflow:hidden;flex:none;display:none} /* Rebalance 01: 순수 글로벌 잠금 바 — 버튼 gLock 표현으로 이관·높이 회수(감사 docs/56 §7) */
 #gcdFill{height:100%;width:0%;background:#f4c95d}
 /* ===== 02A-HF1: 고정 슬롯 / 자원 시인성 ===== */
 .thBadge{min-width:34px;height:15px;display:inline-flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
@@ -166,6 +167,9 @@ button{font-family:inherit;cursor:pointer}
 .skVeil{z-index:1}
 .skill.focusArmed{border-color:#e9c46a;box-shadow:0 0 9px rgba(233,196,106,.55)}
 .skill.dis{opacity:.62}
+/* Rebalance 01: 시전 중 스킬 버튼 — dim 대신 밝게 + 하단 금빛 진행선(실제 p.cast 진행률·priCast와 동일 언어) */
+.skill.casting{opacity:1}
+.skill.casting::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--cp,0%);background:linear-gradient(90deg,#b58a1f,#ffd76a);border-radius:0 2px 2px 0}
 .skCost .rcMana{color:#8ab4ff;font-weight:800}
 .skCost .rcHoly{color:#ffd76a;font-weight:800}
 .skill.saveReady .rcHoly{color:#ffe08a}
@@ -375,7 +379,7 @@ button{font-family:inherit;cursor:pointer}
 /* Rework 02: 파쇄자 전투만 — 파티 줄 위로 + 전사 반보 전진(대치 압축) */
 /* Rework 03: 원호/포위형 배치 (shell_iron 스코프) — 전사·술사 앞날개, 도적·법사 중앙 뒤 */
 /* Layout Rework 01(안 B): 4인 확대 + 좌우 날개 확장으로 파쇄자 포위(더 크게·더 벌려·대등 대치) */
-#stage.sb-boss-iron #stageAllies{bottom:26px;gap:26px}
+#stage.sb-boss-iron #stageAllies{bottom:20px;gap:26px} /* Rebalance 01: 확장된 무대 하단 사용(가로 배치·scale 불변) */
 #stage.sb-boss-iron #sa-war{transform:translate(-24px,-12px);z-index:4}
 #stage.sb-boss-iron #sa-rog{transform:translate(-8px,8px)}
 #stage.sb-boss-iron #sa-mage{transform:translate(8px,8px)}
@@ -2074,6 +2078,10 @@ function render(){
   if(k==='shield'&&su&&t<su.shieldLock){dis=true;vh=100*(su.shieldLock-t)/sk.lock;ct=(su.shieldLock-t).toFixed(1);}
   sC(b,'gLock',t<p.gcd);
   sC(b,'dis',dis);
+  /* Rebalance 01: 시전 중 버튼 표시 — 기존 p.cast(end/dur)만 읽음·새 상태/타이머 0 (docs/56) */
+  const isCasting=!!(p.cast&&p.cast.k===k);
+  sC(b,'casting',isCasting);
+  if(isCasting){const cpv=Math.min(100,Math.max(0,100*(1-(p.cast.end-t)/p.cast.dur))).toFixed(0)+'%';if(b.__cp!==cpv){b.__cp=cpv;b.style.setProperty('--cp',cpv);}}
   const vhs=vh.toFixed(1)+'%';
   if(veil.__vh!==vhs){veil.__vh=vhs;veil.style.height=vhs;}
   sT(cdn,ct);

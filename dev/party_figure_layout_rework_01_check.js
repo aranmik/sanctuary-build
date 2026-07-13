@@ -56,8 +56,10 @@ chk('c5 4인 개별 transform 파싱',
   tw ? `war(${tw.x},${tw.y}) rog(${tr.x},${tr.y}) mage(${tm.x},${tm.y}) sham(${ts.x},${ts.y})` : 'parse fail');
 
 // 6. Party Rework 01 대비 레이아웃 값이 실제로 조정됨 (gap 26 ≠ 12)
+//    ★bottom 상수 승계: 26px(본 카드) → 20px(Rebalance 01·docs/56 §9 승인 — 확장 무대 하단 사용).
+//    본 단언의 취지(gap 26 상향+shell_iron 스코프)는 그대로 검증한다.
 chk('c6 stageAllies gap 상향 조정(26, 이전 12 대비 증가)',
-  hasH('#stage.sb-boss-iron #stageAllies{bottom:26px;gap:26px}'), '');
+  /#stage\.sb-boss-iron #stageAllies\{bottom:20px;gap:26px\}/.test(html), '');
 
 // 7. 크기 상향 — 전사/도적/마법사/주술사/파쇄자 scale
 const sw = figScale('sb-war-fig'), sr = figScale('sb-rog-fig'), sm = figScale('sb-mage-fig'),
@@ -125,9 +127,9 @@ chk('c18 링/플래시(fxr/fxf) 4동료 유지',
 }
 
 // 20. index.html 현행 기준선 (Layout Rework 01 재-baseline)
-chk('c20 index.html 현행 기준선(155,043 B · md5 154ee46e…)',
-  buf.length === 155043 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '154ee46e2c4a28644d58169f88f86c53', '');
+chk('c20 index.html 현행 기준선(156,106 B · md5 ad2a4a4d…)',
+  buf.length === 156106 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
 
 // 21. CORE byte-identical
 {

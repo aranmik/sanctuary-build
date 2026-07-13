@@ -78,8 +78,8 @@ chk('c14 HOLD 파일 repo 미유입',
 
 // 16. index.html 현행 기준선
 chk('c16 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 155043 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '154ee46e2c4a28644d58169f88f86c53', '');
+  buf.length === 156106 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
 
 // 17. CORE 기준선 유지 (실측 byte-identical)
 {

@@ -14,9 +14,9 @@ const lineCount=p=>lines.filter(l=>l.includes(p)).length;      // grep -c 동등
 const occCount=p=>src.split(p).length-1;                        // grep -o 동등(발생 횟수)
 
 // 1. 원본 바이트/줄/md5
-chk('bytes',buf.length,155043);
-chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),2185);
-chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'154ee46e2c4a28644d58169f88f86c53');
+chk('bytes',buf.length,156106);
+chk('lines',src.split('\n').length-(src.endsWith('\n')?1:0),2193);
+chk('md5',crypto.createHash('md5').update(buf).digest('hex'),'ad2a4a4d391e477deafd3b648641c20b');
 
 // 2. CORE 추출 (awk 동등: START 다음 줄 ~ END 직전 줄)
 {let f=0,core=[];for(const l of lines){if(l.includes('//__CORE_START__')){f=1;continue;}if(l.includes('//__CORE_END__'))f=0;if(f)core.push(l);}

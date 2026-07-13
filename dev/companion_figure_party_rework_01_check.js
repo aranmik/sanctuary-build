@@ -94,9 +94,9 @@ chk('c15 신규 상태/타이머 없음(sbFigPose 기존 상태만)',
 }
 
 // 17. index.html 현행 기준선
-chk('c17 index.html 현행 기준선(155,043 B · md5 154ee46e…)',
-  buf.length === 155043 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '154ee46e2c4a28644d58169f88f86c53', '');
+chk('c17 index.html 현행 기준선(156,106 B · md5 ad2a4a4d…)',
+  buf.length === 156106 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
 
 // 18. CORE byte-identical
 {
