@@ -93,7 +93,7 @@ chk('c16 금지 목록(.part/.body/.bt/.sig-av·render.js·좌표계)',
 
 // 17. index.html 무변경 (v8.6 정본 md5 · CSS/JS 포함 단일 파일)
 chk('c17 index.html 무변경(md5 c9e289d7… · CSS/JS 무변 포함)',
-  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
+  crypto.createHash('md5').update(buf).digest('hex') === '2f7a1b29dba5b79950ebdbbeb6e06fb6', '');
 
 // 18. CORE 숫자 유지 (실측)
 {

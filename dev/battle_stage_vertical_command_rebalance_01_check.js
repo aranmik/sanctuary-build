@@ -43,9 +43,9 @@ chk('c5 gcdBar 회수(display:none·DOM 유지)',
   inSrc('#gcdBar{height:3px') && /#gcdBar\{[^}]*display:none/.test(src) &&
   inSrc('<div id="gcdBar"><div id="gcdFill"></div></div>') && inSrc("sW($('gcdFill')"), '');
 
-// 6. 보스 상향 — top-anchor 유지(무대 확장 시 자동 상향) + 클리핑 방지 top:2px 유지
-chk('c6 파쇄자 top-anchor 유지(top:2px·scale 1.04 불변)',
-  inSrc('#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(1.04)'), '');
+// 6. 보스 상향 — top-anchor 유지(무대 확장 시 자동 상향) · top 정확값은 Polish 02 승인 이동으로 2→-8 승계(docs/57)
+chk('c6 파쇄자 top-anchor 유지(top:-8px 〔승계 — Polish 02〕·scale 1.04 불변)',
+  inSrc('#sb-boss-fig{left:50%;top:-8px;transform:translateX(-50%) scale(1.04)'), '');
 
 // 7. 파티 scale 무변경 (.80/.74/.76/.74)
 chk('c7 파티 scale 무변경',
@@ -74,27 +74,27 @@ chk('c11 dis 판정·시각 정합(기존 로직)',
   inSrc("sC(b,'dis',dis);") && inSrc('let dis=!S.started||S.over||!!p.cast;') &&
   inSrc('.skill.dis{opacity:.62}'), '');
 
-// 12. 선택 스킬 cast progress 실제 state (p.cast.end/dur · CSS 고정시간 아님)
-chk('c12 casting 진행=실제 p.cast(end/dur)',
-  inSrc("sC(b,'casting',isCasting);") &&
-  inSrc('100*(1-(p.cast.end-t)/p.cast.dur)') &&
-  inSrc('.skill.casting::after') && inSrc('width:var(--cp,0%)'), '');
+// 12. 〔승계 — Polish 02(docs/57)〕 버튼 cast progress 제거 — 정확 진행은 priCastWrap 한 곳(원계약 "실제 state만 사용"은 priCast 쪽에서 유지)
+chk('c12 버튼 cast progress 제거 승계(진행은 priCastWrap 실 p.cast만)',
+  !inSrc("sC(b,'casting'") &&
+  !inSrc('.skill.casting') && !inSrc('var(--cp') &&
+  inSrc('100*(1-(p.cast.end-t)/p.cast.dur)'), '');
 
 // 13~14. 새 gameplay timer/state 없음 (신규 코드 영역 검사)
 {
   const seg1 = src.slice(src.indexOf("sC(b,'gLock',t<p.gcd);"), src.indexOf("sC(b,'gLock',t<p.gcd);") + 700);
-  chk('c13 새 타이머 없음(신규 casting 코드에 setTimeout/Interval 0)',
+  chk('c13 새 타이머 없음(gLock 인접 코드에 setTimeout/Interval 0)',
     seg1.indexOf('setTimeout(') < 0 && seg1.indexOf('setInterval(') < 0, '');
-  const seg2 = seg1.slice(seg1.indexOf('/* Rebalance 01'));
-  chk('c14 새 gameplay state 없음(신규 casting 코드에 p./S. 대입 0 · __cp는 DOM 캐시)',
-    seg2.length > 50 &&
-    !/p\.\w+\s*=[^=]/.test(seg2) && !/S\.\w+\s*=[^=]/.test(seg2), '');
+  /* 〔승계 — Polish 02〕 앵커 '/* Rebalance 01' 주석이 casting 코드와 함께 제거됨 → gLock 앵커 구간 전체로 동일 단언 유지 */
+  chk('c14 새 gameplay state 없음(gLock 인접 코드에 p./S. 대입 0)',
+    seg1.length > 50 &&
+    !/p\.\w+\s*=[^=]/.test(seg1) && !/S\.\w+\s*=[^=]/.test(seg1), '');
 }
 
-// 15. 글로벌 잠금·마나 부족·시전 중 구분 (세 class 별도 CSS)
-chk('c15 gLock/noMana/casting 구분 CSS',
+// 15. 글로벌 잠금·마나 부족 구분 유지 · casting 밝음 예외는 Polish 02 승인 제거 승계(docs/57 — 시전 중엔 전체 dim 공통 언어)
+chk('c15 gLock/noMana 구분 CSS + casting 밝음 예외 제거 승계',
   inSrc('.skill.gLock{opacity:.66}') && inSrc('.skill.noMana .skCost{color:#ff8a95}') &&
-  inSrc('.skill.casting{opacity:1}'), '');
+  !inSrc('.skill.casting{opacity:1}'), '');
 
 // 16. 독립 바 제거 + 시전 정확 진행은 사제 HUD(priCastWrap) 유지 = §11 허용 위치
 chk('c16 독립 gcdBar 회수 + priCastWrap(HUD 내) 유지',
@@ -152,9 +152,9 @@ try {
 // 26. index 현행 기준선 (재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 현행 기준선(156,106 B · md5 ad2a4a4d…)',
-    buf.length === 156106 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
+  chk('c26 index.html 현행 기준선(155,854 B · md5 2f7a1b29…)',
+    buf.length === 155854 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '2f7a1b29dba5b79950ebdbbeb6e06fb6', '');
 }
 
 // 27. docs/56 필수 절

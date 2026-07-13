@@ -32,7 +32,7 @@ chk('c3 전사/파쇄자 sb 피규어',
 
 // 4. 크기 튜닝 적용 (Rework 02가 sb 피규어에 확대 scale 도입 — 정확한 값은 이후 Rework 03[docs/46]에서 갱신)
 chk('c4 크기 튜닝 존재(sb-boss-fig/sb-war-fig scale)',
-  hasH('#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(') &&
+  hasH('#sb-boss-fig{left:50%;top:-8px;transform:translateX(-50%) scale(') && /* Polish 02 승계: top 2→-8(docs/57) */
   hasH('#sb-war-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale('), '');
 
 // 5. 배치 튜닝 존재 (파티 줄 위로 + 동료 배치 · shell_iron 스코프 · 값은 Rework 03에서 원호로 갱신)
@@ -64,8 +64,8 @@ chk('c9 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 11. index.html 현행 기준선
 chk('c11 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 156106 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
+  buf.length === 155854 &&
+  crypto.createHash('md5').update(buf).digest('hex') === '2f7a1b29dba5b79950ebdbbeb6e06fb6', '');
 
 // 12. CORE byte-identical
 {

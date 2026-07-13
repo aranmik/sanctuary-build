@@ -167,9 +167,7 @@ button{font-family:inherit;cursor:pointer}
 .skVeil{z-index:1}
 .skill.focusArmed{border-color:#e9c46a;box-shadow:0 0 9px rgba(233,196,106,.55)}
 .skill.dis{opacity:.62}
-/* Rebalance 01: 시전 중 스킬 버튼 — dim 대신 밝게 + 하단 금빛 진행선(실제 p.cast 진행률·priCast와 동일 언어) */
-.skill.casting{opacity:1}
-.skill.casting::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--cp,0%);background:linear-gradient(90deg,#b58a1f,#ffd76a);border-radius:0 2px 2px 0}
+/* Polish 02: 버튼 cast progress 제거 — 정확한 시전 진행은 사제 HUD(priCastWrap) 한 곳, 시전·잠금 중 버튼은 전체 dim 언어만 공유(docs/57) */
 .skCost .rcMana{color:#8ab4ff;font-weight:800}
 .skCost .rcHoly{color:#ffd76a;font-weight:800}
 .skill.saveReady .rcHoly{color:#ffe08a}
@@ -367,7 +365,7 @@ button{font-family:inherit;cursor:pointer}
 #stage .sb-shaman .sb-s-totem::before{content:"";position:absolute;left:50%;top:-13px;width:16px;height:16px;transform:translateX(-50%);border-radius:50%;border:3px solid var(--sb-s-main);background:radial-gradient(circle,rgba(143,232,216,.55),transparent 62%);box-shadow:0 0 0 1.5px var(--sb-s-edge),0 0 9px rgba(143,232,216,.6)}
 #stage .sb-shaman .sb-s-totem::after{content:"";position:absolute;left:50%;top:2px;width:6px;height:6px;transform:translateX(-50%);border-radius:50%;background:var(--sb-s-glow);box-shadow:0 0 6px var(--sb-s-glow)}
 /* 전장 배치 + 스위칭 (shell_iron 전투만) — Rework 02: 크기↑·대치 구도 압축 */
-#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(1.04);transform-origin:50% 0;display:none;z-index:2}
+#sb-boss-fig{left:50%;top:-8px;transform:translateX(-50%) scale(1.04);transform-origin:50% 0;display:none;z-index:2} /* Polish 02: 보스 10px 추가 상향(top 2→-8) — windup 망치 최상단 실측 여유 확보·scale 불변(docs/57) */
 #sb-war-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale(.80);transform-origin:50% 100%;display:none;z-index:4}
 #sb-rog-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale(.74);transform-origin:50% 100%;display:none;z-index:3}
 #sb-mage-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale(.76);transform-origin:50% 100%;display:none;z-index:3}
@@ -2078,10 +2076,7 @@ function render(){
   if(k==='shield'&&su&&t<su.shieldLock){dis=true;vh=100*(su.shieldLock-t)/sk.lock;ct=(su.shieldLock-t).toFixed(1);}
   sC(b,'gLock',t<p.gcd);
   sC(b,'dis',dis);
-  /* Rebalance 01: 시전 중 버튼 표시 — 기존 p.cast(end/dur)만 읽음·새 상태/타이머 0 (docs/56) */
-  const isCasting=!!(p.cast&&p.cast.k===k);
-  sC(b,'casting',isCasting);
-  if(isCasting){const cpv=Math.min(100,Math.max(0,100*(1-(p.cast.end-t)/p.cast.dur))).toFixed(0)+'%';if(b.__cp!==cpv){b.__cp=cpv;b.style.setProperty('--cp',cpv);}}
+  /* Polish 02: 버튼 casting class/--cp 토글 제거(시각 전용이던 render 계산) — 진행 표시는 priCastWrap 한 곳(docs/57) */
   const vhs=vh.toFixed(1)+'%';
   if(veil.__vh!==vhs){veil.__vh=vhs;veil.style.height=vhs;}
   sT(cdn,ct);

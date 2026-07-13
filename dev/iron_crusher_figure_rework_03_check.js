@@ -32,7 +32,7 @@ chk('c3 전사/파쇄자 sb 피규어',
 
 // 4. 확대값 존재 (Rework 03 도입 · 정확 값은 이후 Party Rework 01[docs/49]에서 갱신)
 chk('c4 확대 적용(파쇄자/전사 scale 존재)',
-  hasH('#sb-boss-fig{left:50%;top:2px;transform:translateX(-50%) scale(') &&
+  hasH('#sb-boss-fig{left:50%;top:-8px;transform:translateX(-50%) scale(') && /* Polish 02 승계: top 2→-8(docs/57) */
   hasH('#sb-war-fig{left:50%;bottom:-3px;transform:translateX(-50%) scale('), '');
 
 // 5. 원호/포위형 배치 — 4동료 개별 transform (shell_iron 스코프)
@@ -70,8 +70,8 @@ chk('c10 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 12. index.html 현행 기준선
 chk('c12 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 156106 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'ad2a4a4d391e477deafd3b648641c20b', '');
+  buf.length === 155854 &&
+  crypto.createHash('md5').update(buf).digest('hex') === '2f7a1b29dba5b79950ebdbbeb6e06fb6', '');
 
 // 13. CORE byte-identical
 {
