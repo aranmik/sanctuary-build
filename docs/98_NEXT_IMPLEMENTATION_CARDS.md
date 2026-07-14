@@ -157,3 +157,9 @@
 
 ---
 *— 렌, EP10 활주로 팩. 티켓 경계는 유키 결정(상단 3건)이 상위 게이트다.*
+
+---
+
+## EP24 Closeout Update
+
+**Battle Stage Vertical Polish 02 Final Closeout 01** ✅ 카드 단위 FINAL PASS([58](./58_BATTLE_STAGE_VERTICAL_POLISH_02_FINAL_CLOSEOUT.md) · 나라님 Phone Human Gate 강한 PASS · `66a7686` · index/CORE/gameplay 무변경). 다음 작업은 **Skill Cooldown Label Audit 01**이며, 쿨타임 글씨 감사 전의 추가 폴리시, 행동선 미감 개선, 파쇄자 추가 상향은 모두 비차단 backlog다.
