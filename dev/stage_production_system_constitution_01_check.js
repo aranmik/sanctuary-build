@@ -40,9 +40,9 @@ chk('c2 document-only 선언', in59('document-only', '구현 0') && in60('docume
   let f = 0, core = [];
   for (const l of lines) { if (l.includes('//__CORE_START__')) { f = 1; continue; } if (l.includes('//__CORE_END__')) f = 0; if (f) core.push(l); }
   const cmd5 = crypto.createHash('md5').update(core.join('\n') + '\n').digest('hex');
-  chk('c3 index/CORE byte-identical(167,719/956248ca·CORE 6cad2ec2)',
-    buf.length === 167719 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '956248cac4053a7c738074173ffd2904' &&
+  chk('c3 index/CORE byte-identical(174,534/2326daeb·CORE 6cad2ec2)',
+    buf.length === 174534 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '2326daebc987645f32888fa6d74455a4' &&
     core.length === 466 && cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', '');
 }
 
@@ -163,9 +163,12 @@ chk('c29 실제 actor/boss id 사례(war/rog/mage/sham·boss01/shell_iron/shell_
   inSrc("id:'war'") && inSrc('shell_iron') && inSrc('shell_thirst'), '');
 
 // 30. Iron Crusher 0-rect 유령 좌표 회귀 사례 봉인
-chk('c30 유령 좌표 회귀 사례(0-rect→null→숨김·(0,0) 퇴화 금지·실코드 대조)',
+// 〔승계 — F3 closeout(docs/64)〕 헌법 문서의 유령 좌표 서술(fxAnchors A.boss=c('bossAvatar')→0-rect 퇴화)은
+// 회귀 사례로 유지. 실코드에선 F3가 fxAnchors를 resolveAnchor facade로 이관→bossAvatar도 rect-zero→null로 봉인.
+chk('c30 유령 좌표 회귀 사례(0-rect→null→숨김·(0,0) 퇴화 금지·실코드 대조·F3 봉인)',
   in59('유령', '회귀', 'display:none') && in59('on=!!(src&&dst)') &&
-  inSrc('var on=!!(src&&dst);') && inSrc("a={boss:c('bossAvatar')"), '');
+  inSrc('var on=!!(src&&dst);') && inSrc("resolveAnchor('boss','avatar')") &&
+  src.indexOf("window.addEventListener('resize',function(){A=null;})") < 0, '');
 
 // 31. 보스 전환 격리
 chk('c31 보스 전환 격리(전환 프레임 잔재 0·실코드 정리 경로 실존)',

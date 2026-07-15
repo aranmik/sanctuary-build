@@ -1973,16 +1973,17 @@ function showCallout(m,c){
  clearTimeout(calloutTm);calloutTm=setTimeout(function(){b.classList.remove('show');},1400);
 }
 /* ===== 02B: 전장 행동선 오버레이 (render-only) ===== */
+/* F3 closeout(docs/64): fxAnchors는 독립 좌표 소유자가 아님 — 자체 selector/장기 cache/fallback 0.
+   Anchor Registry(slot/avatar/virtual)만 조립하는 얇은 facade. 무효 anchor=null(유령 좌표 없음).
+   장기 cache 제거: A는 매 호출 재조립(resize-only 전역 cache 폐기 — 실제 사용 시점 rect). */
 var A=null;
 function fxAnchors(){
- var st=$('stage'); if(!st)return null;
- var sr=st.getBoundingClientRect(); if(!sr.width||!sr.height)return null;
- function c(id){var e=$(id);if(!e)return null;var r=e.getBoundingClientRect();return {x:r.left-sr.left+r.width/2,y:r.top-sr.top+r.height/2};}
- var a={boss:c('bossAvatar'),war:c('sa-war'),rog:c('sa-rog'),mage:c('sa-mage'),sham:c('sa-sham')};
- a.pri={x:sr.width/2,y:sr.height-4};
- return a;
+ var pt=function(r){return r?r.point:null;};
+ return {boss:pt(resolveAnchor('boss','avatar')),
+  war:pt(resolveAnchor('war','slot')),rog:pt(resolveAnchor('rog','slot')),
+  mage:pt(resolveAnchor('mage','slot')),sham:pt(resolveAnchor('sham','slot')),
+  pri:pt(resolveAnchor('pri','origin'))};
 }
-window.addEventListener('resize',function(){A=null;});
 function fxLn(id,from,to,on,cls){
  var e=$(id); if(!e)return;
  if(from&&to){e.setAttribute('x1',from.x);e.setAttribute('y1',from.y);e.setAttribute('x2',to.x);e.setAttribute('y2',to.y);}
@@ -1991,7 +1992,7 @@ function fxLn(id,from,to,on,cls){
 function fxToggle(id,on){var e=$(id);if(e){var v=on?'1':'0';if(e.style.opacity!==v)e.style.opacity=v;}}
 var fxPriTm=0;
 function fxBeam(tg,kind){
- if(!A)A=fxAnchors(); if(!A||!A[tg])return;
+ A=fxAnchors(); if(!A[tg]||!A.pri)return; /* F3: 매 호출 재조립·anchor null이면 선 skip(이전 좌표 재사용 0) */
  var ln=$('fxPriLine');
  if(ln){ln.setAttribute('x1',A.pri.x);ln.setAttribute('y1',A.pri.y);ln.setAttribute('x2',A[tg].x);ln.setAttribute('y2',A[tg].y);ln.setAttribute('class','fxPri fp-'+kind+' on');clearTimeout(fxPriTm);fxPriTm=setTimeout(function(){ln.setAttribute('class','fxPri fp-'+kind);},460);}
  var fl=$('fxf-'+tg);
@@ -2029,11 +2030,13 @@ function sbSmashFx(S,t){
           sh0:!!(tgU&&tgU.shield&&tgU.shield.amt>0),absL:S.st.abs,aliveL:!!(tgU&&tgU.alive)};
   }
   SB_SM.absL=S.st.abs; SB_SM.aliveL=!!(tgU&&tgU.alive);
-  var src=sbPt('sb-boss-fig','sb-ic-hammer',1), dst=null;
+  /* F3: 좌표는 의미 anchor 요청으로 — selector/rect 소유권은 ANCHOR_REGISTRY(docs/64)·shield/body 선택은 이 handler의 gameplay 의미(legacy 유지) */
+  var srcA=resolveAnchor('boss_iron','weapon'), dstA=null;
   if(tgU&&tgU.alive){
-   if(bc.tg==='war')dst=sbPt('sb-war-fig',(SB_SM.blk||SB_SM.sh0)?'sb-w-shield':'sb-w-body');
-   else if(SB_BODY[bc.tg])dst=sbPt(SB_BODY[bc.tg][0],SB_BODY[bc.tg][1]);
+   if(bc.tg==='war')dstA=resolveAnchor('war',(SB_SM.blk||SB_SM.sh0)?'shield':'body');
+   else dstA=resolveAnchor(bc.tg,'body');
   }
+  var src=srcA&&srcA.point, dst=dstA&&dstA.point;
   var on=!!(src&&dst); /* anchor 부재/대상 무효 → 선 숨김(모서리 fallback 없음) */
   if(on){ln.setAttribute('x1',src.x);ln.setAttribute('y1',src.y);ln.setAttribute('x2',dst.x);ln.setAttribute('y2',dst.y);}
   var pr=(t-bc.start)/Math.max(0.001,bc.end-bc.start);
@@ -2070,6 +2073,78 @@ function sbSmashFx(S,t){
   });
  })(SB_BODY[k][0]);}
 })();
+/* ===== F3: Anchor Registry Foundation 01 (docs/64 · 헌법 docs/59 §12) =====
+   무대 좌표의 의미화: visual consumer는 DOM 구조를 찾지 않고 "누구의 어느 지점"만 요청한다. 규칙:
+   ① Actor Registry는 누구인지 알고, Anchor Registry는 어디인지 안다(책임 분리 — 포즈/좌표 상호 불가침).
+   ② 좌표 계산식은 sbPt가 단일 소유(legacy 산식 byte 보존) — resolver는 의미 조회+유효성 검사 후 위임.
+   ③ 유효하지 않은 anchor(부재/절단/0-rect/비유한)는 null — (0,0) 유령 좌표 fallback ⛔(docs/54 회귀 봉인).
+   ④ rect는 매 요청 실측(장기 캐시 ⛔·프레임 경계 넘는 캐시 ⛔) · gameplay/타이머/포즈/FX 결정 무접촉. */
+var ANCHOR_REGISTRY={ /* actorId → 의미 anchor 정의(현행 실사용 최소 범위만 — 미래 anchor 선등록 ⛔) */
+ boss_iron:{figId:'sb-boss-fig',stageContext:'shell_iron',anchors:{
+  weapon:{part:'sb-ic-hammer',topBias:1,label:'망치 자루 상단(강타선 source)'},
+  body:{part:'sb-ic-body',label:'철괴 몸통'}}},
+ war:{figId:'sb-war-fig',stageContext:'shell_iron',anchors:{
+  shield:{part:'sb-w-shield',label:'방패(보호 destination)'},
+  body:{part:'sb-w-body',label:'몸통(직격 destination)'},
+  slot:{elId:'sa-war',stageContext:null,label:'전장 슬롯 중심(케어선/강타선 destination·전 보스)'}}},
+ rog:{figId:'sb-rog-fig',stageContext:'shell_iron',anchors:{
+  body:{part:'sb-r-body',label:'몸통'},slot:{elId:'sa-rog',stageContext:null,label:'전장 슬롯 중심(차단선 source·케어선 dest)'}}},
+ mage:{figId:'sb-mage-fig',stageContext:'shell_iron',anchors:{
+  body:{part:'sb-m-body',label:'몸통'},slot:{elId:'sa-mage',stageContext:null,label:'전장 슬롯 중심(케어선 dest)'}}},
+ sham:{figId:'sb-sham-fig',stageContext:'shell_iron',anchors:{
+  body:{part:'sb-s-body',label:'몸통'},slot:{elId:'sa-sham',stageContext:null,label:'전장 슬롯 중심(케어선 dest)'}}},
+ /* F3 closeout: fxAnchors 계보(슬롯/아바타/가상 좌표계) — 이모지 보스 아바타·사제 케어선 원점. context-free(null): iron에선 아바타 display:none→rect-zero로 fail-closed */
+ boss:{figId:null,stageContext:null,anchors:{avatar:{elId:'bossAvatar',label:'보스 이모지 아바타 중심(비-iron 선 원점·iron 숨김 시 null)'}}},
+ pri:{figId:null,stageContext:null,anchors:{origin:{virtual:'stage-bottom-center',label:'사제 케어선 원점(무대 하단 중앙 가상점)'}}}
+};
+var SG_ANCHOR_STATS={ok:0,fail:0,lastFailures:[]};
+function sgAnchorFail(reason,actorId,anchorName){
+ SG_ANCHOR_STATS.fail++;
+ var l=SG_ANCHOR_STATS.lastFailures;
+ if(l.length>=8)l.shift();
+ l.push({actorId:String(actorId),anchorName:String(anchorName),reason:reason});
+ return null;
+}
+function resolveAnchor(actorId,anchorName){ /* generic resolver — Actor/직업/보스 id 분기 0·null=fail-closed·좌표 계산 단일 소유(docs/64) */
+ var prof=ANCHOR_REGISTRY[actorId];
+ if(!prof)return sgAnchorFail('actor-unregistered',actorId,anchorName);
+ var def=prof.anchors?prof.anchors[anchorName]:null;
+ if(!def)return sgAnchorFail('anchor-unregistered',actorId,anchorName);
+ var ctx=(def.stageContext!==undefined)?def.stageContext:prof.stageContext; /* def override → prof → null(context-free) */
+ if(ctx!=null&&ctx!==sgBossId())return sgAnchorFail('context-inactive',actorId,anchorName); /* 현재 무대 문맥 밖 Actor는 rect가 남아 있어도 null(§6) */
+ var st=document.getElementById('stage');
+ if(!st)return sgAnchorFail('stage-missing',actorId,anchorName);
+ var sr=(typeof st.getBoundingClientRect==='function')?st.getBoundingClientRect():null;
+ if(def.virtual==='stage-bottom-center'){ /* 가상 anchor — 요소 없이 stage rect 기준(A.pri 등가) */
+  if(!sr||!(sr.width>0&&sr.height>0))return sgAnchorFail('stage-missing',actorId,anchorName);
+  SG_ANCHOR_STATS.ok++;
+  return {actorId:actorId,anchorName:anchorName,point:{x:sr.width/2,y:sr.height-4},reason:'ok'};
+ }
+ var el;
+ if(def.part){var fig=document.getElementById(prof.figId);if(!fig)return sgAnchorFail('element-missing',actorId,anchorName);el=(typeof fig.querySelector==='function')?fig.querySelector('.'+def.part):null;}
+ else if(def.elId){el=document.getElementById(def.elId);} /* 요소 자체(슬롯/아바타) */
+ if(!el)return sgAnchorFail('element-missing',actorId,anchorName);
+ if(el.isConnected===false)return sgAnchorFail('element-disconnected',actorId,anchorName);
+ var r=(typeof el.getBoundingClientRect==='function')?el.getBoundingClientRect():null;
+ /* 유효성=legacy sbPt/fxAnchors 정본(`!r.width&&!r.height`)과 동일: 두 축이 모두 0(=display:none/미배치 ghost)일 때만 거부.
+    ★슬롯(.fig)은 flex로 width:0·height:56(피규어 absolute)이라 legacy가 정상 사용 — w>0&&h로 좁히면 이 실사용 anchor를 잘못 null(HOLD). */
+ if(!r||!(r.width>0||r.height>0))return sgAnchorFail('rect-zero',actorId,anchorName); /* both-0(display:none) → null(§6·유령 좌표 봉인) */
+ if(!(isFinite(r.left)&&isFinite(r.top)&&isFinite(r.width)&&isFinite(r.height)))return sgAnchorFail('rect-invalid',actorId,anchorName);
+ var p;
+ if(def.part){p=sbPt(prof.figId,def.part,def.topBias?1:0);if(!p)return sgAnchorFail('rect-zero',actorId,anchorName);} /* 파츠=legacy sbPt 산식 그대로(강타선 byte 보존) */
+ else{if(!sr||!(sr.width>0))return sgAnchorFail('stage-missing',actorId,anchorName);p={x:r.left-sr.left+r.width/2,y:r.top-sr.top+(def.topBias?r.height*0.12:r.height/2)};} /* elId=중심점(sbPt 동일 공식) */
+ SG_ANCHOR_STATS.ok++;
+ return {actorId:actorId,anchorName:anchorName,point:p,reason:'ok'};
+}
+(function(){ /* F3 debug accessor — F1/F2 stage API 불변 확장·읽기 전용·복사본·DOM node 비반출(docs/64 §19) */
+ var st=(window.__seedHealer&&window.__seedHealer.stage)?window.__seedHealer.stage:null;
+ if(!st)return;
+ st.anchors=function(){return Object.keys(ANCHOR_REGISTRY);};
+ st.actorAnchors=function(id){var p=ANCHOR_REGISTRY[id];return p?JSON.parse(JSON.stringify(p)):null;};
+ st.anchor=function(actorId,anchorName){var r=resolveAnchor(actorId,anchorName);return r?JSON.parse(JSON.stringify(r)):null;};
+ st.anchorStats=function(){return JSON.parse(JSON.stringify(SG_ANCHOR_STATS));};
+})();
+
 /* ===== F2: Actor Registry & Pose Map Foundation 01 (docs/63 · 헌법 docs/59 §7-3/4/5·§10) =====
    Rework 01(docs/44)의 sbFigPose 하드코딩을 데이터로 등가 치환. 규칙:
    ① generic resolver는 조건 키 해석만 안다 — Actor id/직업/보스 분기 0(개성은 profile 데이터).
@@ -2154,7 +2229,7 @@ function sbFigPose(S){ /* F2: 얇은 presenter — 비활성 무대 문맥은 DO
  st.poseStats=function(){return JSON.parse(JSON.stringify(SG_POSE_STATS));};
 })();
 function renderFx(S,t,p,mt){
- if(!A)A=fxAnchors(); if(!A)return;
+ A=fxAnchors(); /* F3: 매 프레임 재조립(장기 cache 없음)·anchor null은 fxLn from&&to 가드가 흡수 */
  var bc=S.boss.cast;
  var smashTg=(bc&&bc.kind==='smash')?bc.tg:null;
  if(!sbSmashFx(S,t))fxLn('fxBossLine',A.boss,smashTg?A[smashTg]:null,!!smashTg,'fxBoss');

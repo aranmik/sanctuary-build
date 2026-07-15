@@ -33,7 +33,7 @@ chk('c7 boss and priest action-line readability', has('보스 행동선', '사�
 chk('c8 button cast line removed and GCD dim', has('금빛 cast 진행선', '글로벌 GCD', 'dim'));
 chk('c9 GCD recovery and priest HUD cast bar', has('자연스럽게 복귀', 'priCastWrap'));
 chk('c10 gameplay and CORE unchanged statement', has('gameplay', 'CORE는 이번 카드에서 변경되지 않았다'));
-chk('c11 live index baseline', md5(indexPath) === '956248cac4053a7c738074173ffd2904');
+chk('c11 live index baseline', md5(indexPath) === '2326daebc987645f32888fa6d74455a4');
 chk('c12 CORE byte-identical baseline', fs.statSync(corePath).size === 22521 && md5(corePath) === '6cad2ec271a2a79afbee881c2a2e0856');
 chk('c13 nonblocking backlog A/B/C', has('쿨타임 글씨', '행동선', '추가 상향'));
 chk('c14 next priority is Skill Cooldown Label Audit 01', has('Skill Cooldown Label Audit 01'));

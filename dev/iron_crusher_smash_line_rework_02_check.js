@@ -39,8 +39,11 @@ chk('c1 shell_iron 전용 게이트',
 }
 
 // 3. 망치 실제 element selector 사용
+/* 〔승계 — F3(docs/64)〕 sbPt 직호출이 의미 anchor 요청으로 치환 — 망치 element rect가 source라는 의미 불변
+   (registry가 weapon→sb-ic-hammer+topBias 바인딩 소유·좌표 산식은 sbPt 위임으로 byte 보존) */
 chk('c3 망치 source(.sb-ic-hammer element rect)',
-  FN.indexOf("sbPt('sb-boss-fig','sb-ic-hammer',1)") >= 0 && inSrc('getBoundingClientRect'), '');
+  FN.indexOf("resolveAnchor('boss_iron','weapon')") >= 0 &&
+  inSrc("weapon:{part:'sb-ic-hammer',topBias:1") && inSrc('getBoundingClientRect'), '');
 
 // 4. shell_iron source에서 bossAvatar 미사용 (새 경로 함수 본문에 부재)
 chk('c4 새 경로에 bossAvatar 미사용', FN.indexOf('bossAvatar') < 0, '');
@@ -51,11 +54,14 @@ chk('c5 모서리/고정좌표 fallback 금지(on=!!(src&&dst))',
   !/setAttribute\('x1',\s*0\)/.test(FN) && !/setAttribute\('x1',\s*-/.test(FN), '');
 
 // 6. actual target id 사용
+// 〔승계 — F3(docs/64)〕 SB_BODY 좌표 조회가 의미 anchor(bc.tg의 body)로 치환 — 실대상 id 사용 의미 불변
 chk('c6 actual target id(bc.tg) 사용',
-  FN.indexOf('S.al[i].id===bc.tg') >= 0 && FN.indexOf('SB_BODY[bc.tg]') >= 0, '');
+  FN.indexOf('S.al[i].id===bc.tg') >= 0 && FN.indexOf("resolveAnchor(bc.tg,'body')") >= 0, '');
 
 // 7~8. 전사 방패/몸통 selector
-chk('c7 전사 방패 selector(.sb-w-shield)', FN.indexOf("'sb-w-shield'") >= 0, '');
+// 〔승계 — F3(docs/64)〕 방패 selector 직서가 의미 'shield' 요청으로 치환 — registry가 sb-w-shield 바인딩 소유
+chk('c7 전사 방패 selector(.sb-w-shield)',
+  FN.indexOf("'shield'") >= 0 && inSrc("shield:{part:'sb-w-shield'"), '');
 chk('c8 전사 body selector(.sb-w-body)', inSrc("war:['sb-war-fig','sb-w-body']"), '');
 
 // 9. 관계선(casting 분기)과 contact(resolve 분기) 분리
@@ -156,9 +162,9 @@ chk('c25 overflow 보호(신규 CSS 고정폭 0·#fxSvg inset 유지)',
 // 26. index.html 현행 기준선(재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 기준선(167,719 B·md5 956248ca…)',
-    buf.length === 167719 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '956248cac4053a7c738074173ffd2904', '');
+  chk('c26 index.html 기준선(174,534 B·md5 2326daeb…)',
+    buf.length === 174534 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '2326daebc987645f32888fa6d74455a4', '');
 }
 
 // 27. 스모크 3종 불변 (gameplay 무변경 실행 증명)

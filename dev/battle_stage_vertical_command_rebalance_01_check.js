@@ -106,8 +106,9 @@ chk('c17 정보 보존(skCost/castTxt/bossCastTxt)',
   inSrc('skCost') && inSrc('castTxt') && inSrc('bossCastTxt') && inSrc('priCastTxt'), '');
 
 // 18. Rework 02 hammer anchor 보존
+// 〔승계 — F3(docs/64)〕 sbPt 직호출→의미 anchor 요청. 망치 source 의미·산식(sbPt 위임·topBias) 불변
 chk('c18 Rework 02 hammer source 보존',
-  inSrc("sbPt('sb-boss-fig','sb-ic-hammer',1)"), '');
+  inSrc("resolveAnchor('boss_iron','weapon')") && inSrc("weapon:{part:'sb-ic-hammer',topBias:1"), '');
 
 // 19. shell_iron 게이트 보존
 chk('c19 shell_iron 게이트 보존',
@@ -152,9 +153,9 @@ try {
 // 26. index 현행 기준선 (재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 현행 기준선(167,719 B · md5 956248ca…)',
-    buf.length === 167719 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '956248cac4053a7c738074173ffd2904', '');
+  chk('c26 index.html 현행 기준선(174,534 B · md5 2326daeb…)',
+    buf.length === 174534 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '2326daebc987645f32888fa6d74455a4', '');
 }
 
 // 27. docs/56 필수 절

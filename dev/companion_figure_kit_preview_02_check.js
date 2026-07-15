@@ -103,8 +103,8 @@ chk('c20 전투 연동 0(Math.random/localStorage/__seedHealer/createGame/enterB
 
 // 21. index.html 무변경
 chk('c21 index.html 무변경(149,309 B · md5 c9e289d7…)',
-  buf.length === 167719 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '956248cac4053a7c738074173ffd2904', '');
+  buf.length === 174534 &&
+  crypto.createHash('md5').update(buf).digest('hex') === '2326daebc987645f32888fa6d74455a4', '');
 
 // 22. CORE 유지
 {
