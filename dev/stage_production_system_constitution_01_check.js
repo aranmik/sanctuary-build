@@ -40,9 +40,9 @@ chk('c2 document-only 선언', in59('document-only', '구현 0') && in60('docume
   let f = 0, core = [];
   for (const l of lines) { if (l.includes('//__CORE_START__')) { f = 1; continue; } if (l.includes('//__CORE_END__')) f = 0; if (f) core.push(l); }
   const cmd5 = crypto.createHash('md5').update(core.join('\n') + '\n').digest('hex');
-  chk('c3 index/CORE byte-identical(155,854/2f7a1b29·CORE 6cad2ec2)',
-    buf.length === 155854 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '2f7a1b29dba5b79950ebdbbeb6e06fb6' &&
+  chk('c3 index/CORE byte-identical(163,803/8675df86·CORE 6cad2ec2)',
+    buf.length === 163803 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '8675df863fa9dbb81a2a9ce71fd3f265' &&
     core.length === 466 && cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', '');
 }
 
@@ -201,10 +201,18 @@ chk('c35 첫 구현 카드 경계(F1 read-only·화면 diff 0·기존 render 무
 chk("c36 감사 사실①: FX('aoe') 중의성 — 실코드 2개소 이상 발신",
   in59('충돌') && (src.match(/FX\('aoe'\)/g) || []).length >= 2, '');
 
-// 37. 감사 주장 사실 대조 ②: 미처리 이벤트 조용한 무시(doFx에 bossCast/judgeWarn case 없음)
-chk('c37 감사 사실②: 미처리 이벤트 no-op(bossCast/judgeWarn/valorOff 발신은 있고 case는 없음)',
-  inSrc("FX('bossCast')") && inSrc("FX('judgeWarn'") && inSrc("FX('valorOff')") &&
-  !inSrc("case 'bossCast'") && !inSrc("case 'judgeWarn'") && !inSrc("case 'valorOff'"), '');
+// 37. 감사 주장 사실 대조 ②: 미처리 이벤트 조용한 무시 — 주장의 범위는 doFx(시각 디스패처)다.
+//     〔승계 — F1(docs/62)〕 F1의 Stage Signal 번역기(sgEv)가 같은 kind를 정당하게 번역(case 보유)하게 되어
+//     전역 부재 검사 → doFx 함수 범위 검사로 정밀화(주장 의미 불변·완화 아님).
+{
+  const dIdx = src.indexOf('function doFx(');
+  const dEnd = src.indexOf('\n}', dIdx);
+  const dFx = (dIdx >= 0 && dEnd > dIdx) ? src.slice(dIdx, dEnd) : '';
+  chk('c37 감사 사실②: 미처리 이벤트 no-op(발신은 있고 doFx에 case는 없음)',
+    inSrc("FX('bossCast')") && inSrc("FX('judgeWarn'") && inSrc("FX('valorOff')") &&
+    dFx.length > 200 &&
+    dFx.indexOf("case 'bossCast'") < 0 && dFx.indexOf("case 'judgeWarn'") < 0 && dFx.indexOf("case 'valorOff'") < 0, '');
+}
 
 // 38. 감사 주장 사실 대조 ③: 이벤트 큐 단일 소비+gameplay 어댑터 공존(seedOnHit)
 chk('c38 감사 사실③: S.ev 단일 splice 소비+drain 내 seedOnHit 구동',

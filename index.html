@@ -1281,6 +1281,7 @@ function newGame(slot){
  if(slot!==undefined)CUR_BOSS=BOSS_DEFS[slot]?slot:'boss01';
  ledgerReset();
  G=createGame(CUR_BOSS);
+ sgReset(G.S); /* F1: 무대 신호 shadow 전투 경계 초기화 — 재시작/보스 전환 시 이전 관측 0(docs/62) */
  var _bd=(BOSS_DEFS[CUR_BOSS]||BOSS_DEFS.boss01).boss,_ov=BOSS_OV[CUR_BOSS]||BOSS_OV.boss01;
  var _bn=$('bossName');if(_bn)_bn.textContent='☠️ '+_bd.name;
  var _oh=$('ovBossH');if(_oh)_oh.textContent=_ov.h;
@@ -1730,6 +1731,114 @@ $('startBtn').addEventListener('click',()=>{ainit();$('startOv').classList.add('
 $('retryBtn').addEventListener('click',()=>{ainit();newGame();G.start();});
 document.addEventListener('touchstart',ainit,{once:true});
 
+/* ===== F1: Stage Signal Shadow Foundation 01 (docs/62 · 헌법 docs/59 §7-2/§8/§23) =====
+   Combat Truth(S·S.ev)의 read-only 번역·관측 그림자. 규칙:
+   ① 소비권 없음 — S.ev의 유일한 splice 소비자는 계속 drain()이며, 본 블록은 drain 루프 말미의 tap으로 읽기만 한다.
+   ② gameplay 쓰기 0·새 상태 0·새 타이머 0·DOM 접근 0 — 산출물은 전부 plain data.
+   ③ 실패는 삼킨다 — 관측 오류가 전투를 멈추지 않는다(sgObserve try/catch).
+   ④ 링버퍼 상한 SG_MAX·전투 경계(newGame)마다 초기화 — 영구 누적/stale 0.
+   ⑤ 신호 어휘는 의미 언어만(직업 자세명·CSS 클래스·selector ⛔ — docs/59 §8). */
+var SG_MAX=96; /* 관측 상한 — 초과 시 오래된 것부터 버림 */
+var SG={on:true,seq:0,battle:0,S:null,buf:[],unknown:0};
+var SG_INTENT={smash:'attack',melee:'attack',allyAtk:'attack',bombBoom:'status-result',debuff:'status-apply',
+ heal:'heal',pray:'heal',shield:'shield',dispel:'cleanse',save:'rescue',intOk:'interrupt',intFail:'interrupt',
+ death:'defeated',valor:'empower',valorOff:'empower',enrage:'enrage',judgeWarn:'judge',
+ start:'battle',win:'battle',lose:'battle'}; /* bossCast/castStart/aoe/fizzle=문맥 분기 · vign=표현 에코(번역 제외) */
+function sgReset(S){SG.S=S||null;SG.battle++;SG.seq=0;SG.buf.length=0;SG.unknown=0;}
+function sgBossId(){return (typeof CUR_BOSS!=='undefined')?CUR_BOSS:null;}
+function sgPush(o){if(SG.buf.length>=SG_MAX)SG.buf.shift();SG.buf.push(o);}
+function sgEv(e,S){ /* 순간 신호 번역 — 순수 함수·원본 e/S 무변경·미지 입력은 unknown으로 안전 강등 */
+ if(!e||!S)return null;
+ var boss=sgBossId();
+ var base={seq:SG.seq+1,battle:SG.battle,t:+S.t.toFixed(2),boss:boss};
+ if(e.y==='fx'){
+  var k=e.k,d=e.d||{};
+  if(k==='vign')return null; /* 화면 비네트 에코 — 진실 아님 */
+  var o={seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:k,
+         intent:SG_INTENT.hasOwnProperty(k)?SG_INTENT[k]:'unknown',
+         phase:'result',source:null,target:(d&&d.tg)||null,result:null};
+  switch(k){
+   case 'smash': case 'melee': o.source='boss';o.phase='contact';break;
+   case 'aoe': /* ★FX('aoe') 중의성의 문맥 분리(docs/59 §5-A): 심연=drain 즉발 / 그 외=judge 착지 */
+    o.source='boss';o.phase='contact';o.target='party';
+    o.intent=(boss==='shell_thirst')?'drain':'judge';break;
+   case 'allyAtk': o.source=(d&&d.tg)||null;o.target='boss';o.phase='contact';break;
+   case 'bossCast': { var bc=S.boss.cast;o.source='boss';o.phase='cast-start';
+    if(bc){o.intent=(bc.kind==='smash')?'attack':'judge';o.target=bc.tg||'party';
+     o.result={name:bc.name,blk:!!bc.blk,un:!!bc.un};} break; }
+   case 'judgeWarn': o.source='boss';o.phase='cast-start';o.target='party';o.result={un:!!(d&&d.un)};break;
+   case 'castStart': { var pc=S.pri.cast;o.source='pri';o.phase='cast-start';o.intent='heal';
+    if(pc){o.target=pc.tg||'party';o.result={name:pc.name,k:pc.k};} break; }
+   case 'fizzle': o.source='pri';o.phase='cancelled';o.intent='heal';break;
+   case 'heal': case 'shield': case 'dispel': case 'save': o.source='pri';break;
+   case 'pray': o.source='pri';o.target='party';break;
+   case 'intOk': o.source='rog';o.target='boss';o.result={ok:true};break;
+   case 'intFail': o.source='rog';o.target='boss';o.result={ok:false};break;
+   case 'debuff': o.source='boss';o.result={bomb:!!(d&&d.bomb)};break;
+   case 'bombBoom': o.source='boss';o.phase='contact';break;
+   case 'valor': o.target='party';o.result={on:true};break;
+   case 'valorOff': o.target='party';o.result={on:false};break;
+   case 'enrage': o.source='boss';break;
+   case 'start': o.phase='battle-start';break;
+   case 'win': o.phase='battle-end';o.result={r:'victory'};break;
+   case 'lose': o.phase='battle-end';o.result={r:'defeat'};break;
+  }
+  return o;
+ }
+ if(e.y==='flt'){ /* 결과 수치의 유일한 per-hit 노출 — 표시 문자열 규약 파싱(docs/54 §6 · WATCH: 문구 변경 시 재검) */
+  var s=(typeof e.txt==='string')?e.txt:'';var amt=null,rt=null;
+  if(e.c==='dmg'&&s.charAt(0)==='-'){amt=parseInt(s.slice(1),10);rt='damage';}
+  else if(e.c==='heal'&&s.charAt(0)==='+'){amt=parseInt(s.slice(1),10);rt='heal';}
+  else if(e.c==='abs'&&s.charAt(0)==='('){amt=parseInt(s.slice(1),10);rt='absorbed';}
+  if(rt===null||!(amt>=0))return null; /* 라벨성 플로팅(방패 막기·낙인 등)은 fx 신호가 담당 */
+  return {seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:'flt',
+   intent:(rt==='heal')?'heal':(rt==='absorbed'?'shield':'attack'),
+   phase:'result',source:null,target:e.tg||null,result:{type:rt,amount:amt}};
+ }
+ if(e.y==='end')return {seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:'end',intent:'battle',phase:'battle-end',source:null,target:null,result:{r:e.rep&&e.rep.r||null}};
+ if(e.y==='sel')return {seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:'sel',intent:'select',phase:'moment',source:'player',target:S.sel,result:null};
+ if(e.y==='deny')return {seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:'deny',intent:'deny',phase:'cancelled',source:'player',target:null,result:null};
+ if(e.y==='log')return null; /* 표현 텍스트 — 번역 제외 */
+ SG.unknown++;
+ return {seq:base.seq,battle:base.battle,t:base.t,boss:boss,ev:String(e.y),intent:'unknown',phase:'moment',source:null,target:null,result:null};
+}
+function sgObserve(e,S){ /* drain tap 전용 — 관측 실패는 삼키고 전투는 계속 간다 */
+ if(!SG.on||!S)return;
+ try{
+  if(SG.S!==S)sgReset(S); /* 방어적 전투 경계(정식 경계는 newGame의 sgReset) */
+  var o=sgEv(e,S);
+  if(o){SG.seq=o.seq;sgPush(o);}
+ }catch(err){SG.unknown++;}
+}
+function sgSnapshot(S,g){ /* 지속 신호 — 매 호출 시점 S에서 순수 파생(프레임 상주 아님·DOM 0) */
+ if(!S)return null;
+ var bc=S.boss.cast,pc=S.pri.cast,t=S.t;
+ var pr=bc?Math.min(1,Math.max(0,(t-bc.start)/Math.max(0.001,bc.end-bc.start))):0;
+ var actors={};
+ for(var i=0;i<S.al.length;i++){var a=S.al[i];var br=false,bo=false;
+  for(var j=0;j<a.debuffs.length;j++){if(a.debuffs[j].k==='brand')br=true;else bo=true;}
+  actors[a.id]={alive:a.alive,hp:+(a.hp/a.max).toFixed(3),
+   shielded:a.shield?{amt:Math.round(a.shield.amt)}:null,
+   branded:br,bombed:bo,sustained:!!(a.hot||a.seed),selected:S.sel===a.id};}
+ var np=(g&&g.nextPattern)?g.nextPattern():null;
+ return {battle:SG.battle,boss:sgBossId(),t:+t.toFixed(2),started:S.started,over:S.over,result:S.result||null,
+  bossHp:+(S.boss.hp/S.boss.max).toFixed(3),enraged:S.boss.enraged,valorActive:t<S.valorUntil,
+  bossAction:bc?{kind:bc.kind,name:bc.name,target:bc.tg||null,blk:!!bc.blk,un:!!bc.un,
+   progress:+pr.toFixed(3),committed:pr>=0.6}:null,
+  nextAction:np?{name:np.nm,eta:+Math.max(0,np.eta).toFixed(2)}:null,
+  priest:{alive:S.pri.alive,hp:+(S.pri.hp/S.pri.max).toFixed(3),mana:Math.round(S.pri.mana),holy:Math.floor(S.pri.holy),
+   gcdLocked:t<S.pri.gcd,shielded:S.pri.shield?{amt:Math.round(S.pri.shield.amt)}:null,
+   casting:pc?{name:pc.name,k:pc.k,target:pc.tg||null,progress:+Math.min(1,Math.max(0,1-(pc.end-t)/pc.dur)).toFixed(3)}:null},
+  actors:actors};
+}
+window.__seedHealer.stage={ /* Debug/Observation Boundary(docs/59 §23) — 전부 읽기 전용·복사본 반환 */
+ setOn:function(v){SG.on=!!v;return SG.on;},
+ isOn:function(){return SG.on;},
+ snapshot:function(){return (typeof G!=='undefined'&&G)?sgSnapshot(G.S,G):null;},
+ signals:function(){return SG.buf.slice();},
+ stats:function(){return {on:SG.on,battle:SG.battle,count:SG.buf.length,seq:SG.seq,unknown:SG.unknown,max:SG_MAX};},
+ translate:sgEv,deriveSnapshot:sgSnapshot,observe:sgObserve,reset:sgReset};
+
 /* --- 이벤트 드레인 --- */
 function drain(){
  const evs=G.S.ev.splice(0);
@@ -1739,6 +1848,7 @@ function drain(){
   else if(e.y==='deny'){showToast(e.m);SFX.ui();}
   else if(e.y==='fx')doFx(e.k,e.d||{});
   else if(e.y==='end'){const rep=e.rep;if(rep.r.indexOf('victory')===0)SAVE.recordWin(rep.t);setTimeout(()=>showReport(rep),650);}
+  sgObserve(e,G.S); /* F1: read-only shadow tap — 기존 분기 전부 뒤·소비/순서 무접촉(docs/62·[61 F1] tap 계약) */
  }
 }
 function addLog(m,c){
