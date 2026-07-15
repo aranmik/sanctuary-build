@@ -2070,18 +2070,89 @@ function sbSmashFx(S,t){
   });
  })(SB_BODY[k][0]);}
 })();
-/* Iron Crusher Figure Rework 01: 기존 전투 상태 → sb 피규어 포즈 class (시각 전용·판정 무접촉·docs/44) */
-function sbFigPose(S){
- if(typeof CUR_BOSS==='undefined'||CUR_BOSS!=='shell_iron')return;
- var bc=S.boss.cast,smashing=!!(bc&&bc.kind==='smash');
- var bf=document.getElementById('sb-boss-fig');
- if(bf){var bp=smashing?'windup':'';if(bf.getAttribute('data-pose')!==bp)bf.setAttribute('data-pose',bp);}
- var war=null;for(var i=0;i<S.al.length;i++){if(S.al[i].id==='war')war=S.al[i];}
- var wp='';
- if(war&&war.alive){ if(war.shield&&war.shield.amt>0)wp='guard'; else if(smashing)wp='brace'; }
- var wf=document.getElementById('sb-war-fig');
- if(wf&&wf.getAttribute('data-pose')!==wp)wf.setAttribute('data-pose',wp);
+/* ===== F2: Actor Registry & Pose Map Foundation 01 (docs/63 · 헌법 docs/59 §7-3/4/5·§10) =====
+   Rework 01(docs/44)의 sbFigPose 하드코딩을 데이터로 등가 치환. 규칙:
+   ① generic resolver는 조건 키 해석만 안다 — Actor id/직업/보스 분기 0(개성은 profile 데이터).
+   ② 입력은 F1 지속 스냅샷(sgSnapshot)만 — 순간 신호 이력 의존 0·gameplay 구조 직독 0.
+   ③ 출력 등가: 전사 우선순위 첫째 방어(보유)>둘째 대비(강타 예고)>기본 / 파쇄자 예고>기본 —
+      게이트(무대 문맥)·reset 시점·기본 자세('') 전부 Rework 01과 동일.
+   ④ DOM 접촉은 presenter(applyActorPose·sbFigPose)만 — registry/resolver는 plain data. 새 포즈·타이머·상태 0. */
+var ACTOR_REGISTRY={ /* Stage presentation profile — gameplay 수치/판정/좌표/FX 없음(발주 §4) */
+ boss_iron:{actorId:'boss_iron',kind:'boss',figId:'sb-boss-fig',stageContext:'shell_iron',
+  snapshotKey:null,defaultPose:'',allowedPoses:['windup'],
+  poseRules:[{pose:'windup',when:{bossActionKind:'smash'}}]},
+ war:{actorId:'war',kind:'companion',figId:'sb-war-fig',stageContext:'shell_iron',
+  snapshotKey:'war',defaultPose:'',allowedPoses:['guard','brace'],
+  poseRules:[ /* 배열 순서=우선순위(첫 일치) — legacy 순서 보존 */
+   {pose:'guard',when:{actorAlive:true,actorShielded:true}},
+   {pose:'brace',when:{actorAlive:true,bossActionKind:'smash'}}]}
+ /* rog/mage/sham/사제: 현행 runtime 포즈 선택 로직 없음 → 미등록(기본 자세·DOM 무접촉 유지·Pose Pack 연결은 F4) */
+};
+var SG_POSE_STATS={resolved:0,ruleHit:0,byDefault:0,unregistered:0,notAllowed:0,badSnapshot:0};
+function sgPoseCond(when,snap,profile){ /* 조건 키 해석기 — 미지 키=불일치(안전) */
+ for(var k in when){
+  var want=when[k],got;
+  if(k==='bossActionKind')got=!!(snap.bossAction&&snap.bossAction.kind===want);
+  else if(k==='actorAlive'||k==='actorShielded'){
+   var a=(snap.actors&&profile.snapshotKey)?snap.actors[profile.snapshotKey]:null;
+   got=(k==='actorAlive')?(!!(a&&a.alive)===want):(!!(a&&a.shielded)===want);
+  }
+  else return false;
+  if(!got)return false;
+ }
+ return true;
 }
+function resolveActorPose(actorId,snap){ /* generic resolver — 등록 profile의 pose map 평가만 */
+ var p=ACTOR_REGISTRY[actorId];
+ if(!p){SG_POSE_STATS.unregistered++;return {pose:'',reason:'unregistered'};}
+ if(!snap||typeof snap!=='object'){SG_POSE_STATS.badSnapshot++;return {pose:p.defaultPose,reason:'bad-snapshot'};}
+ var rules=p.poseRules||[];
+ for(var i=0;i<rules.length;i++){
+  var r=rules[i];
+  if(!r||typeof r.pose!=='string')continue;
+  var ok=false;
+  try{ok=sgPoseCond(r.when||{},snap,p);}catch(e){ok=false;}
+  if(ok){
+   if(p.allowedPoses&&p.allowedPoses.indexOf(r.pose)<0){SG_POSE_STATS.notAllowed++;return {pose:p.defaultPose,reason:'not-allowed'};}
+   SG_POSE_STATS.resolved++;SG_POSE_STATS.ruleHit++;
+   return {pose:r.pose,reason:'rule:'+i};
+  }
+ }
+ SG_POSE_STATS.resolved++;SG_POSE_STATS.byDefault++;
+ return {pose:p.defaultPose,reason:'default'};
+}
+function applyActorPose(el,pose){ /* presenter 적용 — idempotent 속성 교체·DOM 부재/스텁=무해 no-op */
+ if(!el||typeof el.getAttribute!=='function'||typeof el.setAttribute!=='function')return;
+ if(el.getAttribute('data-pose')!==pose)el.setAttribute('data-pose',pose);
+}
+function sbFigPose(S){ /* F2: 얇은 presenter — 비활성 무대 문맥은 DOM 무접촉(legacy 게이트 등가·docs/63) */
+ var ctx=sgBossId(),snap=null;
+ for(var id in ACTOR_REGISTRY){
+  var p=ACTOR_REGISTRY[id];
+  if(p.stageContext&&p.stageContext!==ctx)continue;
+  if(snap===null)snap=sgSnapshot(S,(typeof G!=='undefined')?G:null);
+  applyActorPose(document.getElementById(p.figId),resolveActorPose(id,snap).pose);
+ }
+}
+(function(){ /* F2 debug accessor — F1 stage API 불변 확장·읽기 전용·복사본 반환(docs/63 §11) */
+ var st=(window.__seedHealer&&window.__seedHealer.stage)?window.__seedHealer.stage:null;
+ if(!st)return;
+ st.actors=function(){return Object.keys(ACTOR_REGISTRY);};
+ st.actorProfile=function(id){var p=ACTOR_REGISTRY[id];return p?JSON.parse(JSON.stringify(p)):null;};
+ st.resolvePose=function(id,snap){
+  if(snap===undefined)snap=(typeof G!=='undefined'&&G)?sgSnapshot(G.S,G):null;
+  return resolveActorPose(id,snap);
+ };
+ st.currentPoses=function(){
+  var o={};
+  for(var id in ACTOR_REGISTRY){
+   var e=document.getElementById(ACTOR_REGISTRY[id].figId);
+   o[id]=(e&&typeof e.getAttribute==='function')?e.getAttribute('data-pose'):null;
+  }
+  return o;
+ };
+ st.poseStats=function(){return JSON.parse(JSON.stringify(SG_POSE_STATS));};
+})();
 function renderFx(S,t,p,mt){
  if(!A)A=fxAnchors(); if(!A)return;
  var bc=S.boss.cast;

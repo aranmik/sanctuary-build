@@ -91,7 +91,7 @@ chk('c15 실제 resolve 교차 확인(sm.S===S && t>=end && aliveL)',
 
 // 16. 도적 smash interrupt 미구현 (새 코드 영역에 관련 토큰 0)
 {
-  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* Iron Crusher Figure Rework 01:'));
+  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* ===== F2: Actor Registry') /* 〔승계 — F2(docs/63)〕 구간 종료 앵커: Rework01 주석이 F2 블록으로 치환됨(검사 의미 불변) */);
   chk('c16 도적 smash 차단 미구현(신규 영역에 관련 토큰 0)',
     newBlock.indexOf('intOk') < 0 && newBlock.indexOf('intReady') < 0 &&
     newBlock.indexOf('tryInterrupt') < 0 && newBlock.indexOf('dash') < 0, '');
@@ -99,14 +99,14 @@ chk('c15 실제 resolve 교차 확인(sm.S===S && t>=end && aliveL)',
 
 // 17. 새 gameplay state 없음 — 신규 영역에 S.xxx= 대입 0 (읽기만)
 {
-  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* Iron Crusher Figure Rework 01:'));
+  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* ===== F2: Actor Registry') /* 〔승계 — F2(docs/63)〕 구간 종료 앵커: Rework01 주석이 F2 블록으로 치환됨(검사 의미 불변) */);
   chk('c17 새 gameplay state 0(신규 영역에 S 대입 없음)',
     !/[^.\w]S\.\w+\s*=[^=]/.test(newBlock) && newBlock.indexOf('var SB_SM=null') >= 0, '');
 }
 
 // 18. 새 gameplay timer 없음 (신규 영역 setTimeout/setInterval 0 · animationend 사용)
 {
-  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* Iron Crusher Figure Rework 01:'));
+  const newBlock = src.slice(src.indexOf('/* Smash Line Rework 02: shell_iron 강타 관계선+접촉 분리'), src.indexOf('/* ===== F2: Actor Registry') /* 〔승계 — F2(docs/63)〕 구간 종료 앵커: Rework01 주석이 F2 블록으로 치환됨(검사 의미 불변) */);
   chk('c18 새 타이머 0 + animationend cleanup',
     newBlock.indexOf('setTimeout(') < 0 && newBlock.indexOf('setInterval(') < 0 &&
     newBlock.indexOf("addEventListener('animationend'") >= 0, '');
@@ -156,9 +156,9 @@ chk('c25 overflow 보호(신규 CSS 고정폭 0·#fxSvg inset 유지)',
 // 26. index.html 현행 기준선(재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 기준선(163,803 B·md5 8675df86…)',
-    buf.length === 163803 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '8675df863fa9dbb81a2a9ce71fd3f265', '');
+  chk('c26 index.html 기준선(167,719 B·md5 956248ca…)',
+    buf.length === 167719 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '956248cac4053a7c738074173ffd2904', '');
 }
 
 // 27. 스모크 3종 불변 (gameplay 무변경 실행 증명)
