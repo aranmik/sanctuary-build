@@ -73,9 +73,12 @@ chk('a5 F2 블록 gameplay 쓰기 0(S.*/G.* 대입 없음·S.ev 접근 없음)',
 chk('a6 함수 시그니처 보존(function sbFigPose(S) — 기존 체크 계약 유지)',
   inSrc('function sbFigPose(S)') && inSrc('function resolveActorPose(') && inSrc('function applyActorPose('), '');
 
-chk('a7 동료/사제 미등록(이번 카드 비연결 — 새 포즈 0)',
-  f2.indexOf("rog:{") < 0 && f2.indexOf("mage:{") < 0 && f2.indexOf("sham:{") < 0 && f2.indexOf("pri:{") < 0 &&
-  !inSrc("data-pose=\"interrupt\"") && !inSrc("'charge'") && !inSrc("'sustain'"), '');
+// 〔승계 — F4(docs/65)〕 F2는 동료를 미등록으로 뒀고, F4가 동료 3인을 **generic resolver/presenter 무수정으로 profile 데이터만 추가**해 연결.
+// = F2 기반의 핵심 증명("Actor 추가 = registry 등록만"). 승인 [51] 포즈만 사용(interrupt/channel/sustain)·미승인 포즈 0·resolveActorPose/sgPoseCond 구조 불변(a2가 봉인).
+chk('a7 동료 F4 등록(generic 무수정·registry 데이터만·승인 포즈만)',
+  f2.indexOf("rog:{actorId:'rog'") >= 0 && f2.indexOf("mage:{actorId:'mage'") >= 0 && f2.indexOf("sham:{actorId:'sham'") >= 0 &&
+  inSrc("allowedPoses:['interrupt']") && inSrc("allowedPoses:['channel']") && inSrc("allowedPoses:['sustain']") &&
+  f2.indexOf("pri:{actorId") < 0, '');  // 사제는 여전히 전장 피규어 없음(미등록)
 
 chk('a8 입력=sgSnapshot(presenter가 스냅샷 파생·gameplay 구조 직독 0)',
   prB.indexOf('sgSnapshot(') >= 0 && prB.indexOf('S.boss') < 0 && prB.indexOf('S.al') < 0 &&
@@ -183,11 +186,12 @@ try {
       A2.war === '' && B2.war === '' && A3.boss === B3.boss && A3.war === B3.war, '');
   }
 
-  // c5: 비-iron 무대 문맥 — legacy no-touch === presenter skip(레지스트리 stageContext)
-  chk('c5 비-iron 문맥 등가(legacy 게이트=stageContext 데이터·presenter는 해당 문맥 외 DOM 무접촉)',
+  // c5: 비-iron 무대 문맥 — legacy 게이트=stageContext 데이터. 〔승계 — F4(docs/65 §13)〕 presenter는 문맥 밖 figure를
+  // 무접촉(skip)에서 **owner cleanup(data-pose='')**로 강화 — 숨김 figure의 stale 포즈 0. 시각은 여전히 불변(figure display:none).
+  chk('c5 비-iron 문맥 등가(stageContext 게이트·문맥 밖=owner cleanup reset·시각 불변)',
     oracle(s.createGame('boss01').S, 'boss01') === null &&
     f2.indexOf("stageContext:'shell_iron'") >= 0 && prB.indexOf('stageContext') >= 0 &&
-    prB.indexOf('continue') >= 0, '');
+    prB.indexOf('continue') >= 0 && prB.indexOf("applyActorPose(document.getElementById(p.figId),'')") >= 0, '');
 
   // c6: 보호막 조건 등가 증명(shield 비null ⟺ amt>0 — dmg()가 amt<=0.5에서 null화)
   chk('c6 shielded 조건 등가 근거(비null shield ⟹ amt>0.5 — CORE 파괴/만료 규칙 실존)',
@@ -257,9 +261,9 @@ try {
   chk('g2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('g3 index.html 현행 기준선(174,534 B · md5 2326daeb…)',
-    buf.length === 174534 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '2326daebc987645f32888fa6d74455a4', '');
+  chk('g3 index.html 현행 기준선(178,138 B · md5 ae27ce9c…)',
+    buf.length === 178138 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'ae27ce9c0d5c85a1038fc49c587146ec', '');
 }
 chk('g4 docs/63 필수 절(감사·vocabulary·priority·schema·resolver·입력 계약·fallback·lifecycle·등가성·픽셀·WATCH·F3 계약)',
   doc.length > 3000 &&

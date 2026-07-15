@@ -411,6 +411,19 @@ button{font-family:inherit;cursor:pointer}
 #stage .sb-iron-crusher[data-pose="windup"] .sb-react{transform:rotate(-3deg) translateY(-2px)}
 #stage .sb-iron-crusher[data-pose="windup"] .sb-ic-hammer{transform:rotate(-18deg) translate(2px,-18px)}
 #stage .sb-iron-crusher[data-pose="windup"] .sb-ic-head{transform:translateX(calc(-50% - 3px)) rotate(-3deg)}
+/* F4: 동료 실전 포즈(승인 [51] Pose Pack 이식·연결분만: 도적 interrupt · 마법사 channel · 주술사 sustain) — 전환은 기존 .sb-part/.sb-react transition .28s */
+#stage .sb-rogue[data-pose="interrupt"] .sb-react{transform:translateY(4px) rotate(-4deg) scale(.98)}
+#stage .sb-rogue[data-pose="interrupt"] .sb-r-dagger{transform:rotate(-16deg) translate(-4px,-8px) scale(1.05)}
+#stage .sb-rogue[data-pose="interrupt"] .sb-r-head{transform:translateX(calc(-50% + 2px)) translateY(2px) rotate(-3deg)}
+#stage .sb-rogue[data-pose="interrupt"] .sb-r-body{transform:translateX(calc(-50% + 1px)) rotate(-2deg)}
+#stage .sb-mage[data-pose="channel"] .sb-react{transform:translateY(-2px) scale(1.03)}
+#stage .sb-mage[data-pose="channel"] .sb-m-orb{transform:translate(-22px,8px) scale(1.14)}
+#stage .sb-mage[data-pose="channel"] .sb-m-head{transform:translateX(-50%) translateY(1px) rotate(-3deg)}
+#stage .sb-mage[data-pose="channel"] .sb-aura{transform:translateX(-50%) scale(1.32);opacity:1}
+#stage .sb-shaman[data-pose="sustain"] .sb-react{transform:scale(1.01)}
+#stage .sb-shaman[data-pose="sustain"] .sb-aura{transform:translateX(-50%) scale(1.24);opacity:1}
+#stage .sb-shaman[data-pose="sustain"] .sb-s-totem{transform:rotate(0deg) translateY(-1px)}
+#stage .sb-shaman[data-pose="sustain"] .sb-s-charm{transform:scale(1.15)}
 /* 작은 화면(≤730) fallback — sb 미표시, 기존 이모지+fig 유지(축소 안전) */
 @media (max-height:730px){
  #stage.sb-boss-iron #bossAvatar{display:block}
@@ -1821,8 +1834,11 @@ function sgSnapshot(S,g){ /* 지속 신호 — 매 호출 시점 S에서 순수 
    shielded:a.shield?{amt:Math.round(a.shield.amt)}:null,
    branded:br,bombed:bo,sustained:!!(a.hot||a.seed),selected:S.sel===a.id};}
  var np=(g&&g.nextPattern)?g.nextPattern():null;
+ /* F4: 도적 차단 stance — 기존 intBar 판정(render 2045)의 순수 파생(S.intReady/enraged/cast/rog 읽기만·gameplay 무변) */
+ var _rg=null;for(var _i=0;_i<S.al.length;_i++){if(S.al[_i].id==='rog')_rg=S.al[_i];}
+ var iStance=(!_rg||!_rg.alive)?'none':(S.boss.enraged?'unable':((bc&&bc.kind!=='smash'&&bc.un)?'unable':((t>=S.intReady)?'ready':'cooldown')));
  return {battle:SG.battle,boss:sgBossId(),t:+t.toFixed(2),started:S.started,over:S.over,result:S.result||null,
-  bossHp:+(S.boss.hp/S.boss.max).toFixed(3),enraged:S.boss.enraged,valorActive:t<S.valorUntil,
+  bossHp:+(S.boss.hp/S.boss.max).toFixed(3),enraged:S.boss.enraged,valorActive:t<S.valorUntil,interruptStance:iStance,
   bossAction:bc?{kind:bc.kind,name:bc.name,target:bc.tg||null,blk:!!bc.blk,un:!!bc.un,
    progress:+pr.toFixed(3),committed:pr>=0.6}:null,
   nextAction:np?{name:np.nm,eta:+Math.max(0,np.eta).toFixed(2)}:null,
@@ -2160,11 +2176,20 @@ var ACTOR_REGISTRY={ /* Stage presentation profile — gameplay 수치/판정/�
   snapshotKey:'war',defaultPose:'',allowedPoses:['guard','brace'],
   poseRules:[ /* 배열 순서=우선순위(첫 일치) — legacy 순서 보존 */
    {pose:'guard',when:{actorAlive:true,actorShielded:true}},
-   {pose:'brace',when:{actorAlive:true,bossActionKind:'smash'}}]}
- /* rog/mage/sham/사제: 현행 runtime 포즈 선택 로직 없음 → 미등록(기본 자세·DOM 무접촉 유지·Pose Pack 연결은 F4) */
+   {pose:'brace',when:{actorAlive:true,bossActionKind:'smash'}}]},
+ /* F4: 동료 3인 실전 포즈 연결(docs/65) — 승인 [51] 포즈 중 실제 지속 신호가 있는 것만·순간 포즈(strike/release 등)는 미래 vocabulary */
+ rog:{actorId:'rog',kind:'companion',figId:'sb-rog-fig',stageContext:'shell_iron',
+  snapshotKey:'rog',defaultPose:'',allowedPoses:['interrupt'],candidatePoses:['dash','strike','recover'],
+  poseRules:[{pose:'interrupt',when:{actorAlive:true,bossActionKind:'judge',interruptStance:'ready'}}]}, /* 끊을 judge가 있고 도적이 차단 가능할 때(모르가스·F6에서 가시)—파쇄자엔 judge 없어 기본 */
+ mage:{actorId:'mage',kind:'companion',figId:'sb-mage-fig',stageContext:'shell_iron',
+  snapshotKey:'mage',defaultPose:'',allowedPoses:['channel'],candidatePoses:['charge','release','aftercast'],
+  poseRules:[{pose:'channel',when:{actorAlive:true,battleActive:true,bossActing:false}}]}, /* 주딜러=보스 시전 없는 창에서 시전 지속·보스 예고 시 기본(브레이스 비트) */
+ sham:{actorId:'sham',kind:'companion',figId:'sb-sham-fig',stageContext:'shell_iron',
+  snapshotKey:'sham',defaultPose:'',allowedPoses:['sustain'],candidatePoses:['cleanse','pulse','rescue'],
+  poseRules:[{pose:'sustain',when:{actorAlive:true,valorActive:true}}]} /* 전투 의지(주술사 스킬) 창 동안 유지 집중 */
 };
 var SG_POSE_STATS={resolved:0,ruleHit:0,byDefault:0,unregistered:0,notAllowed:0,badSnapshot:0};
-function sgPoseCond(when,snap,profile){ /* 조건 키 해석기 — 미지 키=불일치(안전) */
+function sgPoseCond(when,snap,profile){ /* 조건 키 해석기 — 미지 키=불일치(안전)·전부 snapshot 순수 읽기(gameplay/pose 이름 0) */
  for(var k in when){
   var want=when[k],got;
   if(k==='bossActionKind')got=!!(snap.bossAction&&snap.bossAction.kind===want);
@@ -2172,6 +2197,10 @@ function sgPoseCond(when,snap,profile){ /* 조건 키 해석기 — 미지 키=�
    var a=(snap.actors&&profile.snapshotKey)?snap.actors[profile.snapshotKey]:null;
    got=(k==='actorAlive')?(!!(a&&a.alive)===want):(!!(a&&a.shielded)===want);
   }
+  else if(k==='valorActive')got=(!!snap.valorActive===want);           /* F4: 주술사 유지(전투 의지 창) */
+  else if(k==='interruptStance')got=(snap.interruptStance===want);      /* F4: 도적 차단 stance(문자열 일치) */
+  else if(k==='battleActive')got=((!!snap.started&&!snap.over)===want); /* F4: 전투 활성(시작∧미종료) */
+  else if(k==='bossActing')got=(!!snap.bossAction===want);             /* F4: 보스 시전 중 여부 */
   else return false;
   if(!got)return false;
  }
@@ -2200,11 +2229,11 @@ function applyActorPose(el,pose){ /* presenter 적용 — idempotent 속성 교�
  if(!el||typeof el.getAttribute!=='function'||typeof el.setAttribute!=='function')return;
  if(el.getAttribute('data-pose')!==pose)el.setAttribute('data-pose',pose);
 }
-function sbFigPose(S){ /* F2: 얇은 presenter — 비활성 무대 문맥은 DOM 무접촉(legacy 게이트 등가·docs/63) */
+function sbFigPose(S){ /* F2 presenter + F4 owner cleanup: 비활성 무대 문맥 figure는 기본 자세로 리셋(stale data-pose 0·docs/65 §13) */
  var ctx=sgBossId(),snap=null;
  for(var id in ACTOR_REGISTRY){
   var p=ACTOR_REGISTRY[id];
-  if(p.stageContext&&p.stageContext!==ctx)continue;
+  if(p.stageContext&&p.stageContext!==ctx){applyActorPose(document.getElementById(p.figId),'');continue;} /* F4: 문맥 밖=owner cleanup(숨김 figure의 이전 포즈 잔존 제거·시각 불변) */
   if(snap===null)snap=sgSnapshot(S,(typeof G!=='undefined')?G:null);
   applyActorPose(document.getElementById(p.figId),resolveActorPose(id,snap).pose);
  }
