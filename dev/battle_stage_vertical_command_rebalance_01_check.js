@@ -56,11 +56,11 @@ chk('c7 파티 scale 무변경',
 
 // 8. 파티 가로 배치 무변경 (원호 translate 4종 + gap 26)
 chk('c8 파티 가로 배치(원호 translate·gap 26) 무변경',
-  inSrc('#stage.sb-boss-iron #sa-war{transform:translate(-24px,-12px);z-index:4}') &&
-  inSrc('#stage.sb-boss-iron #sa-rog{transform:translate(-8px,8px)}') &&
-  inSrc('#stage.sb-boss-iron #sa-mage{transform:translate(8px,8px)}') &&
-  inSrc('#stage.sb-boss-iron #sa-sham{transform:translate(24px,-6px)}') &&
-  /#stage\.sb-boss-iron #stageAllies\{bottom:20px;gap:26px\}/.test(src), '');
+  inSrc('#stage.sb-fig-stage #sa-war{transform:translate(-24px,-12px);z-index:4}') &&
+  inSrc('#stage.sb-fig-stage #sa-rog{transform:translate(-8px,8px)}') &&
+  inSrc('#stage.sb-fig-stage #sa-mage{transform:translate(8px,8px)}') &&
+  inSrc('#stage.sb-fig-stage #sa-sham{transform:translate(24px,-6px)}') &&
+  /#stage\.sb-fig-stage #stageAllies\{bottom:20px;gap:26px\}/.test(src), '');
 
 // 9. 바 의미 감사 문서 존재
 chk('c9 바 의미 감사 문서(docs/56 §7)', inDoc('하단 바의 실제 의미', 'gcdBar', 'priCastWrap'), '');
@@ -153,9 +153,9 @@ try {
 // 26. index 현행 기준선 (재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 현행 기준선(194,919 B · md5 33d20ae3…)',
-    buf.length === 194919 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  chk('c26 index.html 현행 기준선(205,777 B · md5 dd4e0405…)',
+    buf.length === 205777 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 }
 
 // 27. docs/56 필수 절

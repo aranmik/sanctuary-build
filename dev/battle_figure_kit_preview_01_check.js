@@ -80,8 +80,8 @@ chk('c12 전투 연동 0(Math.random/localStorage/__seedHealer/createGame 부재
 
 // 13. index.html 기준선 유지
 chk('c13 index.html 무변경(149,309 B · md5 c9e289d7…)',
-  buf.length === 194919 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  buf.length === 205777 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 
 // 14. CORE 유지 (실측 · 파일 산출 없이 메모리 계산)
 {

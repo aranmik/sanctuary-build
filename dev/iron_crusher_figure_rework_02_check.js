@@ -37,8 +37,8 @@ chk('c4 크기 튜닝 존재(sb-boss-fig/sb-war-fig scale)',
 
 // 5. 배치 튜닝 존재 (파티 줄 위로 + 동료 배치 · shell_iron 스코프 · 값은 Rework 03에서 원호로 갱신)
 chk('c5 배치 튜닝 존재(파티 줄 + 동료 transform · shell_iron 스코프)',
-  hasH('#stage.sb-boss-iron #stageAllies{bottom:') &&
-  hasH('#stage.sb-boss-iron #sa-war{transform:'), '');
+  hasH('#stage.sb-fig-stage #stageAllies{bottom:') &&
+  hasH('#stage.sb-fig-stage #sa-war{transform:'), '');
 
 // 6. sb- 네임스페이스 유지
 chk('c6 sb- 네임스페이스(15회+)', cntH('sb-') >= 15, cntH('sb-') + '회');
@@ -64,8 +64,8 @@ chk('c9 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 11. index.html 현행 기준선
 chk('c11 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 194919 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  buf.length === 205777 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 
 // 12. CORE byte-identical
 {
@@ -93,9 +93,11 @@ try {
 } catch (e) { chk('c14 스모크 3종 불변', false, e.message); }
 
 // 15. 다른 보스 회귀 보호 (배치 튜닝이 shell_iron 스코프 — 전역 stageAllies 미변경)
-chk('c15 배치 튜닝 shell_iron 스코프(전역 stageAllies bottom:6px 유지)',
+// 〔승계 — F6(docs/68 §15)〕 배치 스코프가 보스별 → 보스 figure 무대 공통(.sb-fig-stage)·문맥 토글은 Profile 기반.
+// 의미 불변: 배치 튜닝은 figure 무대에만 적용되고, figure 없는 보스는 전역 stageAllies bottom:6px를 그대로 쓴다.
+chk('c15 배치 튜닝 figure 무대 스코프(전역 stageAllies bottom:6px 유지)',
   hasH('#stageAllies{position:absolute;bottom:6px') &&
-  hasH("sC(_stg,'sb-boss-iron',(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron'))"), '');
+  hasH("sC(st,'sb-fig-stage',!!(act&&resolveBossFigureShell(act)))"), '');
 
 // 16. Preview 01 / Pose Pack 01 / Rework 01 파일 유지
 chk('c16 프리뷰/포즈팩/Rework01 문서 유지',
@@ -117,7 +119,7 @@ chk('c18 docs/45 필수 절(크기 전후/버린 안/대치 구도/회귀/리스
 // 19. div/section 균형 (CSS만 바꿨으니 202/202 유지)
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c19 div/section 균형(214/214·8/8)', dO === dC && dO === 214 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
+  chk('c19 div/section 균형(218/218·8/8)', dO === dC && dO === 218 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 
 console.log(`\n${fail === 0 ? '★ IRON CRUSHER FIGURE REWORK 02 CHECK PASS' : '★ IRON CRUSHER FIGURE REWORK 02 CHECK FAIL'} (${pass} pass / ${fail} fail)`);

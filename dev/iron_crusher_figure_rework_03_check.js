@@ -37,14 +37,14 @@ chk('c4 확대 적용(파쇄자/전사 scale 존재)',
 
 // 5. 원호/포위형 배치 — 4동료 개별 transform (shell_iron 스코프)
 chk('c5 원호 배치(4동료 개별 transform · shell_iron 스코프)',
-  hasH('#stage.sb-boss-iron #sa-war{transform:translate(') &&
-  hasH('#stage.sb-boss-iron #sa-rog{transform:translate(') &&
-  hasH('#stage.sb-boss-iron #sa-mage{transform:translate(') &&
-  hasH('#stage.sb-boss-iron #sa-sham{transform:translate('), '');
+  hasH('#stage.sb-fig-stage #sa-war{transform:translate(') &&
+  hasH('#stage.sb-fig-stage #sa-rog{transform:translate(') &&
+  hasH('#stage.sb-fig-stage #sa-mage{transform:translate(') &&
+  hasH('#stage.sb-fig-stage #sa-sham{transform:translate('), '');
 
 // 6. 파티 줄 위치 조정 (shell_iron 스코프)
-chk('c6 파티 줄 위치 조정(#stage.sb-boss-iron #stageAllies bottom)',
-  hasH('#stage.sb-boss-iron #stageAllies{bottom:'), '');
+chk('c6 파티 줄 위치 조정(#stage.sb-fig-stage #stageAllies bottom)',
+  hasH('#stage.sb-fig-stage #stageAllies{bottom:'), '');
 
 // 7. sb- 네임스페이스 유지
 chk('c7 sb- 네임스페이스(15회+)', cntH('sb-') >= 15, cntH('sb-') + '회');
@@ -70,8 +70,8 @@ chk('c10 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 12. index.html 현행 기준선
 chk('c12 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 194919 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  buf.length === 205777 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 
 // 13. CORE byte-identical
 {
@@ -99,9 +99,11 @@ try {
 } catch (e) { chk('c15 스모크 3종 불변', false, e.message); }
 
 // 16. 다른 보스 회귀 보호 (원호 배치가 shell_iron 스코프 — 전역 stageAllies 미변경)
-chk('c16 배치 shell_iron 스코프(전역 stageAllies bottom:6px 유지)',
+// 〔승계 — F6(docs/68 §15)〕 배치 스코프가 보스별 → 보스 figure 무대 공통(.sb-fig-stage)·문맥 토글은 Profile 기반.
+// 의미 불변: 원호 배치는 figure 무대에만·figure 없는 보스는 전역 stageAllies bottom:6px 유지.
+chk('c16 배치 figure 무대 스코프(전역 stageAllies bottom:6px 유지)',
   hasH('#stageAllies{position:absolute;bottom:6px') &&
-  hasH("sC(_stg,'sb-boss-iron',(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron'))"), '');
+  hasH("sC(st,'sb-fig-stage',!!(act&&resolveBossFigureShell(act)))"), '');
 
 // 17. Preview/Pose Pack/Rework 01·02 파일 유지
 chk('c17 프리뷰/포즈팩/Rework01·02 문서 유지',
@@ -122,7 +124,7 @@ chk('c19 docs/46 필수 절(시도안/버린 안/원호 구도/회귀/리스크)
 // 20. div/section 균형
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c20 div/section 균형(214/214·8/8)', dO === dC && dO === 214 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
+  chk('c20 div/section 균형(218/218·8/8)', dO === dC && dO === 218 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 
 console.log(`\n${fail === 0 ? '★ IRON CRUSHER FIGURE REWORK 03 CHECK PASS' : '★ IRON CRUSHER FIGURE REWORK 03 CHECK FAIL'} (${pass} pass / ${fail} fail)`);

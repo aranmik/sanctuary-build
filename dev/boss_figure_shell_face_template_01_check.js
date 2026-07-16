@@ -59,14 +59,17 @@ chk('a1 BOSS_STAGE_PROFILE 존재 + boss_iron reference profile(bossId/actorId/s
   inSrc("shell_iron:{bossId:'shell_iron',actorId:'boss_iron',shellId:'sb_unit_v1'") &&
   inSrc("figId:'sb-boss-fig',hostId:'stage',stageContext:'shell_iron'"), f5.length + 'B');
 
+// 〔승계 — F6(docs/68 §10)〕 모르가스 profile(boss01) 등록으로 목록 확장 — F5 계약의 목적(데이터 추가만으로 보스 등록)이 실증된 결과.
+// shell은 여전히 1종(sb_unit_v1 재사용=새 shell 불요 증명). F5 generic 로직 무수정.
 chk('a2 debug accessor 등록 목록(profiles/shells·F1~F4A API 공존)',
   !!(stage && stage.bossProfiles && stage.bossShells && stage.bossProfile && stage.resolveBossFace && stage.bossFigure) &&
-  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron']) &&
+  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron', 'boss01']) &&
   JSON.stringify(stage.bossShells()) === JSON.stringify(['sb_unit_v1']) &&
   !!(stage.resolvePose && stage.anchor && stage.cueState && stage.deriveSnapshot), '');
 
+// 〔승계 — F6〕 boss01은 이제 등록됨 → 미등록 대표를 shell_thirst(F7 몫)로 교체. 의미(미등록/프로토타입 키 → null·예외 0) 불변.
 chk('a3 미등록 bossId → null(예외 0) · 프로토타입 키 → null',
-  stage.bossProfile('nope') === null && stage.bossProfile('boss01') === null &&
+  stage.bossProfile('nope') === null && stage.bossProfile('shell_thirst') === null &&
   stage.bossProfile('toString') === null && stage.bossProfile('') === null &&
   stage.bossProfile(undefined) === null, '');
 
@@ -265,9 +268,11 @@ chk('f9 Actor Registry 연결(boss_iron→bossStageProfile 참조·pose resolver
   inSrc("bossStageProfile:'shell_iron'") && rvB.indexOf('bossStageProfile') < 0 && cdB.indexOf('bossStageProfile') < 0 &&
   (function () { const p = stage.actorProfile('boss_iron'); return p && p.bossStageProfile === 'shell_iron' && p.actorId === 'boss_iron'; })(), '');
 
-chk('f10 Actor/Anchor 등록 목록 불변(신규 actor 0)',
-  stage.actors().join(',') === 'boss_iron,war,rog,mage,sham' &&
-  JSON.stringify(stage.anchors()) === JSON.stringify(['boss_iron', 'war', 'rog', 'mage', 'sham', 'boss', 'pri']), '');
+// 〔승계 — F6(docs/68 §14·§16)〕 F5는 "신규 actor 0"이 맞았고, F6는 새 보스를 등록하는 카드다 → 의미를 "F5 기반이 소유한
+// 기존 등록(파쇄자·동료 4인·fxAnchors 계보)은 불변, 추가는 모르가스 1종뿐"으로 승계. 동료/파쇄자/boss/pri 항목·순서 그대로.
+chk('f10 Actor/Anchor 등록: 기존 항목 불변 + F6 모르가스 1종만 추가',
+  stage.actors().join(',') === 'boss_iron,boss_morgas,war,rog,mage,sham' &&
+  JSON.stringify(stage.anchors()) === JSON.stringify(['boss_iron', 'war', 'rog', 'mage', 'sham', 'boss_morgas', 'boss', 'pri']), '');
 
 /* ===== G. Cleanup ===== */
 chk('g1 owner cleanup 존재(문맥 밖 data-face 제거·F2 presenter와 동일 규약)',
@@ -296,9 +301,9 @@ try {
   chk('h2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('h3 index.html 신 기준선(194,919 B · md5 33d20ae3…)',
-    buf.length === 194919 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', buf.length + 'B');
+  chk('h3 index.html 신 기준선(205,777 B · md5 dd4e0405…)',
+    buf.length === 205777 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', buf.length + 'B');
 }
 chk('h4 docs/67 필수 절(감사·Profile·Shell·Face·분리·slot·fallback·mapping·anchor·ownership·lifecycle·cleanup·등가·관측·F6·F7·closeout)',
   doc.length > 5000 &&

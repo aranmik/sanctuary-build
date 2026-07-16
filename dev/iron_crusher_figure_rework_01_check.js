@@ -33,7 +33,7 @@ chk('c3 실전 파쇄자 sb 피규어(sb-boss-fig + sb-iron-crusher + 망치/코
 chk('c4 shell_iron 게이트 + 스위칭 CSS',
   hasH("CUR_BOSS==='shell_iron'") && hasH('sb-boss-iron') &&
   hasH('#stage.sb-boss-iron #sb-boss-fig{display:block}') &&
-  hasH('#stage.sb-boss-iron #bossAvatar{display:none}'), '');
+  hasH('#stage.sb-fig-stage #bossAvatar{display:none}'), '');
 
 // 5. sb- 네임스페이스 사용
 chk('c5 sb- 네임스페이스(15회+)', cntH('sb-') >= 15, cntH('sb-') + '회');
@@ -78,8 +78,8 @@ chk('c14 HOLD 파일 repo 미유입',
 
 // 16. index.html 현행 기준선
 chk('c16 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 194919 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  buf.length === 205777 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 
 // 17. CORE 기준선 유지 (실측 byte-identical)
 {
@@ -108,8 +108,12 @@ try {
 } catch (e) { chk('c19 스모크 3종 불변', false, e.message); }
 
 // 20. 다른 보스 분기 보호 (fallback: boss01일 때 sb-boss-iron 미부여 — toggle 조건이 shell_iron 한정)
-chk('c20 다른 보스 회귀 보호(sC toggle이 shell_iron 조건)',
-  hasH("sC(_stg,'sb-boss-iron',(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron'))"), '');
+// 〔승계 — F6(docs/68 §15)〕 무대 문맥 토글이 newGame 하드코딩(CUR_BOSS==='shell_iron')에서 Profile 데이터 기반
+// sbStageContext()로 치환 — 보호 의미는 강화·불변: 각 보스의 contextClass는 자기가 활성일 때만(p===act) 켜지고,
+// figure profile이 없는 보스(심연)는 어떤 문맥 class도 받지 못한다.
+chk('c20 다른 보스 회귀 보호(문맥 토글이 활성 보스 전용)',
+  hasH('sC(st,p.contextClass,p===act)') && hasH("contextClass:'sb-boss-iron'") &&
+  hasH('sbStageContext()'), '');
 
 // 21. Preview 01 / Pose Pack 01 파일 유지
 chk('c21 프리뷰/포즈팩 파일 유지',
@@ -126,7 +130,7 @@ chk('c22 docs/44 필수 절',
 // 23. div/section 균형
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c23 div/section 균형(214/214·8/8)', dO === dC && sO === sC2 && dO === 214 && sO === 8,
+  chk('c23 div/section 균형(218/218·8/8)', dO === dC && sO === sC2 && dO === 218 && sO === 8,
     dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 

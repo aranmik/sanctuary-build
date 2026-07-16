@@ -30,11 +30,11 @@ chk('c2 보스 scale 1.04·origin 불변',
 
 // 3. 파티 위치 불변 (allies bottom/gap + 원호 translate 4종)
 chk('c3 파티 위치 불변(bottom:20·gap:26·원호 4종)',
-  /#stage\.sb-boss-iron #stageAllies\{bottom:20px;gap:26px\}/.test(src) &&
-  inSrc('#stage.sb-boss-iron #sa-war{transform:translate(-24px,-12px);z-index:4}') &&
-  inSrc('#stage.sb-boss-iron #sa-rog{transform:translate(-8px,8px)}') &&
-  inSrc('#stage.sb-boss-iron #sa-mage{transform:translate(8px,8px)}') &&
-  inSrc('#stage.sb-boss-iron #sa-sham{transform:translate(24px,-6px)}'), '');
+  /#stage\.sb-fig-stage #stageAllies\{bottom:20px;gap:26px\}/.test(src) &&
+  inSrc('#stage.sb-fig-stage #sa-war{transform:translate(-24px,-12px);z-index:4}') &&
+  inSrc('#stage.sb-fig-stage #sa-rog{transform:translate(-8px,8px)}') &&
+  inSrc('#stage.sb-fig-stage #sa-mage{transform:translate(8px,8px)}') &&
+  inSrc('#stage.sb-fig-stage #sa-sham{transform:translate(24px,-6px)}'), '');
 
 // 4. 파티 scale 불변 (.80/.74/.76/.74)
 chk('c4 파티 scale 불변',
@@ -147,7 +147,7 @@ chk('c24 타 보스 보호(게이트·기존 fxLn·전역 bottom:6·≤730 fallb
   inSrc("var iron=(typeof CUR_BOSS!=='undefined'&&CUR_BOSS==='shell_iron');") &&
   inSrc("if(!sbSmashFx(S,t))fxLn('fxBossLine',A.boss,smashTg?A[smashTg]:null,!!smashTg,'fxBoss');") &&
   inSrc('#stageAllies{position:absolute;bottom:6px') &&
-  inSrc('#stage.sb-boss-iron #bossAvatar{display:block}'), '');
+  inSrc('#stage.sb-fig-stage #bossAvatar{display:block}'), '');
 
 // 25~26. 390×844 overflow 0 · console 0 (pane 실측 기록 검증)
 chk('c25 390×844 overflow 0 기록', inDoc('overflow 0'), '');
@@ -166,9 +166,9 @@ try {
 // 28. index 현행 기준선 (재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c28 index.html 현행 기준선(194,919 B · md5 33d20ae3…)',
-    buf.length === 194919 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
+  chk('c28 index.html 현행 기준선(205,777 B · md5 dd4e0405…)',
+    buf.length === 205777 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
 }
 
 // 29. docs/57 필수 절
