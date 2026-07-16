@@ -162,9 +162,9 @@ chk('c25 overflow 보호(신규 CSS 고정폭 0·#fxSvg inset 유지)',
 // 26. index.html 현행 기준선(재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c26 index.html 기준선(185,737 B·md5 8d72d049…)',
-    buf.length === 185737 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
+  chk('c26 index.html 기준선(194,919 B·md5 33d20ae3…)',
+    buf.length === 194919 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
 }
 
 // 27. 스모크 3종 불변 (gameplay 무변경 실행 증명)

@@ -410,7 +410,9 @@ button{font-family:inherit;cursor:pointer}
 #stage .sb-warrior[data-pose="brace"] .sb-w-sword{transform:rotate(-52deg)}
 #stage .sb-iron-crusher[data-pose="windup"] .sb-react{transform:rotate(-3deg) translateY(-2px)}
 #stage .sb-iron-crusher[data-pose="windup"] .sb-ic-hammer{transform:rotate(-18deg) translate(2px,-18px)}
-#stage .sb-iron-crusher[data-pose="windup"] .sb-ic-head{transform:translateX(calc(-50% - 3px)) rotate(-3deg)}
+/* F5: 얼굴 파츠는 face state가 소유(pose=몸이 무엇을 하는가 / face=얼굴이 무엇을 드러내는가·docs/67 §8).
+   파쇄자는 face 'tell' ⟺ pose 'windup'(둘 다 bossActionKind:'smash' 파생·같은 render 패스) → 시각 결과 등가. */
+#stage .sb-iron-crusher[data-face="tell"] .sb-ic-head{transform:translateX(calc(-50% - 3px)) rotate(-3deg)}
 /* F4: 동료 실전 포즈(승인 [51] Pose Pack 이식·연결분만: 도적 interrupt · 마법사 channel · 주술사 sustain) — 전환은 기존 .sb-part/.sb-react transition .28s */
 #stage .sb-rogue[data-pose="interrupt"] .sb-react{transform:translateY(4px) rotate(-4deg) scale(.98)}
 #stage .sb-rogue[data-pose="interrupt"] .sb-r-dagger{transform:rotate(-16deg) translate(-4px,-8px) scale(1.05)}
@@ -2183,6 +2185,7 @@ function resolveAnchor(actorId,anchorName){ /* generic resolver — Actor/직업
    ④ DOM 접촉은 presenter(applyActorPose·sbFigPose)만 — registry/resolver는 plain data. 새 포즈·타이머·상태 0. */
 var ACTOR_REGISTRY={ /* Stage presentation profile — gameplay 수치/판정/좌표/FX 없음(발주 §4) */
  boss_iron:{actorId:'boss_iron',kind:'boss',figId:'sb-boss-fig',stageContext:'shell_iron',
+  bossStageProfile:'shell_iron', /* F5: figure shell/face 계약 참조(docs/67) — Actor Registry는 정체성·pose만 소유, shell 세부는 BOSS_STAGE_PROFILE. generic pose resolver는 이 키를 읽지 않음 */
   snapshotKey:null,defaultPose:'',allowedPoses:['windup'],
   poseRules:[{pose:'windup',when:{bossActionKind:'smash'}}]},
  war:{actorId:'war',kind:'companion',figId:'sb-war-fig',stageContext:'shell_iron',
@@ -2290,6 +2293,135 @@ function renderFx(S,t,p,mt){
   if(ring.className!==cls)ring.className=cls;
  }
 }
+/* ===== F5: Boss Figure Shell / Face Template 01 (docs/67 · 헌법 docs/59 §12·§20·§23) =====
+   골격은 공통, 연기는 고유 — 보스마다 다른 인형을 만들되, 인형을 무대에 세우는 방법은 하나로 만든다. 규칙:
+   ① 데이터는 보스별(BOSS_STAGE_PROFILE)·실행은 generic — resolver/presenter에 bossId·보스 이름 literal 분기 0.
+   ② Shell=현행 sb- 자산의 3층 transform 골격을 서술만 한다(DOM 생성 0·binder 방식) — 반복 render 재생성 0·duplicate root 0.
+   ③ Face=pose와 분리(data-pose=몸이 무엇을 하는가 / data-face=얼굴이 무엇을 드러내는가) — gameplay는 face 이름을 모른다.
+   ④ face 조건 해석은 F2 sgPoseCond 재사용(조건 어휘 단일) — 실 gameplay truth 있는 상태만 연결(파쇄자: smash 예고=tell).
+   ⑤ 좌표는 F3 resolveAnchor 위임만(자체 rect/캐시/listener 0·(0,0) fallback 0)·미등록 boss/shell=null(예외 0). */
+var BOSS_FIGURE_SHELL={ /* 무대 골격 어휘 — 현행 sb- 자산 존중(레이어 3층=배치/반응/idle·파츠는 .sb-part) */
+ sb_unit_v1:{shellId:'sb_unit_v1',layers:['sb-react','sb-fit','sb-fig'],partClass:'sb-part',
+  slots:['root','ground','aura','body','core','ornament','face','weapon','sideL','sideR']} /* slot 어휘만 — 미보유 slot은 null(빈 DOM 남발 0·좌우 대칭 강제 0) */
+};
+var BOSS_STAGE_PROFILE={ /* bossId → 무대 figure 계약(현행 실사용 최소만 — 미래 보스 추측 선등록 ⛔) */
+ shell_iron:{bossId:'shell_iron',actorId:'boss_iron',shellId:'sb_unit_v1',
+  figId:'sb-boss-fig',hostId:'stage',stageContext:'shell_iron',
+  parts:{root:'sb-fig',ground:'sb-shadow',aura:'sb-aura',body:'sb-ic-body',core:'sb-ic-core',
+   ornament:'sb-ic-pauldrons',face:'sb-ic-head',weapon:'sb-ic-hammer'}, /* sideL/sideR 미보유=null(비대칭 보스는 F7에서 등록) */
+  faceParts:{root:'sb-ic-head'}, /* 단일 파츠 얼굴 — 눈/바이저는 ::before/::after(pseudo=파츠·anchor 불가·docs/59 Anchor 8원칙) */
+  defaultFace:'neutral',allowedFaces:['neutral','tell'],candidateFaces:['hurt','groggy','enraged','defeated'],
+  faceRules:[{face:'tell',when:{bossActionKind:'smash'}}], /* 실 truth 있는 상태만 — hurt/groggy 등은 신호+one-shot 준비 후 후속 카드 */
+  anchors:['weapon','body']} /* F3 semantic anchor 연결 선언(정본 등록은 ANCHOR_REGISTRY) */
+};
+var SG_FACE_STATS={resolved:0,ruleHit:0,byDefault:0,unregistered:0,notAllowed:0,badSnapshot:0,cleared:0};
+function resolveBossStageProfile(bossId){ /* generic 조회 — 미등록/미지/프로토타입 키=null(예외 0·등록 순서 의존 0) */
+ if(typeof bossId!=='string'||!bossId)return null;
+ var p=BOSS_STAGE_PROFILE[bossId];
+ return (p&&typeof p==='object'&&p.bossId===bossId)?p:null; /* self-key 검증=상속 속성(toString 등) 차단 */
+}
+function resolveBossFigureShell(profile){ /* generic 조회 — 미등록 shellId=null(안전) */
+ if(!profile)return null;
+ var s=BOSS_FIGURE_SHELL[profile.shellId];
+ return (s&&typeof s==='object'&&s.shellId===profile.shellId)?s:null;
+}
+function resolveBossPart(profile,slot){ /* slot→class — 미보유 optional slot=null(유령 DOM 0) */
+ if(!profile||!profile.parts||typeof slot!=='string')return null;
+ var c=profile.parts[slot];
+ return (typeof c==='string'&&c)?c:null;
+}
+function resolveBossPartEl(profile,slot){ /* slot→요소 — binding은 profile이 공급(bossId 조립 selector 0·DOM 생성 0) */
+ var c=resolveBossPart(profile,slot);
+ if(!c)return null;
+ var fig=document.getElementById(profile.figId);
+ if(!fig||typeof fig.querySelector!=='function')return null;
+ return fig.querySelector('.'+c)||null;
+}
+function resolveBossAnchor(profile,anchorName){ /* profile 선언 anchor만 F3 resolver로 위임 — 자체 rect/좌표 계산·캐시 0 */
+ if(!profile||!profile.anchors||profile.anchors.indexOf(anchorName)<0)return null;
+ return resolveAnchor(profile.actorId,anchorName);
+}
+function resolveBossFace(profile,snap){ /* generic — faceRules 평가만·조건 해석은 F2 sgPoseCond 재사용(조건 어휘 단일·id 분기 0) */
+ if(!profile){SG_FACE_STATS.unregistered++;return {face:'',reason:'unregistered'};}
+ var def=(typeof profile.defaultFace==='string')?profile.defaultFace:'';
+ if(!snap||typeof snap!=='object'){SG_FACE_STATS.badSnapshot++;return {face:def,reason:'bad-snapshot'};}
+ var rules=profile.faceRules||[];
+ for(var i=0;i<rules.length;i++){
+  var r=rules[i];
+  if(!r||typeof r.face!=='string')continue;
+  var ok=false;
+  try{ok=sgPoseCond(r.when||{},snap,profile);}catch(e){ok=false;}
+  if(ok){
+   if(profile.allowedFaces&&profile.allowedFaces.indexOf(r.face)<0){SG_FACE_STATS.notAllowed++;return {face:def,reason:'not-allowed'};} /* 미지/불허 face=안전 fallback */
+   SG_FACE_STATS.resolved++;SG_FACE_STATS.ruleHit++;
+   return {face:r.face,reason:'rule:'+i};
+  }
+ }
+ SG_FACE_STATS.resolved++;SG_FACE_STATS.byDefault++;
+ return {face:def,reason:'default'};
+}
+function presentBossFigure(profile,resolved){ /* presenter — data-face 반영만·idempotent 속성 교체(DOM 생성/재생성 0·class churn 0) */
+ if(!profile)return;
+ var el=document.getElementById(profile.figId);
+ if(!el||typeof el.setAttribute!=='function'||typeof el.getAttribute!=='function')return;
+ var f=(resolved&&typeof resolved.face==='string')?resolved.face:'';
+ if(el.getAttribute('data-face')!==f)el.setAttribute('data-face',f);
+}
+function clearBossFigure(profile){ /* owner cleanup — 문맥 밖/미지 shell 보스의 stale data-face 제거(boss switch·battle end·newGame) */
+ if(!profile)return;
+ var el=document.getElementById(profile.figId);
+ if(!el||typeof el.setAttribute!=='function'||typeof el.getAttribute!=='function')return;
+ if(el.getAttribute('data-face')!==''){el.setAttribute('data-face','');SG_FACE_STATS.cleared++;}
+}
+function sbBossFigure(S){ /* render 진입점 — 활성 boss 문맥만 face 반영·나머지 등록 보스는 owner cleanup(stale 0·docs/67 §16) */
+ var ctx=sgBossId(),snap=null;
+ for(var id in BOSS_STAGE_PROFILE){
+  var p=resolveBossStageProfile(id);
+  if(!p)continue;
+  if(p.stageContext&&p.stageContext!==ctx){clearBossFigure(p);continue;} /* 문맥 밖=cleanup(F2 presenter와 같은 owner 규약) */
+  if(!resolveBossFigureShell(p)){clearBossFigure(p);continue;}            /* 미등록 shell=표현 0(안전) */
+  if(snap===null)snap=sgSnapshot(S,(typeof G!=='undefined')?G:null);
+  presentBossFigure(p,resolveBossFace(p,snap));
+ }
+}
+(function(){ /* F5 debug accessor — 읽기 전용·복사본·DOM node 비반출·production state 수정 0(docs/59 §23) */
+ var st=(window.__seedHealer&&window.__seedHealer.stage)?window.__seedHealer.stage:null;if(!st)return;
+ st.bossProfiles=function(){return Object.keys(BOSS_STAGE_PROFILE);};
+ st.bossShells=function(){return Object.keys(BOSS_FIGURE_SHELL);};
+ st.bossProfile=function(id){var p=resolveBossStageProfile(id);return p?JSON.parse(JSON.stringify(p)):null;};
+ st.resolveBossFace=function(id,snap){
+  if(snap===undefined)snap=(typeof G!=='undefined'&&G)?sgSnapshot(G.S,G):null;
+  return resolveBossFace(resolveBossStageProfile(id),snap);
+ };
+ st.bossFaceStats=function(){return JSON.parse(JSON.stringify(SG_FACE_STATS));};
+ st.bossFigure=function(){
+  var ctx=sgBossId(),p=resolveBossStageProfile(ctx),sh=resolveBossFigureShell(p);
+  var o={bossId:ctx,contextActive:!!p,actorId:p?p.actorId:null,shellId:p?p.shellId:null,
+   pose:null,face:null,mappedParts:[],boundParts:[],missingParts:[],anchors:{},
+   rootCount:0,duplicateRoot:0,staleFaceCount:0};
+  for(var id in BOSS_STAGE_PROFILE){ /* stale=문맥 밖인데 data-face 잔존한 등록 보스 수 */
+   var q=resolveBossStageProfile(id);if(!q)continue;
+   var qe=document.getElementById(q.figId);
+   if(q.stageContext&&q.stageContext!==ctx&&qe&&typeof qe.getAttribute==='function'&&qe.getAttribute('data-face'))o.staleFaceCount++;
+  }
+  if(!p)return o;
+  var el=document.getElementById(p.figId);
+  if(el){
+   if(typeof el.getAttribute==='function'){o.pose=el.getAttribute('data-pose');o.face=el.getAttribute('data-face');}
+   var all=(typeof document.querySelectorAll==='function')?document.querySelectorAll('#'+p.figId):null;
+   o.rootCount=all?all.length:0;o.duplicateRoot=Math.max(0,o.rootCount-1);
+  }
+  var slots=sh?sh.slots:Object.keys(p.parts||{});
+  for(var i=0;i<slots.length;i++){
+   var s=slots[i];if(!resolveBossPart(p,s))continue;
+   o.mappedParts.push(s);
+   (resolveBossPartEl(p,s)?o.boundParts:o.missingParts).push(s);
+  }
+  var an=p.anchors||[];
+  for(var j=0;j<an.length;j++){var a=resolveBossAnchor(p,an[j]);o.anchors[an[j]]=a?JSON.parse(JSON.stringify(a.point)):null;}
+  return o;
+ };
+})();
 /* ===== F4A: Shaman Sustain Support Cue 01 (docs/66 · 헌법 docs/59 §12·§23) =====
    진리(valorActive)의 false→true 경계에서 1회: 주술사 지원 파동 + 파티 머리 위 ping → 이후 은은한 유지(hold는 sustain 포즈 CSS가 소유).
    규칙: ① 입력=sgSnapshot(valorActive)만·true 유지 중 재발화 0·true→false/battle 경계 cleanup.
@@ -2373,7 +2505,7 @@ function render(){
  const vb=$('valorBanner');
  if(t<S.valorUntil){vb.classList.remove('hidden');sT($('valorLeft'),(S.valorUntil-t).toFixed(1)+'s');}
  else vb.classList.add('hidden');
- const mt=G.meleeTgtId();renderFx(S,t,p,mt);sbFigPose(S);sbSupportCue(S);
+ const mt=G.meleeTgtId();renderFx(S,t,p,mt);sbFigPose(S);sbBossFigure(S);sbSupportCue(S);
  for(const id of IDS){
   const u=(id==='pri')?p:S.al.find(a=>a.id===id);
   const fr=$('f-'+id);

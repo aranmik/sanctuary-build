@@ -83,9 +83,9 @@ chk('c23 행동선·데칼·runtime 미구현 명시',
 // 24. index.html md5 유지 (무변경)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c24 index.html 무변경(185,737 B · md5 8d72d049…)',
-    buf.length === 185737 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
+  chk('c24 index.html 무변경(194,919 B · md5 33d20ae3…)',
+    buf.length === 194919 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
 }
 
 // 25. CORE 기준선 유지

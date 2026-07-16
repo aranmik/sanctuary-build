@@ -84,8 +84,9 @@ try {
   chk('a5 battle 경계 guard 존재(SG.battle 변화→scHardReset·prev 리셋·발화 없음)',
     runB.indexOf('SC_CUE.battle!==SG.battle') >= 0 && runB.indexOf('scHardReset()') >= 0 &&
     hardB.indexOf('SC_CUE.prev=false') >= 0 && hardB.indexOf('SC_CUE.els.length=0') >= 0, '');
+  // 〔승계 — F5(docs/67)〕 render 배선에 sbBossFigure(얼굴 presenter)가 pose와 cue 사이로 들어옴 — 형태 핀만 갱신·의미(figure 상태가 cue보다 먼저) 불변
   chk('a6 render 진입점=cueDrive와 동일 경로(sbSupportCue→sbSupportCueRun(snap))',
-    inSrc('function sbSupportCue(S){sbSupportCueRun(S,sgSnapshot(S,') && inSrc('sbFigPose(S);sbSupportCue(S);'), '');
+    inSrc('function sbSupportCue(S){sbSupportCueRun(S,sgSnapshot(S,') && inSrc('sbFigPose(S);sbBossFigure(S);sbSupportCue(S);'), '');
 } catch (e) { chk('a* 신호 경계(예외)', false, e.message); }
 
 /* ===== B. 기반 경계 ===== */
@@ -172,8 +173,9 @@ chk('e2 마법사 channel 규칙/CSS 무변(orb 슥슥 보존)',
 chk('e3 도적 interrupt 규칙 무변(가짜 action 0)',
   inSrc("{pose:'interrupt',when:{actorAlive:true,bossActionKind:'judge',interruptStance:'ready'}}") &&
   !inSrc('data-pose="strike"') && !inSrc('data-pose="dash"'), '');
-chk('e4 주연 순서=figure 포즈 먼저(sbFigPose)→cue(sbSupportCue)·figure 포즈가 cue보다 우선',
-  inSrc('sbFigPose(S);sbSupportCue(S);'), '');
+// 〔승계 — F5(docs/67)〕 sbBossFigure(보스 얼굴)가 pose 뒤·cue 앞에 삽입 — 형태 핀만 갱신·의미(figure 상태가 cue보다 우선) 불변
+chk('e4 주연 순서=figure 포즈/얼굴 먼저(sbFigPose→sbBossFigure)→cue(sbSupportCue)',
+  inSrc('sbFigPose(S);sbBossFigure(S);sbSupportCue(S);'), '');
 chk('e5 sustain hold=주술사 부적만 은은한 맥동(전 화면 flash 0·body/aura 강발광 0·마법사와 다른 느린 리듬)',
   inSrc('#stage .sb-shaman[data-pose="sustain"] .sb-s-charm{animation:sbSustainHold 2.6s ease-in-out infinite}') &&
   inSrc('@keyframes sbSustainHold'), '');
@@ -194,9 +196,9 @@ try {
   chk('f2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('f3 index.html 신 기준선(185,737 B · md5 8d72d049…)',
-    buf.length === 185737 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', buf.length + 'B');
+  chk('f3 index.html 신 기준선(194,919 B · md5 33d20ae3…)',
+    buf.length === 194919 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', buf.length + 'B');
 }
 chk('f4 docs/66 필수 절(피드백·가독성·설계·edge 계약·lifecycle·anchor 대응표·fallback·Ensemble·비변경·등가·cleanup·관측·Human Gate·F5)',
   doc.length > 4000 &&

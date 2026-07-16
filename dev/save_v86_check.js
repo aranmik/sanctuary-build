@@ -74,7 +74,7 @@ chk('c13 세이브 계보표(v8.2~v8.6)',
 
 // 14. index.html 무변경 (현행 md5 대조)
 chk('c14 index.html 현행 기준선(md5 c9e289d7…)',
-  crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
+  crypto.createHash('md5').update(buf).digest('hex') === '33d20ae34951a736cad2e236fdd2057a', '');
 
 // 15. CORE 숫자 유지 (실측)
 {
