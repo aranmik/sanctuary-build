@@ -261,9 +261,9 @@ try {
   chk('g2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('g3 index.html 현행 기준선(178,138 B · md5 ae27ce9c…)',
-    buf.length === 178138 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'ae27ce9c0d5c85a1038fc49c587146ec', '');
+  chk('g3 index.html 현행 기준선(185,737 B · md5 8d72d049…)',
+    buf.length === 185737 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
 }
 chk('g4 docs/63 필수 절(감사·vocabulary·priority·schema·resolver·입력 계약·fallback·lifecycle·등가성·픽셀·WATCH·F3 계약)',
   doc.length > 3000 &&

@@ -289,9 +289,9 @@ chk('d4 RNG 부재(Math.random 0회=결정론·RNG 소비 변화 N/A)',
   chk('e1 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('e2 index.html 현행 기준선(178,138 B · md5 ae27ce9c…)',
-    buf.length === 178138 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'ae27ce9c0d5c85a1038fc49c587146ec', '');
+  chk('e2 index.html 현행 기준선(185,737 B · md5 8d72d049…)',
+    buf.length === 185737 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
 }
 chk('e3 docs/62 필수 절(감사·shadow 방식·schema·대응표·lifecycle·fallback·debug·등가성·WATCH·F2 계약)',
   doc.length > 3000 &&

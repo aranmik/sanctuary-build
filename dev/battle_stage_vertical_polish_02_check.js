@@ -166,9 +166,9 @@ try {
 // 28. index 현행 기준선 (재-baseline 후 자기 핀)
 {
   const buf = fs.readFileSync(path.join(ROOT, 'index.html'));
-  chk('c28 index.html 현행 기준선(178,138 B · md5 ae27ce9c…)',
-    buf.length === 178138 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'ae27ce9c0d5c85a1038fc49c587146ec', '');
+  chk('c28 index.html 현행 기준선(185,737 B · md5 8d72d049…)',
+    buf.length === 185737 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '8d72d049b3090904abfd26488c7d4270', '');
 }
 
 // 29. docs/57 필수 절
