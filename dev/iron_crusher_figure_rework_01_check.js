@@ -78,8 +78,8 @@ chk('c14 HOLD 파일 repo 미유입',
 
 // 16. index.html 현행 기준선
 chk('c16 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 205777 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
+  buf.length === 213295 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', '');
 
 // 17. CORE 기준선 유지 (실측 byte-identical)
 {
@@ -130,7 +130,7 @@ chk('c22 docs/44 필수 절',
 // 23. div/section 균형
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c23 div/section 균형(218/218·8/8)', dO === dC && sO === sC2 && dO === 218 && sO === 8,
+  chk('c23 div/section 균형(222/222·8/8)', dO === dC && sO === sC2 && dO === 222 && sO === 8,
     dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 

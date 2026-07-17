@@ -63,13 +63,14 @@ chk('a1 BOSS_STAGE_PROFILE 존재 + boss_iron reference profile(bossId/actorId/s
 // shell은 여전히 1종(sb_unit_v1 재사용=새 shell 불요 증명). F5 generic 로직 무수정.
 chk('a2 debug accessor 등록 목록(profiles/shells·F1~F4A API 공존)',
   !!(stage && stage.bossProfiles && stage.bossShells && stage.bossProfile && stage.resolveBossFace && stage.bossFigure) &&
-  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron', 'boss01']) &&
+// 〔승계 — F7(docs/69)〕 심연 profile(shell_thirst) 추가로 목록 3종 — F5 계약이 3보스를 수용했고 shell은 여전히 1종(재사용 3회).
+  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron', 'boss01', 'shell_thirst']) &&
   JSON.stringify(stage.bossShells()) === JSON.stringify(['sb_unit_v1']) &&
   !!(stage.resolvePose && stage.anchor && stage.cueState && stage.deriveSnapshot), '');
 
-// 〔승계 — F6〕 boss01은 이제 등록됨 → 미등록 대표를 shell_thirst(F7 몫)로 교체. 의미(미등록/프로토타입 키 → null·예외 0) 불변.
+// 〔승계 — F6→F7〕 boss01·shell_thirst 모두 등록됨 → 미등록 대표를 실재하지 않는 id로 교체. 의미(미등록/프로토타입 키 → null·예외 0) 불변.
 chk('a3 미등록 bossId → null(예외 0) · 프로토타입 키 → null',
-  stage.bossProfile('nope') === null && stage.bossProfile('shell_thirst') === null &&
+  stage.bossProfile('nope') === null && stage.bossProfile('shell_void') === null &&
   stage.bossProfile('toString') === null && stage.bossProfile('') === null &&
   stage.bossProfile(undefined) === null, '');
 
@@ -270,8 +271,10 @@ chk('f9 Actor Registry 연결(boss_iron→bossStageProfile 참조·pose resolver
 
 // 〔승계 — F6(docs/68 §14·§16)〕 F5는 "신규 actor 0"이 맞았고, F6는 새 보스를 등록하는 카드다 → 의미를 "F5 기반이 소유한
 // 기존 등록(파쇄자·동료 4인·fxAnchors 계보)은 불변, 추가는 모르가스 1종뿐"으로 승계. 동료/파쇄자/boss/pri 항목·순서 그대로.
-chk('f10 Actor/Anchor 등록: 기존 항목 불변 + F6 모르가스 1종만 추가',
-  stage.actors().join(',') === 'boss_iron,boss_morgas,war,rog,mage,sham' &&
+// 〔승계 — F7(docs/69 §19)〕 심연 actor 추가. ★anchor 목록은 불변 — 심연은 cast를 안 해 A.boss 소비자가 전부 OFF이므로
+// 실사용 anchor가 0이고, 따라서 anchor를 등록하지 않았다(미사용 선등록 ⛔). 기존 항목·순서 불변.
+chk('f10 Actor/Anchor 등록: 기존 항목 불변 + 보스 actor만 추가(anchor 목록 불변)',
+  stage.actors().join(',') === 'boss_iron,boss_morgas,boss_abyss,war,rog,mage,sham' &&
   JSON.stringify(stage.anchors()) === JSON.stringify(['boss_iron', 'war', 'rog', 'mage', 'sham', 'boss_morgas', 'boss', 'pri']), '');
 
 /* ===== G. Cleanup ===== */
@@ -301,9 +304,9 @@ try {
   chk('h2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('h3 index.html 신 기준선(205,777 B · md5 dd4e0405…)',
-    buf.length === 205777 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', buf.length + 'B');
+  chk('h3 index.html 신 기준선(213,295 B · md5 afe3de3a…)',
+    buf.length === 213295 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', buf.length + 'B');
 }
 chk('h4 docs/67 필수 절(감사·Profile·Shell·Face·분리·slot·fallback·mapping·anchor·ownership·lifecycle·cleanup·등가·관측·F6·F7·closeout)',
   doc.length > 5000 &&

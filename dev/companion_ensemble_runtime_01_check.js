@@ -96,7 +96,7 @@ try { h = require('./harness.js'); s = h.sb.window.__seedHealer; stage = s.stage
 // 〔승계 — F6(docs/68 §14)〕 모르가스 boss actor 등록으로 목록 확장 — 동료 4인 등록·순서·의미 불변
 chk('b6 debug accessor(resolvePose/actors/poseStats·F1~F3 API 공존)',
   !!(stage && stage.resolvePose && stage.actors && stage.poseStats && stage.anchor && stage.deriveSnapshot) &&
-  stage.actors().join(',') === 'boss_iron,boss_morgas,war,rog,mage,sham', '');
+  stage.actors().join(',') === 'boss_iron,boss_morgas,boss_abyss,war,rog,mage,sham', '');
 
 function run(bossId, until, inputs, watch) {
   h.sb.CUR_BOSS = bossId;
@@ -214,9 +214,9 @@ try {
   chk('h2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('h3 index.html 현행 기준선(205,777 B · md5 dd4e0405…)',
-    buf.length === 205777 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
+  chk('h3 index.html 현행 기준선(213,295 B · md5 afe3de3a…)',
+    buf.length === 213295 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', '');
 }
 chk('h4 docs/65 필수 절(감사·채택/미채택·신호 대응표·priority·Ensemble·lifecycle·cleanup·이식·등가·관측·Human Gate·F5 계약)',
   doc.length > 4000 &&

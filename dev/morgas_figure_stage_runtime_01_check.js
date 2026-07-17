@@ -76,8 +76,10 @@ chk('a1 모르가스 BOSS_STAGE_PROFILE 등록(bossId/actorId/shellId/figId/cont
   inSrc("boss01:{bossId:'boss01',actorId:'boss_morgas',shellId:'sb_unit_v1'") &&
   inSrc("figId:'sb-morgas-fig',hostId:'stage',stageContext:'boss01',contextClass:'sb-boss-morgas'"), '');
 
+// 〔승계 — F7(docs/69)〕 심연(shell_thirst) 추가로 목록 3종. 의미 불변: boss01이 등록돼 있고 shell은 여전히 1종(재사용 증명).
 chk('a2 profile 목록에 boss01 추가 + shell은 기존 1종 재사용(새 shell 불요 증명)',
-  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron', 'boss01']) &&
+  stage.bossProfiles().indexOf('boss01') >= 0 &&
+  JSON.stringify(stage.bossProfiles()) === JSON.stringify(['shell_iron', 'boss01', 'shell_thirst']) &&
   JSON.stringify(stage.bossShells()) === JSON.stringify(['sb_unit_v1']), '');
 
 chk('a3 ACTOR_REGISTRY 연결(actorId 일치·bossStageProfile 링크·figId 일치)',
@@ -97,8 +99,9 @@ chk('a4 shellId 유효(등록 shell 조회 성공) · part mapping 유효(실사
       !p.parts.ornament && !p.parts.sideL && !p.parts.sideR; // 미보유 optional=null
   })(), '');
 
+// 〔승계 — F7〕 shell_thirst가 등록됨 → 미등록 대표를 실재하지 않는 id로 교체. 의미(미등록/프로토타입 키 → null·예외 0) 불변.
 chk('a5 unknown boss fallback 보존(미등록/프로토타입 키 → null·예외 0)',
-  stage.bossProfile('nope') === null && stage.bossProfile('shell_thirst') === null &&
+  stage.bossProfile('nope') === null && stage.bossProfile('shell_void') === null &&
   stage.bossProfile('toString') === null && stage.bossProfile(undefined) === null, '');
 
 chk('a6 Profile에 gameplay mutable state 0(순수 표현 데이터)',
@@ -300,9 +303,21 @@ chk('g3 동료 pose rule/CSS 불변(전사·마법사·주술사·도적)',
   inSrc("{pose:'sustain',when:{actorAlive:true,valorActive:true}}") &&
   inSrc('#stage .sb-mage[data-pose="channel"] .sb-m-orb{transform:translate(-22px,8px) scale(1.14)}'), '');
 
-chk('g4 심연 무접촉(figure 0·문맥 class 0·avatar 경로 유지)',
-  !inSrc('sb-thirst-fig') && !inSrc('sb-boss-thirst') && !/shell_thirst:\{bossId:/.test(src) &&
-  inSrc('<div id="bossAvatar">☠️</div>'), '');
+// 〔승계 — F7(docs/69)〕 심연 figure는 F7이 추가했다(F6 시점엔 없었음). 이 단언의 취지=「모르가스 카드가 심연에 누수되지 않는다」를
+// 유지: 모르가스 자산(sb-mg-*)이 심연 문맥/figure에 등장하지 않고, legacy 아바타 요소(폴백 경로)는 그대로 존치한다.
+chk('g4 모르가스↔심연 분리(모르가스 자산 누수 0·legacy avatar 요소 존치)',
+  (function () {
+    const m = src.match(/<div class="sb-unit sb-abyss"[\s\S]*?<\/div><\/div><\/div><\/div>/);
+    const abyssMarkup = m ? m[0] : '';
+    const noMgInMarkup = abyssMarkup.length > 50 && abyssMarkup.indexOf('sb-mg-') < 0;
+    // 심연으로 스코프된 CSS 규칙에 모르가스 파츠 0 (선택자 단위 검사)
+    const rules = src.match(/[^{}]+\{[^{}]*\}/g) || [];
+    const noMgInAbyssRules = !rules.some(function (r) {
+      const sel = r.slice(0, r.indexOf('{'));
+      return (sel.indexOf('sb-abyss') >= 0 || sel.indexOf('sb-boss-thirst') >= 0) && r.indexOf('sb-mg-') >= 0;
+    });
+    return noMgInMarkup && noMgInAbyssRules && inSrc('<div id="bossAvatar">☠️</div>');
+  })(), '');
 
 chk('g5 신규 대형 FX 0(F6는 figure/pose/face만·행동선 문법 신설 0)',
   !inSrc('fxJudgeLine') && !inSrc('fxMorgas') &&
@@ -349,9 +364,9 @@ try {
   chk('i2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('i3 index.html 신 기준선(205,777 B · md5 dd4e0405…)',
-    buf.length === 205777 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', buf.length + 'B');
+  chk('i3 index.html 신 기준선(213,295 B · md5 afe3de3a…)',
+    buf.length === 213295 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', buf.length + 'B');
 }
 chk('i4 docs/68 필수 절(감사·truth·silhouette·shell·Profile·mapping·faceParts·vocabulary·judge·interrupt·context·anchor·lifecycle·cleanup·무수정·등가·비변경·관측·Human Gate·F7·F8)',
   doc.length > 6000 &&

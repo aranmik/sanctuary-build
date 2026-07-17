@@ -64,8 +64,8 @@ chk('c9 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 11. index.html 현행 기준선
 chk('c11 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 205777 &&
-  crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', '');
+  buf.length === 213295 &&
+  crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', '');
 
 // 12. CORE byte-identical
 {
@@ -119,7 +119,7 @@ chk('c18 docs/45 필수 절(크기 전후/버린 안/대치 구도/회귀/리스
 // 19. div/section 균형 (CSS만 바꿨으니 202/202 유지)
 {
   const dO = cntH('<div'), dC = cntH('</div>'), sO = cntH('<section'), sC2 = cntH('</section>');
-  chk('c19 div/section 균형(218/218·8/8)', dO === dC && dO === 218 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
+  chk('c19 div/section 균형(222/222·8/8)', dO === dC && dO === 222 && sO === 8, dO + '/' + dC + ' · ' + sO + '/' + sC2);
 }
 
 console.log(`\n${fail === 0 ? '★ IRON CRUSHER FIGURE REWORK 02 CHECK PASS' : '★ IRON CRUSHER FIGURE REWORK 02 CHECK FAIL'} (${pass} pass / ${fail} fail)`);

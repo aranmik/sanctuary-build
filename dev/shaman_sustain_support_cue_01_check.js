@@ -196,9 +196,9 @@ try {
   chk('f2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('f3 index.html 신 기준선(205,777 B · md5 dd4e0405…)',
-    buf.length === 205777 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'dd4e04052d3cf4f271f35a45a6a8dc9d', buf.length + 'B');
+  chk('f3 index.html 신 기준선(213,295 B · md5 afe3de3a…)',
+    buf.length === 213295 &&
+    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', buf.length + 'B');
 }
 chk('f4 docs/66 필수 절(피드백·가독성·설계·edge 계약·lifecycle·anchor 대응표·fallback·Ensemble·비변경·등가·cleanup·관측·Human Gate·F5)',
   doc.length > 4000 &&
