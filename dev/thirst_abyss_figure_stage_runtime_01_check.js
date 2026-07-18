@@ -354,10 +354,13 @@ chk('j4 F2/F3 generic resolver Actor id 분기 0(F7 후에도)',
     .every(id => rvB.indexOf("'" + id + "'") < 0 && cdB.indexOf("'" + id + "'") < 0 &&
       prB.indexOf("'" + id + "'") < 0 && raB.indexOf("'" + id + "'") < 0), '');
 
-chk('j5 sgPoseCond 조건 키 무변경(F7이 새 조건 언어 추가 0)',
+// 〔승계 — F8A(docs/70 §5)〕 F7은 조건 키를 추가하지 않았고(W1로 HOLD·보고), F8A가 발주 승인 하에 `enraged` 키 정확히 1개를 추가했다.
+// 의미 승계: F7 시점의 기존 키 5종은 그대로이고, 추가분은 F8A 발주가 명시 허용한 1개뿐임을 검증한다(무단 확장 0).
+chk('j5 sgPoseCond 조건 키 계보(기존 5종 무변 + F8A 승인 enraged 1개만)',
   cdB.indexOf('valorActive') >= 0 && cdB.indexOf('interruptStance') >= 0 &&
   cdB.indexOf('battleActive') >= 0 && cdB.indexOf('bossActing') >= 0 &&
-  cdB.indexOf('bossActionKind') >= 0 && cdB.indexOf('enraged') < 0, ''); // enraged 키 미추가 = generic 무수정
+  cdB.indexOf('bossActionKind') >= 0 &&
+  (cdB.match(/k==='enraged'/g) || []).length === 1, '');
 
 /* ===== K. 회귀 ===== */
 try {
@@ -372,9 +375,9 @@ try {
   chk('k2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('k3 index.html 신 기준선(213,295 B · md5 afe3de3a…)',
-    buf.length === 213295 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', buf.length + 'B');
+  chk('k3 index.html 신 기준선(223,967 B · md5 1fa9132f…)',
+    buf.length === 223967 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '1fa9132fb7567a778ce6e3f77ed856df', buf.length + 'B');
 }
 chk('k4 docs/69 필수 절(감사·즉발·silhouette·shell·Profile·mapping·sideL·face 없음·vocabulary·ambient·anchor·lifecycle·cleanup·무수정·등가·비변경·관측·Human Gate·F8·F9)',
   doc.length > 6000 &&

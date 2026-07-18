@@ -217,9 +217,9 @@ chk('e1 rect 장기 캐시 없음(resolver 매 호출 실측·프레임 경계 �
   chk('e2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('e3 index.html 현행 기준선(213,295 B · md5 afe3de3a…)',
-    buf.length === 213295 &&
-    crypto.createHash('md5').update(buf).digest('hex') === 'afe3de3af0ddffc81ba9e0a090e1892e', '');
+  chk('e3 index.html 현행 기준선(223,967 B · md5 1fa9132f…)',
+    buf.length === 223967 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '1fa9132fb7567a778ce6e3f77ed856df', '');
 }
 
 chk('e4 docs/64 필수 절(계보 감사·치환/비치환 범위·schema·validity·산식·fail-closed·유령 좌표·대응표·lifecycle·frame budget·debug·closeout·WATCH·F4 계약)',
