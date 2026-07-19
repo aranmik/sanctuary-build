@@ -30,7 +30,11 @@ const rasB = strip(fnBody('resolveActorState'));
 const pasB = strip(fnBody('presentActorState'));
 const srcB = strip(fnBody('srClearReaction'));
 const capB = strip(fnBody('clearActorPresence'));
-const hitB = strip(fnBody('srBossHit'));
+// 〔승계 — F8B-1(docs/71)〕 F8A가 srBossHit 본문에서 검증하던 reaction rail(coalescing·generation·animationend·timeout)이
+// generic `srTrigger(key)`로 승격됐다(어휘 추가를 위한 최소 일반화). srBossHit은 어휘만 지정하는 얇은 호출자가 됐으므로,
+// rail 계약 검사는 srTrigger 본문을 대상으로 승계한다 — 계약 내용은 불변(삭제/완화 0).
+const hitB = strip(fnBody('srBossHit')) + strip(fnBody('srTrigger'));
+const railB = strip(fnBody('srTrigger'));
 const drvB = strip(fnBody('sbBossState'));
 const F8A = rasB + pasB + srcB + capB + hitB + drvB;
 const cdB = strip(fnBody('sgPoseCond'));
@@ -124,18 +128,20 @@ chk('b6 미등록/불허 안전 fallback + presenter는 data-state만(idempotent
   })(), '');
 
 /* ===== C. Reaction Channel ===== */
+// 〔승계 — F8B-1〕 profile reaction 데이터에 priority/coalesce 필드가 추가됨(rail 일반화). hit 어휘의 anim/ms 정본은 불변.
 chk('c1 3보스 reactions 선언(anim 정본+ms 안전망·조합 문자열 0)',
-  inSrc("reactions:{hit:{anim:'sbReactIron',ms:320}}") &&
-  inSrc("reactions:{hit:{anim:'sbReactMorgas',ms:300}}") &&
-  inSrc("reactions:{hit:{anim:'sbReactAbyss',ms:320}}") &&
+  inSrc("hit:{anim:'sbReactIron',ms:320,priority:10,coalesce:0.12}") &&
+  inSrc("hit:{anim:'sbReactMorgas',ms:300,priority:10,coalesce:0.12}") &&
+  inSrc("hit:{anim:'sbReactAbyss',ms:320,priority:10,coalesce:0.12}") &&
   !inSrc('enraged-hit') && !inSrc("reaction:'enragedHit'"), '');
 
-chk('c2 srBossHit=활성 profile만·미등록/미선언/미지 shell=무해 no-op·bossId 분기 0',
-  hitB.indexOf('resolveBossStageProfile(sgBossId())') >= 0 &&
-  hitB.indexOf('!p||!p.reactions||!p.reactions.hit') >= 0 &&
-  hitB.indexOf('resolveBossFigureShell(p)') >= 0 &&
-  ['shell_iron', 'boss01', 'shell_thirst', 'sbReactIron', 'sbReactMorgas', 'sbReactAbyss']
-    .every(t => hitB.indexOf("'" + t + "'") < 0), '');
+// 〔승계 — F8B-1〕 활성 profile 가드가 srTrigger로 이동(어휘는 인자). 계약 불변: 활성 boss만·미등록/미선언/미지 shell=무해 no-op·bossId 분기 0.
+chk('c2 reaction 발화=활성 profile만·미등록/미선언/미지 shell=무해 no-op·bossId 분기 0',
+  railB.indexOf('resolveBossStageProfile(sgBossId())') >= 0 &&
+  railB.indexOf('!p||!p.reactions||!p.reactions[key]') >= 0 &&
+  railB.indexOf('resolveBossFigureShell(p)') >= 0 &&
+  ['shell_iron', 'boss01', 'shell_thirst', 'sbReactIron', 'sbReactMorgas', 'sbReactAbyss', 'hit', 'interrupted']
+    .every(t => railB.indexOf("'" + t + "'") < 0), '');
 
 try { // 실 카운팅(하네스): 접수/coalescing/미등록 no-op
   h.sb.CUR_BOSS = 'shell_iron';
@@ -158,20 +164,24 @@ try { // 실 카운팅(하네스): 접수/coalescing/미등록 no-op
   })(), '');
 } catch (e) { chk('c3~c5 reaction 카운팅(예외)', false, e.message); }
 
-chk('c6 lifecycle=F4A 패턴(animationend 1회 바인딩 bound 가드·main anim 이름 필터·gen 안전망 timeout·restart reflow)',
-  hitB.indexOf('SR_STAGE.bound[p.figId]') >= 0 && hitB.indexOf("addEventListener('animationend'") >= 0 &&
-  hitB.indexOf('e.animationName===pp.reactions.hit.anim') >= 0 &&
-  hitB.indexOf('if(gen===SR_STAGE.gen)srClearReaction(p)') >= 0 &&
-  hitB.indexOf('void fig.offsetWidth') >= 0, '');
+// 〔승계 — F8B-1〕 animationend 필터가 단일 어휘(hit.anim)에서 profile 등록 어휘 전체 순회로 확장(다어휘 rail). 계약 불변.
+chk('c6 lifecycle=F4A 패턴(animationend 1회 바인딩 bound 가드·등록 anim 이름 필터·gen 안전망 timeout·restart reflow)',
+  railB.indexOf('SR_STAGE.bound[p.figId]') >= 0 && railB.indexOf("addEventListener('animationend'") >= 0 &&
+  railB.indexOf('pp.reactions[k].anim===e.animationName') >= 0 &&
+  railB.indexOf('if(gen===SR_STAGE.gen)') >= 0 && railB.indexOf('srClearReaction(p)') >= 0 &&
+  railB.indexOf('void fig.offsetWidth') >= 0, '');
 
+// 〔승계 — F8B-1〕 카운터가 어휘별 맵(SR_STAGE.count[key])으로 확장. 계약 불변: 접수(통계/generation)가 DOM 접근보다 먼저.
 chk('c7 접수와 표현 분리(통계는 DOM 부재에도 창 계약 유지·표현만 무해 생략)',
-  hitB.indexOf('SR_STAGE.hits++') < hitB.indexOf('document.getElementById(p.figId)'), '');
+  railB.indexOf('SR_STAGE.count[key]') < railB.indexOf('document.getElementById(p.figId)'), '');
 
 /* ===== D. Coalescing ===== */
-chk('d1 게임시간 창 0.12s(벽시계 아님=frozen-tab 안전·같은 battle 한정)',
-  hitB.indexOf("(t-SR_STAGE.lastHitT)<0.12") >= 0 &&
-  hitB.indexOf('SR_STAGE.battle===SG.battle') >= 0 &&
-  hitB.indexOf('performance.now') < 0, '');
+// 〔승계 — F8B-1〕 0.12s 상수가 profile 데이터(coalesce)로 이동하고 rail은 어휘별 창을 읽는다. 계약 불변: 게임시간·같은 battle 한정.
+chk('d1 게임시간 창 0.12s(벽시계 아님=frozen-tab 안전·같은 battle 한정·profile 공급)',
+  railB.indexOf('(t-SR_STAGE.lastT[key])<win') >= 0 &&
+  railB.indexOf('SR_STAGE.battle===SG.battle') >= 0 &&
+  railB.indexOf('performance.now') < 0 &&
+  (src.match(/coalesce:0\.12/g) || []).length === 3, '');
 
 chk('d2 reaction duration 계약(130~190ms·안전망 ms>duration)',
   inSrc('animation:sbReactIron .18s ease-out') && inSrc('animation:sbReactMorgas .16s ease-out') &&
@@ -182,8 +192,10 @@ chk('d3 무한/반복 장치 0(setInterval 0·Math.random 0·infinite reaction 0
   F8A.indexOf('setInterval') < 0 && F8A.indexOf('Math.random') < 0 &&
   !/sbReact\w+ [^;}]*infinite/.test(src), '');
 
-chk('d4 setTimeout=srBossHit 안전망 1개뿐(owner+gen 가드)',
-  (hitB.match(/setTimeout\(/g) || []).length === 1 &&
+// 〔승계 — F8B-1〕 안전망이 rail(srTrigger)로 이동. 계약 불변: reaction 경로 전체에 timeout은 정확히 1개·owner+gen 가드.
+chk('d4 setTimeout=reaction rail 안전망 1개뿐(owner+gen 가드)',
+  (railB.match(/setTimeout\(/g) || []).length === 1 &&
+  strip(fnBody('srBossHit')).indexOf('setTimeout') < 0 &&
   rasB.indexOf('setTimeout') < 0 && drvB.indexOf('setTimeout') < 0 && capB.indexOf('setTimeout') < 0, '');
 
 /* ===== E. Transform Ownership ===== */
@@ -272,9 +284,11 @@ chk('h4 얼굴 생성 0(심연 faceParts 부재 유지·face reaction 0)',
   !/data-reaction="hit"[^{]*\.sb-mg-eyes/.test(src), '');
 
 /* ===== I. Cleanup ===== */
+// 〔승계 — F8B-1〕 추적 리셋이 단일 lastHitT에서 어휘별 맵(lastT={})+활성 reaction 리셋으로 확장. 계약 불변: 경계에서 전 보스 정리+추적 신선.
 chk('i1 battle 경계 hard clear(sbBossState의 SG.battle 가드→전 등록 보스 reaction 제거·추적 리셋)',
   drvB.indexOf('SG.battle!==SR_STAGE.battle') >= 0 &&
-  drvB.indexOf('SR_STAGE.lastHitT=-1') >= 0 && drvB.indexOf('srClearReaction(bp)') >= 0, '');
+  drvB.indexOf('SR_STAGE.lastT={}') >= 0 && drvB.indexOf("SR_STAGE.activeKey=''") >= 0 &&
+  drvB.indexOf('srClearReaction(bp)') >= 0, '');
 
 chk('i2 문맥 밖=state/reaction 동시 제거(clearActorPresence·F5 owner 규약)',
   drvB.indexOf('clearActorPresence(p)') >= 0 &&
@@ -335,9 +349,9 @@ try {
   chk('k2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('k3 index.html 신 기준선(223,967 B · md5 1fa9132f…)',
-    buf.length === 223967 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '1fa9132fb7567a778ce6e3f77ed856df', buf.length + 'B');
+  chk('k3 index.html 신 기준선(227,650 B · md5 5d645ffc…)',
+    buf.length === 227650 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', buf.length + 'B');
 }
 chk('k4 docs/70 필수 절(truth·transform·Profile·state·reaction·generation·coalescing·mapping·동시성·anchor·lifecycle·cleanup·등가·관측·Human Gate·F8B·F9)',
   doc.length > 6000 &&

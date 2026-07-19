@@ -70,8 +70,8 @@ chk('c10 행동선/SVG stroke 신규 0(sb 영역)',
 
 // 12. index.html 현행 기준선
 chk('c12 index.html 현행 기준선(149,309 B · md5 c9e289d7…)',
-  buf.length === 223967 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '1fa9132fb7567a778ce6e3f77ed856df', '');
+  buf.length === 227650 &&
+  crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', '');
 
 // 13. CORE byte-identical
 {

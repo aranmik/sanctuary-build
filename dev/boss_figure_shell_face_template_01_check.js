@@ -304,9 +304,9 @@ try {
   chk('h2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('h3 index.html 신 기준선(223,967 B · md5 1fa9132f…)',
-    buf.length === 223967 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '1fa9132fb7567a778ce6e3f77ed856df', buf.length + 'B');
+  chk('h3 index.html 신 기준선(227,650 B · md5 5d645ffc…)',
+    buf.length === 227650 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', buf.length + 'B');
 }
 chk('h4 docs/67 필수 절(감사·Profile·Shell·Face·분리·slot·fallback·mapping·anchor·ownership·lifecycle·cleanup·등가·관측·F6·F7·closeout)',
   doc.length > 5000 &&
