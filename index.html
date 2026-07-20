@@ -506,6 +506,31 @@ button{font-family:inherit;cursor:pointer}
 #stage .sb-morgas[data-reaction="hit"] .sb-react{animation:sbReactMorgas .16s ease-out}
 #stage .sb-morgas[data-reaction="hit"] .sb-mg-head{animation:sbReactMgHead .16s ease-out}
 #stage .sb-abyss[data-reaction="hit"] .sb-react{animation:sbReactAbyss .18s ease-out}
+/* F8B-2(docs/72): 심연 drain 결과 — 빼앗긴 순간 공허가 한 번 더 깊어진다. 예고 0(결과에만)·중심 방향만(outward 0).
+   ★ambient 보존 전략: base 애니(sbAbCoreIn/DrawIn/Pool/ShardL/ShardR)를 가진 파츠엔 animation을 얹지 않는다(교체 점프 0).
+     → base 없는 파츠(.sb-react·core::before 공허·shadow)는 keyframes / base 있는 파츠(aura·pool·shard)는 **transition 기반 개별 속성**.
+     개별 속성(scale/translate)은 base의 transform과 네이티브 합성되고, enraged의 animation-duration override와도 무관하다. */
+@keyframes sbReactAbDrain{0%{scale:1;translate:0 0}
+ 26%{scale:.972 .968;translate:0 1px}                    /* 뿌리는 거의 움직이지 않는다(hit .958/.93보다 얕음) */
+ 55%{scale:.978 .974;translate:0 .5px}
+ 100%{scale:1;translate:0 0}}
+@keyframes sbReactAbVoid{0%{scale:1;box-shadow:inset 0 0 0 1px rgba(79,214,200,.22)}
+ 30%{scale:1.62;box-shadow:inset 0 0 3px 1px rgba(79,214,200,.44)}   /* 공허가 넓고 깊어지며 테두리가 조여든다 */
+ 62%{scale:1.46;box-shadow:inset 0 0 2px 1px rgba(79,214,200,.34)}
+ 100%{scale:1;box-shadow:inset 0 0 0 1px rgba(79,214,200,.22)}}
+@keyframes sbReactAbGround{0%{scale:1}32%{scale:.93 .88}100%{scale:1}}  /* 웅덩이도 안으로 */
+#stage .sb-abyss[data-reaction="drain"] .sb-react{animation:sbReactAbDrain .34s cubic-bezier(.25,.7,.35,1)}
+#stage .sb-abyss[data-reaction="drain"] .sb-ab-core::before{animation:sbReactAbVoid .34s cubic-bezier(.25,.7,.35,1)}
+#stage .sb-abyss[data-reaction="drain"] .sb-shadow{animation:sbReactAbGround .34s cubic-bezier(.25,.7,.35,1)}
+/* base 애니 보유 파츠 — transition으로 안쪽으로 당겼다가 천천히 풀린다(반동 없이·좌우 서로 다른 속도=비대칭 유지) */
+#stage .sb-abyss .sb-aura{transition:transform .28s ease,scale .2s ease-out}
+#stage .sb-abyss .sb-ab-pool{transition:transform .28s ease,scale .2s ease-out}
+#stage .sb-abyss .sb-ab-shardL{transition:transform .28s ease,translate .15s ease-out}
+#stage .sb-abyss .sb-ab-shardR{transition:transform .28s ease,translate .23s ease-out}
+#stage .sb-abyss[data-reaction="drain"] .sb-aura{scale:.9}
+#stage .sb-abyss[data-reaction="drain"] .sb-ab-pool{scale:.94 .96}
+#stage .sb-abyss[data-reaction="drain"] .sb-ab-shardL{translate:7px 2px}   /* left:6 → 중심(+x) */
+#stage .sb-abyss[data-reaction="drain"] .sb-ab-shardR{translate:-6px 1px}  /* left:118 → 중심(-x)·더 느리게 */
 /* 포즈 어휘 (연결분만: 전사 guard/brace · 파쇄자 windup) */
 #stage .sb-warrior[data-pose="guard"] .sb-react{transform:translateX(4px)}
 #stage .sb-warrior[data-pose="guard"] .sb-w-shield{transform:translateX(-15px) translateY(-3px) scale(1.22)}
@@ -2055,7 +2080,7 @@ function doFx(k,d){
   case 'dispel':d.big?SFX.defuse():SFX.dispel();flashFrame(d.tg,'rgba(217,166,255,.8)');fxBeam(d.tg,'dispel');break;
   case 'debuff':d.bomb?SFX.bomb():SFX.debuff();break;
   case 'bombBoom':SFX.boom();shake();vign();break;
-  case 'aoe':SFX.aoe();shake();vign();break;
+  case 'aoe':SFX.aoe();shake();vign();srEventReaction('aoe');break; /* F8B-2: 결과 적용 뒤 같은 frame·기존 screen FX 원문 보존(docs/72) */
   case 'smash':SFX.smash();shake();break;
   case 'melee':SFX.melee();break;
   case 'allyAtk':bossHit();pulseStage(d.tg);srBossHit();break; /* F8A: figure hit reaction — 기존 read-only 시각 이벤트 소비(docs/70 §7)·legacy bossHit 경로 보존 */
@@ -2481,7 +2506,9 @@ var BOSS_STAGE_PROFILE={ /* bossId → 무대 figure 계약(현행 실사용 최
   faceRules:[], /* faceParts 없음·face state 0 — 지속 face truth가 없으므로 만들지 않는다(발주 §9-A) */
   defaultState:'',allowedStates:['enraged'],candidateStates:['groggy','defeated'], /* F8A: 얼굴은 없어도 상태는 있다 — enraged=실 truth */
   stateRules:[{state:'enraged',when:{enraged:true}}],
-  reactions:{hit:{anim:'sbReactAbyss',ms:320,priority:10,coalesce:0.12}},
+  reactions:{hit:{anim:'sbReactAbyss',ms:320,priority:10,coalesce:0.12},
+   drain:{anim:'sbReactAbDrain',ms:460,priority:30,coalesce:0}}, /* F8B-2(docs/72): 빼앗은 순간의 삼킴 — hit보다 우선·병합 없음(1 결과=1 반응) */
+  reactionEvents:{aoe:'drain'}, /* F8B-2: 이 보스에게 표현 이벤트 'aoe'는 drain 결과다(모르가스는 미선언→judge 착지에서 무해 no-op) */
   anchors:[]} /* 실사용 anchor 0 — 미사용 anchor 선등록 ⛔(F8이 갈증선을 그릴 때 최소 등록) */
 };
 var SG_FACE_STATS={resolved:0,ruleHit:0,byDefault:0,unregistered:0,notAllowed:0,badSnapshot:0,cleared:0};
@@ -2746,6 +2773,17 @@ function srTrigger(key){ /* F8B-1(docs/71): generic result reaction 발화 — k
 }
 function srBossHit(){srTrigger('hit');} /* FX('allyAtk') 소비자 — 어휘만 지정·나머지는 generic rail */
 function srBossInterrupted(){srTrigger('interrupted');} /* F8B-1: FX('intOk') 소비자 — 실제 차단 성공 truth 전용 */
+function srEventReaction(evKey){ /* F8B-2(docs/72): 표현 이벤트 → reaction 어휘 매핑을 **profile이 소유**한다.
+   ★`FX('aoe')`는 심연 drain과 모르가스 judge 착지가 어휘를 공유하고 둘 다 CORE 안이라 payload 보강이 불가 —
+   그래서 "이 이벤트가 나에게 무슨 결과인가"를 활성 boss profile에게 묻는다(reactionEvents). 미선언 보스=무해 no-op.
+   generic은 조회만 — bossId 분기 0·이벤트 의미 추측 0·SCRIPT 시간 감시 0·CSS/DOM 상태 읽기 0. */
+ if(typeof evKey!=='string'||!evKey)return;
+ var p=resolveBossStageProfile(sgBossId());
+ if(!p||!p.reactionEvents)return;
+ var key=p.reactionEvents[evKey];
+ if(typeof key!=='string'||!key)return;
+ srTrigger(key);
+}
 function sbBossState(S){ /* render 진입점 — state(지속) 동기 + battle 경계 hard clear(stale reaction 0) */
  if(SG.battle!==SR_STAGE.battle){
   SR_STAGE.battle=SG.battle;SR_STAGE.gen++;SR_STAGE.lastT={};SR_STAGE.last=null;
@@ -2769,10 +2807,11 @@ function sbBossState(S){ /* render 진입점 — state(지속) 동기 + battle �
   return resolveActorState(resolveBossStageProfile(id||sgBossId()),snap);
  };
  st.reactionStats=function(){return {battle:SR_STAGE.battle,gen:SR_STAGE.gen,
-  hits:SR_STAGE.count.hit||0,interrupted:SR_STAGE.count.interrupted||0, /* 어휘별 발화 수(F8B-1) */
+  hits:SR_STAGE.count.hit||0,interrupted:SR_STAGE.count.interrupted||0,drain:SR_STAGE.count.drain||0, /* 어휘별 발화 수(F8B-1·F8B-2) */
   coalesced:SR_STAGE.coalesced,suppressed:SR_STAGE.suppressed,
   lastHitT:(typeof SR_STAGE.lastT.hit==='number')?SR_STAGE.lastT.hit:-1,
-  lastInterruptT:(typeof SR_STAGE.lastT.interrupted==='number')?SR_STAGE.lastT.interrupted:-1};};
+  lastInterruptT:(typeof SR_STAGE.lastT.interrupted==='number')?SR_STAGE.lastT.interrupted:-1,
+  lastDrainT:(typeof SR_STAGE.lastT.drain==='number')?SR_STAGE.lastT.drain:-1};};
  st.lastReaction=function(){return SR_STAGE.last?JSON.parse(JSON.stringify(SR_STAGE.last)):null;};
  st.activeReaction=function(){return {key:SR_STAGE.activeKey,priority:SR_STAGE.activePri,until:SR_STAGE.activeUntil};};
 })();

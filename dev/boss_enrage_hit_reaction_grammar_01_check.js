@@ -349,9 +349,9 @@ try {
   chk('k2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('k3 index.html 신 기준선(227,650 B · md5 5d645ffc…)',
-    buf.length === 227650 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', buf.length + 'B');
+  chk('k3 index.html 신 기준선(231,444 B · md5 34281b01…)',
+    buf.length === 231444 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d', buf.length + 'B');
 }
 chk('k4 docs/70 필수 절(truth·transform·Profile·state·reaction·generation·coalescing·mapping·동시성·anchor·lifecycle·cleanup·등가·관측·Human Gate·F8B·F9)',
   doc.length > 6000 &&

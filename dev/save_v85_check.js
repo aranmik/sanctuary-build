@@ -49,7 +49,7 @@ chk('c7 두 거울·3보스·종료 반영',
 // 8. index.html 무변경 (현행 md5)
 // ※ 라이브 index.html 가드 — Chapel Loadout UI 01(EP23) 재-baseline로 현행 md5 갱신(세이브 v8.5 기록 숫자 2630669c는 발행 시점 스냅샷으로 유지 · c2)
 chk('c8 index.html 현행 기준선(md5 172e4660…)',
-  crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', '');
+  crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d', '');
 
 // 9. CORE 숫자 유지 (실측)
 {

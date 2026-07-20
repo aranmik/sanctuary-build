@@ -55,7 +55,7 @@ chk('c14 완료 카드 목록(11종 핵심)', hasAll(['Repo Foundation 01', 'Iro
 // 11. index.html 변경 없음 (현행 기준선 md5와 동일)
 // ※ 라이브 index.html 가드 — Chapel Loadout UI 01(EP23) 재-baseline로 현행 md5 갱신(docs/36 §E 기록 숫자는 1차 데모 스냅샷으로 유지)
 chk('c15 index.html 현행 기준선(md5 172e4660…)',
-  crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', '');
+  crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d', '');
 
 // 12. CORE 숫자 유지
 {

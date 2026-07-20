@@ -214,9 +214,9 @@ try {
   chk('h2 CORE byte-identical(466/22,521/6cad2ec2)',
     coreLines.length === 466 && Buffer.byteLength(core, 'utf8') === 22521 &&
     cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', coreLines.length + '/' + cmd5.slice(0, 8));
-  chk('h3 index.html 현행 기준선(227,650 B · md5 5d645ffc…)',
-    buf.length === 227650 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', '');
+  chk('h3 index.html 현행 기준선(231,444 B · md5 34281b01…)',
+    buf.length === 231444 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d', '');
 }
 chk('h4 docs/65 필수 절(감사·채택/미채택·신호 대응표·priority·Ensemble·lifecycle·cleanup·이식·등가·관측·Human Gate·F5 계약)',
   doc.length > 4000 &&

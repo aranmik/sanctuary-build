@@ -40,9 +40,9 @@ chk('c2 document-only 선언', in59('document-only', '구현 0') && in60('docume
   let f = 0, core = [];
   for (const l of lines) { if (l.includes('//__CORE_START__')) { f = 1; continue; } if (l.includes('//__CORE_END__')) f = 0; if (f) core.push(l); }
   const cmd5 = crypto.createHash('md5').update(core.join('\n') + '\n').digest('hex');
-  chk('c3 index/CORE byte-identical(227,650/5d645ffc·CORE 6cad2ec2)',
-    buf.length === 227650 &&
-    crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb' &&
+  chk('c3 index/CORE byte-identical(231,444/34281b01·CORE 6cad2ec2)',
+    buf.length === 231444 &&
+    crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d' &&
     core.length === 466 && cmd5 === '6cad2ec271a2a79afbee881c2a2e0856', '');
 }
 

@@ -130,9 +130,9 @@ chk('c18 링/플래시(fxr/fxf) 4동료 유지',
 }
 
 // 20. index.html 현행 기준선 (Layout Rework 01 재-baseline)
-chk('c20 index.html 현행 기준선(227,650 B · md5 5d645ffc…)',
-  buf.length === 227650 &&
-  crypto.createHash('md5').update(buf).digest('hex') === '5d645ffcf1592f1430b73647f4c39ccb', '');
+chk('c20 index.html 현행 기준선(231,444 B · md5 34281b01…)',
+  buf.length === 231444 &&
+  crypto.createHash('md5').update(buf).digest('hex') === '34281b013d013542e18d9ea5429ab95d', '');
 
 // 21. CORE byte-identical
 {
